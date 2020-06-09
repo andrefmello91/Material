@@ -2,58 +2,31 @@
 
 namespace Material
 {
+	// Steel
 	public class Steel
 	{
 		// Steel properties
-		public double YieldStress { get; }
+		public double YieldStress   { get; }
 		public double ElasticModule { get; }
-		public double Strain { get; set; }
-		public double Stress { get; set; }
-
-		public double YieldStrain
-		{
-			get
-			{
-				if (IsSet)
-					return
-						YieldStress / ElasticModule;
-				//else
-				return
-					0;
-			}
-		}
-
-		// Maximum plastic strain on steel
-		public double esu = 0.01;
-
-		// Verify if steel is set
-		public bool IsSet
-		{
-			get
-			{
-				if (YieldStress == 0 || ElasticModule == 0)
-					return
-						false;
-				//else
-				return
-					true;
-			}
-		}
+		public double Strain        { get; set; }
+		public double Stress        { get; set; }
+		public double YieldStrain   => YieldStress / ElasticModule;
 
 		// Read the steel parameters
 		public Steel(double yieldStress, double elasticModule = 210000)
 		{
-			YieldStress = yieldStress;
+			YieldStress   = yieldStress;
 			ElasticModule = elasticModule;
 		}
+
+		// Maximum plastic strain on steel
+		public double esu = 0.01;
 
 		// Set steel strain
 		public void SetStrain(double strain)
 		{
 			Strain = strain;
 		}
-
-		// Set steel stress given strain
 
 		// Calculate stress in reinforcement given strain
 		public void SetStress(double strain)
@@ -63,12 +36,19 @@ namespace Material
 				Stress = -YieldStress;
 
 			// Elastic
-			if (strain < YieldStrain)
+			else if (strain < YieldStrain)
 				Stress = ElasticModule * strain;
 
 			// Tension yielding
 			else
 				Stress = YieldStress;
+		}
+
+		// Set Strain and calculate stress
+		public void SetStrainAndStress(double strain)
+		{
+			SetStrain(strain);
+			SetStress(strain);
 		}
 
 		// Calculate secant module of steel
@@ -85,5 +65,17 @@ namespace Material
 			}
 		}
 
+		public override string ToString()
+		{
+			char epsilon = (char) Characters.Epsilon;
+
+			double ey = Math.Round(1000 * YieldStrain, 2);
+
+			return
+				"Steel Parameters: " +
+				"\nfy = " + YieldStress      + " MPa" +
+				"\nEs = " + ElasticModule    + " MPa" +
+				"\n" + epsilon + "y = " + ey + " E-03";
+		}
 	}
 }
