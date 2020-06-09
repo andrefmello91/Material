@@ -6,21 +6,28 @@ namespace Material
 	public class Steel
 	{
 		// Steel properties
-		public double YieldStress   { get; }
-		public double ElasticModule { get; }
-		public double Strain        { get; set; }
-		public double Stress        { get; set; }
-		public double YieldStrain   => YieldStress / ElasticModule;
+		public double YieldStress    { get; }
+		public double ElasticModule  { get; }
+		public double UltimateStrain { get; }
+		public double Strain         { get; set; }
+		public double Stress         { get; set; }
+		public double YieldStrain    => YieldStress / ElasticModule;
 
-		// Read the steel parameters
-		public Steel(double yieldStress, double elasticModule = 210000)
+		// Hardening properties
+		private bool   ConsiderStrainHardening { get; }
+		private double HardeningModule         { get; }
+		private double HardeningStrain         { get; }
+
+        // Read the steel parameters
+        public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01, bool considerStrainHardening = false, double hardeningModule = 0, double hardeningStrain = 0)
 		{
-			YieldStress   = yieldStress;
-			ElasticModule = elasticModule;
+			YieldStress             = yieldStress;
+			ElasticModule           = elasticModule;
+			UltimateStrain          = ultimateStrain;
+			ConsiderStrainHardening = considerStrainHardening;
+			HardeningModule         = hardeningModule;
+			HardeningStrain         = hardeningStrain;
 		}
-
-		// Maximum plastic strain on steel
-		public double esu = 0.01;
 
 		// Set steel strain
 		public void SetStrain(double strain)
@@ -31,17 +38,7 @@ namespace Material
 		// Calculate stress in reinforcement given strain
 		public void SetStress(double strain)
 		{
-			// Compression yielding
-			if (strain <= -YieldStrain)
-				Stress = -YieldStress;
-
-			// Elastic
-			else if (strain < YieldStrain)
-				Stress = ElasticModule * strain;
-
-			// Tension yielding
-			else
-				Stress = YieldStress;
+			Stress = CalculateStress(strain);
 		}
 
 		// Set Strain and calculate stress
@@ -51,8 +48,35 @@ namespace Material
 			SetStress(strain);
 		}
 
-		// Calculate secant module of steel
-		public double SecantModule
+		// Calculate stress
+		private double CalculateStress(double strain)
+		{
+			// Compression yielding
+			if (strain <= -YieldStrain)
+				return -YieldStress;
+
+			// Elastic
+			if (strain < YieldStrain)
+				return ElasticModule * strain;
+
+            // Tension yielding
+            if (!ConsiderStrainHardening && strain < UltimateStrain)
+	            return YieldStress;
+
+            // Tension yielding
+            if (ConsiderStrainHardening && strain < HardeningStrain)
+	            return YieldStress;
+
+            // Tension hardening (if considered)
+            if (ConsiderStrainHardening && strain < UltimateStrain)
+	            return YieldStress + HardeningModule * (strain - HardeningStrain);
+
+            // Failure
+            return 0;
+		}
+
+        // Calculate secant module of steel
+        public double SecantModule
 		{
 			get
 			{
@@ -71,11 +95,23 @@ namespace Material
 
 			double ey = Math.Round(1000 * YieldStrain, 2);
 
-			return
-				"Steel Parameters: " +
-				"\nfy = " + YieldStress      + " MPa" +
-				"\nEs = " + ElasticModule    + " MPa" +
-				"\n" + epsilon + "y = " + ey + " E-03";
+			string msg =
+				"Steel Parameters:\n" +
+				"fy = "          + YieldStress   + " MPa\n" +
+				"Es = "          + ElasticModule + " MPa\n" +
+				epsilon + "y = " + ey            + " E-03";
+
+			if (ConsiderStrainHardening)
+			{
+				double esh = Math.Round(1000 * HardeningStrain, 2);
+
+				msg += "\n\n" +
+				       "Hardening parameters:\n" +
+				       "Esh = "          + HardeningModule + " MPa\n" +
+				       epsilon + "sh = " + esh             + " E-03";
+			}
+
+			return msg;
 		}
 	}
 }
