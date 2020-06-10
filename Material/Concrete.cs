@@ -11,11 +11,12 @@ namespace Material
 		public ModelBehavior            ConcreteModelBehavior   { get; }
 		public Behavior                 ConcreteBehavior        { get; }
 
+		public bool			 Cracked           => ConcreteBehavior.Cracked;
         public AggregateType Type              => ConcreteParameters.Type;
 		public double        AggregateDiameter => ConcreteParameters.AggregateDiameter;
 
         // Read the concrete parameters
-        public Concrete(double strength, double aggregateDiameter, ModelParameters modelParameters, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+        public Concrete(double strength, double aggregateDiameter, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
 		{
 			// Initiate parameters
 			ConcreteModelParameters = modelParameters;

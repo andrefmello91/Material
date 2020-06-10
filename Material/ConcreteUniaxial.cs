@@ -11,11 +11,11 @@ namespace Material
             public double Strain  { get; set; }
             public double Stress  { get; set; }
 
-            public Uniaxial(double strength, double aggregateDiameter, ModelParameters modelParameters, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
+            public Uniaxial(double strength, double aggregateDiameter, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
             {
             }
 
-            public Uniaxial(Parameters parameters, ModelBehavior behavior) : base(parameters, behavior)
+            public Uniaxial(Parameters parameters, ModelBehavior behavior = ModelBehavior.MCFT) : base(parameters, behavior)
             {
             }
 

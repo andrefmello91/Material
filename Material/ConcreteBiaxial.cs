@@ -14,7 +14,7 @@ namespace Material
             public (double ec1, double ec2) PrincipalStrains  { get; set; }
             public (double fc1, double fc2) PrincipalStresses { get; set; }
 
-            public Biaxial(double strength, double aggregateDiameter, ModelParameters modelParameters, ModelBehavior behavior, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
+            public Biaxial(double strength, double aggregateDiameter, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
             {
             }
 

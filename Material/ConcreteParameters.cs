@@ -257,7 +257,8 @@ namespace Material
 			        UltimateStrain  = ecu;
 		        }
 
-		        private double fcr => 0.65 * Math.Pow(Strength, 0.33);
+		        private double fcr => 0.33 * Math.Sqrt(Strength);
+		        //private double fcr => 0.65 * Math.Pow(Strength, 0.33);
 		        private double ec  => -0.002;
 		        private double ecu => -0.0035;
 		        private double Ec  => -2 * Strength / ec;
