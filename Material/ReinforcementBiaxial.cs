@@ -13,6 +13,8 @@ namespace Material
 			public (double X, double Y) BarSpacing  { get; }
 			public (Steel X, Steel Y)   Steel       { get; }
 			public (double X, double Y) Ratio       { get; }
+			public Matrix<double>       Stiffness   { get; set; }
+			public Vector<double>       Strains     { get; set; }
 			private double              PanelWidth  { get; }
 
 			// Constructor
@@ -24,6 +26,7 @@ namespace Material
 				Steel       = steel;
 				PanelWidth  = panelWidth;
 				Ratio       = CalculateRatio();
+				Stiffness   = InitialStiffness();
 			}
 
 			// Verify if reinforcement is set
@@ -31,27 +34,33 @@ namespace Material
 			public bool ySet  => BarDiameter.Y > 0 && BarSpacing.Y > 0;
 			public bool IsSet => xSet || ySet;
 
+			// Get steel parameters
+			public double fyx  => Steel.X.YieldStress;
+			public double Esxi => Steel.X.ElasticModule;
+			public double fyy  => Steel.Y.YieldStress;
+			public double Esyi => Steel.Y.ElasticModule;
+
+            // Get reinforcement stresses
+			public (double fsx, double fsy) SteelStresses => (Steel.X.Stress, Steel.Y.Stress);
+
+			// Get reinforcement secant module
+			public (double Esx, double Esy) SecantModule => (Steel.X.SecantModule, Steel.Y.SecantModule);
+
 			// Get stress vector
-			public Vector<double> StressVector
+			public Vector<double> Stresses
 			{
 				get
 				{
 					var (psx, psy) = Ratio;
-					var (fsx, fsy) = Stresses;
+					var (fsx, fsy) = SteelStresses;
 
 					return
-						Vector<double>.Build.DenseOfArray(new []
+						Vector<double>.Build.DenseOfArray(new[]
 						{
 							psx * fsx, psy * fsy, 0
 						});
 				}
 			}
-
-			// Get reinforcement stresses
-			public (double fsx, double fsy) Stresses => (Steel.X.Stress, Steel.Y.Stress);
-
-			// Get reinforcement secant module
-			public (double Esx, double Esy) SecantModule => (Steel.X.SecantModule, Steel.Y.SecantModule);
 
             // Calculate the panel reinforcement ratio
             public (double X, double Y) CalculateRatio()
@@ -83,8 +92,50 @@ namespace Material
 					(thetaNx, thetaNy);
 			}
 
-			// Calculate tension stiffening coefficient
-			public double TensionStiffeningCoefficient(double theta1)
+			// Calculate Stresses
+			public void CalculateStresses(Vector<double> strains)
+			{
+				Strains = strains;
+				
+				// Calculate stresses in steel
+				SetStrainsAndStresses(Strains);
+			}
+
+			// Calculate reinforcement stiffness matrix
+			public void CalculateStiffness((double Esx, double Esy)? steelSecantModule = null)
+			{
+				var (psx, psy) = Ratio;
+
+				double Esx, Esy;
+
+				if (steelSecantModule.HasValue)
+					(Esx, Esy) = steelSecantModule.Value;
+				else
+					(Esx, Esy) = SecantModule;
+
+				// Steel matrix
+				var Ds = Matrix<double>.Build.Dense(3, 3);
+				Ds[0, 0] = psx * Esx;
+				Ds[1, 1] = psy * Esy;
+
+				Stiffness = Ds;
+			}
+
+            // Initial reinforcement stiffness
+            public Matrix<double> InitialStiffness()
+			{
+				var (psx, psy) = Ratio;
+
+                // Steel matrix
+                var Ds = Matrix<double>.Build.Dense(3, 3);
+				Ds[0, 0] = psx * Esxi;
+				Ds[1, 1] = psy * Esyi;
+
+				return Ds;
+			}
+
+            // Calculate tension stiffening coefficient
+            public double TensionStiffeningCoefficient(double theta1)
 			{
 				// Get reinforcement angles and stresses
 				var (thetaNx, thetaNy)     = Angles(theta1);
@@ -106,7 +157,7 @@ namespace Material
 				// Get reinforcement angles and stresses
 				var (thetaNx, thetaNy) = Angles(theta1);
 				(double psx, double psy) = Ratio;
-				(double fsx, double fsy) = Stresses;
+				(double fsx, double fsy) = SteelStresses;
 				double fyx = Steel.X.YieldStress;
 				double fyy = Steel.Y.YieldStress;
 
