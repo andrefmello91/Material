@@ -26,7 +26,7 @@ namespace Material
 		}
 
 		// Alternate
-		public Concrete(Parameters parameters, ModelBehavior behavior)
+		public Concrete(Parameters parameters, ModelBehavior behavior = ModelBehavior.MCFT)
 		{
 			// Initiate parameters
 			ConcreteParameters    = parameters;
@@ -67,10 +67,6 @@ namespace Material
 				new Behavior.DSFM(ConcreteParameters);
 		}
 
-
-        // Verify if concrete was set
-        public bool IsSet => fc > 0;
-
         // Get parameters
         public double fc  => ConcreteParameters.Strength;
         public double fcr => ConcreteParameters.TensileStrength;
@@ -81,20 +77,6 @@ namespace Material
 		public double ecr => ConcreteParameters.CrackStrain;
 		public double nu  => ConcreteParameters.Poisson;
 
-		public override string ToString()
-		{
-			char
-				phi = (char) Characters.Phi,
-				eps = (char) Characters.Epsilon;
-
-			return
-				"Concrete Parameters:\n"                          +
-				"\nfc = "             + fc                        + " MPa" +
-				"\nfcr = "            + Math.Round(fcr, 2)        + " MPa"  +
-				"\nEc = "             + Math.Round(Ec, 2)         + " MPa"  +
-				"\n" + eps + "c = "   + Math.Round(1000 * ec, 2)  + " E-03" +
-                "\n" + eps + "cu = "  + Math.Round(1000 * ecu, 2) + " E-03" +
-				"\n" + phi + ",ag = " + AggregateDiameter         + " mm";
-        }
+		public override string ToString() => ConcreteParameters.ToString();
 	}
 }

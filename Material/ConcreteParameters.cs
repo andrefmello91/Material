@@ -53,7 +53,26 @@ namespace Material
 		        Poisson           = 0.2;
 	        }
 
-	        public class MC2010 : Parameters
+	        // Verify if concrete was set
+	        public bool IsSet => Strength > 0;
+
+            public override string ToString()
+	        {
+		        char
+			        phi = (char)Characters.Phi,
+			        eps = (char)Characters.Epsilon;
+
+		        return
+			        "Concrete Parameters:\n" +
+			        "\nfc = " + Strength + " MPa" +
+			        "\nfcr = " + Math.Round(TensileStrength, 2) + " MPa" +
+			        "\nEc = " + Math.Round(InitialModule, 2) + " MPa" +
+			        "\n" + eps + "c = "   + Math.Round(1000 * PlasticStrain, 2) + " E-03" +
+			        "\n" + eps + "cu = "  + Math.Round(1000 * UltimateStrain, 2) + " E-03" +
+			        "\n" + phi + ",ag = " + AggregateDiameter + " mm";
+	        }
+
+            public class MC2010 : Parameters
 	        {
 		        // Calculate parameters according to FIB MC2010
 		        public MC2010(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)

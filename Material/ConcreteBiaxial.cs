@@ -24,6 +24,11 @@ namespace Material
 	            Stiffness = InitialStiffness();
             }
 
+            // Alternate
+            public Biaxial(Parameters parameters, ModelBehavior behavior = ModelBehavior.MCFT) : base(parameters, behavior)
+            {
+            }
+
             // Calculate secant module of concrete
             public (double Ec1, double Ec2) SecantModule
             {
