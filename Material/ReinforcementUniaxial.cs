@@ -40,6 +40,9 @@ namespace Material
 				}
 			}
 
+			// Calculate normal stiffness
+			public double Stiffness => Steel.ElasticModule * Area;
+
 			// Get strain and stress
 			public double Strain => Steel.Strain;
 			public double Stress => Steel.Stress;

@@ -26,6 +26,12 @@ namespace Material
             // Calculate secant module of concrete
             public double SecantModule => ConcreteBehavior.SecantModule(Stress, Strain);
 
+			// Calculate normal stiffness
+			public double Stiffness => Ec * Area;
+
+			// Calculate maximum force
+			public double MaxForce => -fc * Area;
+
 			// Calculate current force
 			public double Force => Stress * Area;
 
