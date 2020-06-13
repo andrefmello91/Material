@@ -1,4 +1,5 @@
-﻿using MathNet.Numerics;
+﻿using System.Runtime.InteropServices;
+using MathNet.Numerics;
 
 namespace Material
 {
@@ -10,17 +11,46 @@ namespace Material
             // Properties
             public double Strain  { get; set; }
             public double Stress  { get; set; }
+            public double Area    { get; }
 
-            public Uniaxial(double strength, double aggregateDiameter, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
+            public Uniaxial(double strength, double aggregateDiameter, double concreteArea, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
             {
+	            Area = concreteArea;
             }
 
-            public Uniaxial(Parameters parameters, ModelBehavior behavior = ModelBehavior.MCFT) : base(parameters, behavior)
+            public Uniaxial(Parameters parameters, double concreteArea, ModelBehavior behavior = ModelBehavior.MCFT) : base(parameters, behavior)
             {
+	            Area = concreteArea;
             }
 
             // Calculate secant module of concrete
             public double SecantModule => ConcreteBehavior.SecantModule(Stress, Strain);
+
+			// Calculate current force
+			public double Force => Stress * Area;
+
+			// Calculate force given strain
+			public double CalculateForce(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
+			{
+				double stress = CalculateStress(strain, referenceLength, reinforcement);
+
+				return
+					stress * Area;
+			}
+
+			// Calculate stress given strain
+			public double CalculateStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
+			{
+				if (strain == 0)
+					return 0;
+
+				if (strain > 0)
+					return
+						ConcreteBehavior.TensileStress(strain, referenceLength, reinforcement);
+
+				return
+					ConcreteBehavior.CompressiveStress(strain);
+            }
 
             // Set concrete principal strains
             public void SetStrain(double strain)
@@ -29,23 +59,16 @@ namespace Material
             }
 
             // Set concrete stresses given strains
-            public void SetStress(double strain, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null)
+            public void SetStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
             {
-	            if (strain == 0)
-		            Stress = 0;
-
-				else if (strain > 0)
-		            Stress = ConcreteBehavior.TensileStress(strain, referenceLength, theta1, reinforcement);
-
-	            else
-		            Stress = ConcreteBehavior.CompressiveStress(strain);
+	            Stress = CalculateStress(strain, referenceLength, reinforcement);
             }
 
             // Set concrete strains and stresses
-            public void SetStrainsAndStresses(double strain, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null)
+            public void SetStrainsAndStresses(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
             {
 	            SetStrain(strain);
-	            SetStress(strain, referenceLength, theta1, reinforcement);
+	            SetStress(strain, referenceLength, reinforcement);
             }
         }
     }

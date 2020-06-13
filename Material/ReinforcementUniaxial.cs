@@ -60,8 +60,36 @@ namespace Material
 				return 0;
 			}
 
-			// Set steel strains
-			public void SetStrain(double strain)
+			// Calculate current force
+			public double CalculateForce(double strain)
+			{
+				return
+					Area * Steel.CalculateStress(strain);
+			}
+
+			// Calculate tension stiffening coefficient
+			public double TensionStiffeningCoefficient()
+			{
+				// Calculate coefficient for tension stiffening effect
+				return
+					0.25 * BarDiameter / Ratio;
+			}
+
+			// Calculate maximum value of fc1 that can be transmitted across cracks
+			public double MaximumPrincipalTensileStress()
+			{
+				// Get reinforcement stress
+				double
+					fs = Stress,
+					fy = Steel.YieldStress;
+
+				// Check the maximum value of fc1 that can be transmitted across cracks
+				return
+					Ratio * (fy - fs);
+			}
+
+            // Set steel strains
+            public void SetStrain(double strain)
 			{
 				Steel.SetStrain(strain);
 			}

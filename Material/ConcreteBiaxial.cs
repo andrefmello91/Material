@@ -62,7 +62,7 @@ namespace Material
 
                 // Calculate stresses
                 double
-	                fc1 = ConcreteBehavior.TensileStress(PrincipalStrains.ec1, referenceLength, PrincipalAngles.theta1, reinforcement),
+	                fc1 = ConcreteBehavior.TensileStress(PrincipalStrains, referenceLength, PrincipalAngles.theta1, reinforcement),
 	                fc2 = ConcreteBehavior.CompressiveStress(PrincipalStrains);
 
                 PrincipalStresses = (fc1, fc2);

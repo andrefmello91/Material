@@ -49,7 +49,7 @@ namespace Material
 		}
 
 		// Calculate stress
-		private double CalculateStress(double strain)
+		public double CalculateStress(double strain)
 		{
 			// Compression yielding
 			if (strain <= -YieldStrain)

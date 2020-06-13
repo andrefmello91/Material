@@ -50,7 +50,7 @@ namespace Material
 
             // Calculate concrete stresses
             public abstract double TensileStress((double ec1, double ec2) principalStrains, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null);
-            public abstract double TensileStress(double strain, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null);
+            public abstract double TensileStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null);
 	        public abstract double CompressiveStress((double ec1, double ec2) principalStrains);
 	        public abstract double CompressiveStress(double strain);
 
@@ -108,13 +108,10 @@ namespace Material
                 }
 
                 // Calculate tensile stress in concrete
-                public override double TensileStress(double strain, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null)
+                public override double TensileStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
 		        {
-			        // Verify cracked state
-			        VerifyCracked(strain);
-
                     // Constitutive relation
-                    if (!Cracked) // Not cracked
+                    if (strain <= ecr) // Not cracked
 				        return
 					        strain * Ec;
 
@@ -177,13 +174,10 @@ namespace Material
                 }
 
                 #region Uniaxial
-                public override double TensileStress(double strain, double Lr, double thetaC1, Reinforcement.Biaxial reinforcement)
+                public override double TensileStress(double strain, double Lr, Reinforcement.Uniaxial reinforcement)
                 {
-	                // Verify cracked state
-	                VerifyCracked(strain);
-
                     // Check if concrete is cracked
-                    if (!Cracked) // Not cracked
+                    if (strain <= ecr) // Not cracked
                         return
                             Ec * strain;
 
@@ -193,17 +187,16 @@ namespace Material
                     double fc1a = fcr * (1 - (strain - ecr) / (ets - ecr));
 
                     // Calculate coefficient for tension stiffening effect
-                    double m = reinforcement.TensionStiffeningCoefficient(thetaC1);
+                    double m = reinforcement.TensionStiffeningCoefficient();
 
                     // Calculate concrete postcracking stress associated with tension stiffening
                     double fc1b = fcr / (1 + Math.Sqrt(2.2 * m * strain));
-                    //double fc1b = fcr / (1 + Math.Sqrt(500 * ec1));
 
                     // Calculate maximum tensile stress
                     double fc1c = Math.Max(fc1a, fc1b);
 
                     // Check the maximum value of fc1 that can be transmitted across cracks
-                    double fc1s = reinforcement.MaximumPrincipalTensileStress(thetaC1);
+                    double fc1s = reinforcement.MaximumPrincipalTensileStress();
 
                     // Calculate concrete tensile stress
                     return
@@ -238,7 +231,7 @@ namespace Material
 	                // Calculate fp and ep
 	                double
 		                fp = -betaD * fc,
-		                ep = betaD * ec;
+		                ep =  betaD * ec;
 
 	                // Calculate parameters of concrete
 	                double k;
@@ -280,7 +273,6 @@ namespace Material
 
 	                // Calculate concrete postcracking stress associated with tension stiffening
 	                double fc1b = fcr / (1 + Math.Sqrt(2.2 * m * ec1));
-	                //double fc1b = fcr / (1 + Math.Sqrt(500 * ec1));
 
 	                // Calculate maximum tensile stress
 	                double fc1c = Math.Max(fc1a, fc1b);
