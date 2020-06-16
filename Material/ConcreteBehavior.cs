@@ -165,7 +165,9 @@ namespace Material
 
 
                 #endregion
-            }
+
+                public override string ToString() => "MCFT";
+	        }
 
             public class DSFM : Behavior
 	        {
@@ -286,7 +288,9 @@ namespace Material
 		                Math.Min(fc1c, fc1s);
                 }
                 #endregion
-            }
+
+                public override string ToString() => "DSFM";
+	        }
         }
 	}
 }
