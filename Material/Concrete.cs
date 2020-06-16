@@ -25,13 +25,20 @@ namespace Material
 			ConcreteBehavior        = Concrete_Behavior();
 		}
 
-		// Alternate
+		// Alternates
 		public Concrete(Parameters parameters, ModelBehavior behavior = ModelBehavior.MCFT)
 		{
 			// Initiate parameters
 			ConcreteParameters    = parameters;
 			ConcreteModelBehavior = behavior;
 			ConcreteBehavior      = Concrete_Behavior();
+		}
+
+		public Concrete(Parameters parameters, Behavior concreteBehavior)
+		{           
+			// Initiate parameters
+			ConcreteParameters = parameters;
+			ConcreteBehavior   = concreteBehavior;
 		}
 
         // Get parameters

@@ -106,12 +106,7 @@ namespace Material
 			{
 				var (psx, psy) = Ratio;
 
-				double Esx, Esy;
-
-				if (steelSecantModule.HasValue)
-					(Esx, Esy) = steelSecantModule.Value;
-				else
-					(Esx, Esy) = SecantModule;
+				var (Esx, Esy) = steelSecantModule ?? SecantModule;
 
 				// Steel matrix
 				var Ds = Matrix<double>.Build.Dense(3, 3);

@@ -23,6 +23,11 @@ namespace Material
 	            Area = concreteArea;
             }
 
+            public Uniaxial(Parameters parameters, double concreteArea, Behavior concreteBehavior) : base(parameters, concreteBehavior)
+            {
+	            Area = concreteArea;
+            }
+
             // Calculate secant module of concrete
             public double SecantModule => ConcreteBehavior.SecantModule(Stress, Strain);
 

@@ -29,6 +29,10 @@ namespace Material
             {
             }
 
+            public Biaxial(Parameters parameters, Behavior concreteBehavior) : base(parameters, concreteBehavior)
+            {
+            }
+
             // Calculate secant module of concrete
             public (double Ec1, double Ec2) SecantModule
             {
@@ -71,12 +75,7 @@ namespace Material
             // Calculate concrete stiffness matrix
             public void CalculateStiffness(double? thetaC1 = null, (double Ec1, double Ec2)? concreteSecantModule = null)
             {
-	            double Ec1, Ec2;
-
-	            if (concreteSecantModule.HasValue)
-		            (Ec1, Ec2) = concreteSecantModule.Value;
-	            else
-		            (Ec1, Ec2) = SecantModule;
+	            var (Ec1, Ec2) = concreteSecantModule ?? SecantModule;
 
 	            double Gc = Ec1 * Ec2 / (Ec1 + Ec2);
 
@@ -106,24 +105,20 @@ namespace Material
             // Calculate tensile strain angle
             public (double theta1, double theta2) StrainAngles(Vector<double> strains = null, (double ec1, double ec2)? principalStrains = null)
             {
-	            if (strains == null)
-		            strains = Strains;
-
-	            if (!principalStrains.HasValue)
-		            principalStrains = PrincipalStrains;
+	            var e  = strains          ?? Strains;
+	            var e1 = principalStrains ?? PrincipalStrains;
 
 	            return
-		            Strain.PrincipalAngles(strains, principalStrains.Value);
+		            Strain.PrincipalAngles(e, e1);
             }
 
             // Calculate principal strains
             public (double ec1, double ec2) Principal_Strains(Vector<double> strains = null)
             {
-	            if (strains == null)
-		            strains = Strains;
+	            var e = strains ?? Strains;
 
                 return
-	                Strain.PrincipalStrains(strains);
+                    Strain.PrincipalStrains(e);
             }
 
             // Calculate initial stiffness
@@ -147,11 +142,10 @@ namespace Material
             // This matrix transforms from x-y to 1-2 coordinates
             public Matrix<double> TransformationMatrix(double? theta1 = null)
             {
-	            if (!theta1.HasValue)
-		            theta1 = PrincipalAngles.theta1;
+	            double theta = theta1 ?? PrincipalAngles.theta1;
 
 	            return
-		            Strain.TransformationMatrix(theta1.Value);
+		            Strain.TransformationMatrix(theta);
             }
         }
     }

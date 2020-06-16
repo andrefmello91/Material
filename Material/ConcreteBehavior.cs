@@ -175,7 +175,7 @@ namespace Material
                 }
 
                 #region Uniaxial
-                public override double TensileStress(double strain, double Lr, Reinforcement.Uniaxial reinforcement)
+                public override double TensileStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
                 {
                     // Check if concrete is cracked
                     if (strain <= ecr) // Not cracked
@@ -184,7 +184,7 @@ namespace Material
 
                     // Cracked
                     // Calculate concrete post-cracking stress associated with tension softening
-                    double ets = 2 * Gf / (fcr * Lr);
+                    double ets = 2 * Gf / (fcr * referenceLength);
                     double fc1a = fcr * (1 - (strain - ecr) / (ets - ecr));
 
                     // Calculate coefficient for tension stiffening effect

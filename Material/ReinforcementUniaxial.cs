@@ -15,7 +15,7 @@ namespace Material
 			private double ConcreteArea  { get; }
 
             // Constructor
-            public Uniaxial(int numberOfBars, double barDiameter, double concreteArea = 0, Steel steel = null)
+            public Uniaxial(int numberOfBars, double barDiameter, double concreteArea, Steel steel)
 			{
 				NumberOfBars = numberOfBars;
 				BarDiameter  = barDiameter;
