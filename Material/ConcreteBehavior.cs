@@ -8,6 +8,7 @@ namespace Material
 	{
 		public enum ModelBehavior
 		{
+			Linear,
 			MCFT,
 			DSFM
 		}

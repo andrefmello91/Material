@@ -59,13 +59,20 @@ namespace Material
 		// Get parameters
 		private Behavior Concrete_Behavior()
 		{
-			if (ConcreteModelBehavior == ModelBehavior.MCFT)
-				return
-					new Behavior.MCFT(ConcreteParameters);
+			switch (ConcreteModelBehavior)
+			{
+                case ModelBehavior.MCFT:
+	                return
+		                new Behavior.MCFT(ConcreteParameters);
 
-			return
-				new Behavior.DSFM(ConcreteParameters);
-		}
+                case ModelBehavior.DSFM:
+	                return
+		                new Behavior.DSFM(ConcreteParameters);
+            }
+
+			// Linear:
+			return null;
+        }
 
         // Get parameters
         public double fc  => ConcreteParameters.Strength;
