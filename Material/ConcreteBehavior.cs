@@ -6,7 +6,7 @@ namespace Material
 	// Concrete
 	public partial class Concrete
 	{
-		public enum ModelBehavior
+		public enum BehaviorModel
 		{
 			Linear,
 			MCFT,

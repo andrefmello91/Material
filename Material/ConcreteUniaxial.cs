@@ -1,7 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using MathNet.Numerics;
-
-namespace Material
+﻿namespace Material
 {
 	// Concrete
 	public partial class Concrete
@@ -13,12 +10,12 @@ namespace Material
             public double Stress  { get; set; }
             public double Area    { get; }
 
-            public Uniaxial(double strength, double aggregateDiameter, double concreteArea, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
+            public Uniaxial(double strength, double aggregateDiameter, double concreteArea, ParameterModel parameterModel = ParameterModel.MCFT, BehaviorModel behavior = BehaviorModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, parameterModel, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
             {
 	            Area = concreteArea;
             }
 
-            public Uniaxial(Parameters parameters, double concreteArea, ModelBehavior behavior = ModelBehavior.MCFT) : base(parameters, behavior)
+            public Uniaxial(Parameters parameters, double concreteArea, BehaviorModel behavior = BehaviorModel.MCFT) : base(parameters, behavior)
             {
 	            Area = concreteArea;
             }

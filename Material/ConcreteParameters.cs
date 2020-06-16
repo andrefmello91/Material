@@ -17,7 +17,7 @@ namespace Material
 		}
 
 		// Model parameters
-		public enum ModelParameters
+		public enum ParameterModel
 		{
 			NBR6118,
 			MC2010,

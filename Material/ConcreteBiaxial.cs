@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using MathNet.Numerics;
-using MathNet.Numerics.Interpolation;
 using MathNet.Numerics.LinearAlgebra;
 using Relations;
 
@@ -19,13 +18,13 @@ namespace Material
             public (double fc1, double fc2)       PrincipalStresses { get; set; }
 			public Matrix<double>                 Stiffness         { get; set; }
 
-            public Biaxial(double strength, double aggregateDiameter, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, modelParameters, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
+            public Biaxial(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, BehaviorModel behavior = BehaviorModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, parameterModel, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
             {
 	            Stiffness = InitialStiffness();
             }
 
             // Alternate
-            public Biaxial(Parameters parameters, ModelBehavior behavior = ModelBehavior.MCFT) : base(parameters, behavior)
+            public Biaxial(Parameters parameters, BehaviorModel behavior = BehaviorModel.MCFT) : base(parameters, behavior)
             {
             }
 

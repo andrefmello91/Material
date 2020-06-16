@@ -1,36 +1,34 @@
-﻿using System;
-
-namespace Material
+﻿namespace Material
 {
 	// Concrete
 	public partial class Concrete : Relations
 	{
 		// Properties
-		public ModelParameters          ConcreteModelParameters { get; }
-		public Parameters               ConcreteParameters      { get; }
-		public ModelBehavior            ConcreteModelBehavior   { get; }
-		public Behavior                 ConcreteBehavior        { get; }
+		public ParameterModel ConcreteParameterModel { get; }
+		public Parameters     ConcreteParameters      { get; }
+		public BehaviorModel  ConcreteBehaviorModel   { get; }
+		public Behavior       ConcreteBehavior        { get; }
 
 		public bool			 Cracked           => ConcreteBehavior.Cracked;
         public AggregateType Type              => ConcreteParameters.Type;
 		public double        AggregateDiameter => ConcreteParameters.AggregateDiameter;
 
         // Read the concrete parameters
-        public Concrete(double strength, double aggregateDiameter, ModelParameters modelParameters = ModelParameters.MCFT, ModelBehavior behavior = ModelBehavior.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+        public Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, BehaviorModel behavior = BehaviorModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
 		{
 			// Initiate parameters
-			ConcreteModelParameters = modelParameters;
+			ConcreteParameterModel  = parameterModel;
 			ConcreteParameters      = Concrete_Parameters(strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain);
-			ConcreteModelBehavior   = behavior;
+			ConcreteBehaviorModel   = behavior;
 			ConcreteBehavior        = Concrete_Behavior();
 		}
 
 		// Alternates
-		public Concrete(Parameters parameters, ModelBehavior behavior = ModelBehavior.MCFT)
+		public Concrete(Parameters parameters, BehaviorModel behavior = BehaviorModel.MCFT)
 		{
 			// Initiate parameters
 			ConcreteParameters    = parameters;
-			ConcreteModelBehavior = behavior;
+			ConcreteBehaviorModel = behavior;
 			ConcreteBehavior      = Concrete_Behavior();
 		}
 
@@ -44,18 +42,18 @@ namespace Material
         // Get parameters
         private Parameters Concrete_Parameters(double strength, double aggregateDiameter, AggregateType aggregateType, double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain)
 		{
-			switch (ConcreteModelParameters)
+			switch (ConcreteParameterModel)
 			{
-                case ModelParameters.MC2010:
+                case ParameterModel.MC2010:
 					return new Parameters.MC2010(strength, aggregateDiameter, aggregateType);
 
-                case ModelParameters.NBR6118:
+                case ParameterModel.NBR6118:
 					return new Parameters.NBR6118(strength, aggregateDiameter, aggregateType);
 
-                case ModelParameters.MCFT:
+                case ParameterModel.MCFT:
 					return new Parameters.MCFT(strength, aggregateDiameter, aggregateType);
 
-                case ModelParameters.DSFM:
+                case ParameterModel.DSFM:
 					return new Parameters.DSFM(strength, aggregateDiameter, aggregateType);
 			}
 
@@ -66,13 +64,13 @@ namespace Material
 		// Get parameters
 		private Behavior Concrete_Behavior()
 		{
-			switch (ConcreteModelBehavior)
+			switch (ConcreteBehaviorModel)
 			{
-                case ModelBehavior.MCFT:
+                case BehaviorModel.MCFT:
 	                return
 		                new Behavior.MCFT(ConcreteParameters);
 
-                case ModelBehavior.DSFM:
+                case BehaviorModel.DSFM:
 	                return
 		                new Behavior.DSFM(ConcreteParameters);
             }
