@@ -40,9 +40,9 @@ namespace Material
 	        public double        UltimateStrain    { get; set; }
 
 	        // Automatic calculated properties
-	        public double CrackStrain       => TensileStrength / InitialModule;
-	        public double TransversalModule => SecantModule / 2.4;
-	        public double FractureParameter => 0.075;
+	        public double         CrackStrain       => TensileStrength / InitialModule;
+	        public double         TransversalModule => SecantModule / 2.4;
+	        public virtual double FractureParameter => 0.075;
 
 	        public Parameters(double strength, double aggregateDiameter,
 		        AggregateType aggregateType = AggregateType.Quartzite)
@@ -147,6 +147,8 @@ namespace Material
 					        UltimateStrainSpline.Interpolate(Strength);
 			        }
 		        }
+
+		        public override double FractureParameter => 0.073 * Math.Pow(Strength, 0.18);
 
 		        // Array of high strength concrete classes, C50 to C90 (MC2010)
 		        private readonly double[] classes =
