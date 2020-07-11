@@ -47,11 +47,11 @@ namespace Material
 	        public virtual double FractureParameter => 0.075;
 
 			// Constructor (strength in MPa and aggregate diameter im mm)
-	        public Parameters(double strength, double aggregateDiameter,
+	        public Parameters(double strengthMPa, double aggregateDiametermm,
 		        AggregateType aggregateType = AggregateType.Quartzite)
 	        {
-		        Strength          = strength;
-		        AggregateDiameter = aggregateDiameter;
+		        Strength          = strengthMPa;
+		        AggregateDiameter = aggregateDiametermm;
 		        Type              = aggregateType;
 		        Poisson           = 0.2;
 	        }
@@ -75,34 +75,10 @@ namespace Material
 			        "\n" + phi + ",ag = " + AggregateDiameter + " mm";
 	        }
 
-			// T string with custom units
-            public string ToString(PressureUnit stressUnit, LengthUnit lengthUnit)
-	        {
-				// Convert units
-				IQuantity
-					fc    = Pressure.FromMegapascals(Strength),
-					ft    = Pressure.FromMegapascals(Math.Round(TensileStrength, 2)),
-					Ec    = Pressure.FromMegapascals(Math.Round(InitialModule, 2)),
-					phiAg = Length.FromMillimeters(AggregateDiameter);
-
-				char
-			        phi = (char)Characters.Phi,
-			        eps = (char)Characters.Epsilon;
-
-				return
-					"Concrete Parameters:\n" +
-					"\nfc = "   + fc.ToUnit(stressUnit) +
-			        "\nft = "  + ft.ToUnit(stressUnit) +
-			        "\nEc = "   + Ec.ToUnit(stressUnit) +
-			        "\n" + eps  + "c = "   + Math.Round(1000 * PlasticStrain, 2) + " E-03" +
-			        "\n" + eps  + "cu = "  + Math.Round(1000 * UltimateStrain, 2) + " E-03" +
-			        "\n" + phi  + ",ag = " + phiAg.ToUnit(lengthUnit);
-	        }
-
             public class MC2010 : Parameters
 	        {
 		        // Calculate parameters according to FIB MC2010
-		        public MC2010(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+		        public MC2010(double strengthMPa, double aggregateDiametermm, AggregateType aggregateType = AggregateType.Quartzite) : base(strengthMPa, aggregateDiametermm, aggregateType)
 		        {
 			        TensileStrength = fctm;
 			        PlasticStrain   = ec1;
@@ -196,8 +172,8 @@ namespace Material
 	        public class NBR6118 : Parameters
 	        {
 		        // Calculate parameters according to FIB MC2010
-		        public NBR6118(double strength, double aggregateDiameter,
-			        AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter,
+		        public NBR6118(double strengthMPa, double aggregateDiametermm,
+			        AggregateType aggregateType = AggregateType.Quartzite) : base(strengthMPa, aggregateDiametermm,
 			        aggregateType)
 		        {
 			        TensileStrength   = fctm;
@@ -278,8 +254,8 @@ namespace Material
 	        // MCFT Parameters
 	        public class MCFT : Parameters
 	        {
-		        public MCFT(double strength, double aggregateDiameter,
-			        AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter,
+		        public MCFT(double strengthMPa, double aggregateDiametermm,
+			        AggregateType aggregateType = AggregateType.Quartzite) : base(strengthMPa, aggregateDiametermm,
 			        aggregateType)
 		        {
 			        TensileStrength = fcr;
@@ -297,7 +273,7 @@ namespace Material
 	        // DSFM Parameters
 	        public class DSFM : Parameters
 	        {
-		        public DSFM(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+		        public DSFM(double strengthMPa, double aggregateDiametermm, AggregateType aggregateType = AggregateType.Quartzite) : base(strengthMPa, aggregateDiametermm, aggregateType)
 		        {
 			        TensileStrength = fcr;
 			        PlasticStrain   = ec;
@@ -315,7 +291,7 @@ namespace Material
 	        // Custom parameters
 	        public class Custom : Parameters
 	        {
-		        public Custom(double strength, double aggregateDiameter, double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain) : base(strength, aggregateDiameter)
+		        public Custom(double strengthMPa, double aggregateDiametermm, double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain) : base(strengthMPa, aggregateDiametermm)
 		        {
 			        TensileStrength = tensileStrength;
 			        InitialModule   = elasticModule;

@@ -19,13 +19,13 @@ namespace Material
 		private double HardeningStrain         { get; }
 
         // Read the steel parameters
-        public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01, bool considerStrainHardening = false, double hardeningModule = 0, double hardeningStrain = 0)
+        public Steel(double yieldStressMPa, double elasticModuleMPa = 210000, double ultimateStrain = 0.01, bool considerStrainHardening = false, double hardeningModuleMPa = 0, double hardeningStrain = 0)
 		{
-			YieldStress             = yieldStress;
-			ElasticModule           = elasticModule;
+			YieldStress             = yieldStressMPa;
+			ElasticModule           = elasticModuleMPa;
 			UltimateStrain          = ultimateStrain;
 			ConsiderStrainHardening = considerStrainHardening;
-			HardeningModule         = hardeningModule;
+			HardeningModule         = hardeningModuleMPa;
 			HardeningStrain         = hardeningStrain;
 		}
 
