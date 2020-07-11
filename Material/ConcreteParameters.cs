@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using MathNet.Numerics.Interpolation;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Material
 {
@@ -44,6 +46,7 @@ namespace Material
 	        public double         TransversalModule => SecantModule / 2.4;
 	        public virtual double FractureParameter => 0.075;
 
+			// Constructor (strength in MPa and aggregate diameter im mm)
 	        public Parameters(double strength, double aggregateDiameter,
 		        AggregateType aggregateType = AggregateType.Quartzite)
 	        {
@@ -65,11 +68,35 @@ namespace Material
 		        return
 			        "Concrete Parameters:\n" +
 			        "\nfc = " + Strength + " MPa" +
-			        "\nfcr = " + Math.Round(TensileStrength, 2) + " MPa" +
+			        "\nft = " + Math.Round(TensileStrength, 2) + " MPa" +
 			        "\nEc = " + Math.Round(InitialModule, 2) + " MPa" +
 			        "\n" + eps + "c = "   + Math.Round(1000 * PlasticStrain, 2) + " E-03" +
 			        "\n" + eps + "cu = "  + Math.Round(1000 * UltimateStrain, 2) + " E-03" +
 			        "\n" + phi + ",ag = " + AggregateDiameter + " mm";
+	        }
+
+			// T string with custom units
+            public string ToString(PressureUnit stressUnit, LengthUnit lengthUnit)
+	        {
+				// Convert units
+				IQuantity
+					fc    = Pressure.FromMegapascals(Strength),
+					ft    = Pressure.FromMegapascals(Math.Round(TensileStrength, 2)),
+					Ec    = Pressure.FromMegapascals(Math.Round(InitialModule, 2)),
+					phiAg = Length.FromMillimeters(AggregateDiameter);
+
+				char
+			        phi = (char)Characters.Phi,
+			        eps = (char)Characters.Epsilon;
+
+				return
+					"Concrete Parameters:\n" +
+					"\nfc = "   + fc.ToUnit(stressUnit) +
+			        "\nft = "  + ft.ToUnit(stressUnit) +
+			        "\nEc = "   + Ec.ToUnit(stressUnit) +
+			        "\n" + eps  + "c = "   + Math.Round(1000 * PlasticStrain, 2) + " E-03" +
+			        "\n" + eps  + "cu = "  + Math.Round(1000 * UltimateStrain, 2) + " E-03" +
+			        "\n" + phi  + ",ag = " + phiAg.ToUnit(lengthUnit);
 	        }
 
             public class MC2010 : Parameters

@@ -1,4 +1,6 @@
-﻿namespace Material
+﻿using UnitsNet.Units;
+
+namespace Material
 {
 	// Concrete
 	public partial class Concrete : Relations
@@ -90,5 +92,9 @@
 		public double nu  => ConcreteParameters.Poisson;
 
 		public override string ToString() => ConcreteParameters.ToString();
+
+		// T string with custom units
+		public string ToString(PressureUnit stressUnit, LengthUnit lengthUnit) =>
+			ConcreteParameters.ToString(stressUnit, lengthUnit);
 	}
 }
