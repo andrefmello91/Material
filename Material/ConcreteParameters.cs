@@ -75,6 +75,28 @@ namespace Material
 			        "\n" + phi + ",ag = " + AggregateDiameter + " mm";
 	        }
 
+            public string ToString(PressureUnit strengthUnit, LengthUnit aggregateUnit)
+            {
+	            IQuantity
+		            fc    = Pressure.FromMegapascals(Strength).ToUnit(strengthUnit),
+		            ft    = Pressure.FromMegapascals(TensileStrength).ToUnit(strengthUnit),
+		            Ec    = Pressure.FromMegapascals(InitialModule).ToUnit(strengthUnit),
+		            phiAg = Length.FromMillimeters(AggregateDiameter).ToUnit(aggregateUnit);
+
+		        char
+			        phi = (char)Characters.Phi,
+			        eps = (char)Characters.Epsilon;
+
+		        return
+			        "Concrete Parameters:\n" +
+			        "\nfc = " + fc +
+			        "\nft = " + ft +
+			        "\nEc = " + Ec +
+			        "\n" + eps + "c = "   + Math.Round(1000 * PlasticStrain, 2)  + " E-03" +
+			        "\n" + eps + "cu = "  + Math.Round(1000 * UltimateStrain, 2) + " E-03" +
+			        "\n" + phi + ",ag = " + phiAg;
+	        }
+
             public class MC2010 : Parameters
 	        {
 		        // Calculate parameters according to FIB MC2010

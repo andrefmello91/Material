@@ -93,8 +93,6 @@ namespace Material
 
 		public override string ToString() => ConcreteParameters.ToString();
 
-		// T string with custom units
-		public string ToString(PressureUnit stressUnit, LengthUnit lengthUnit) =>
-			ConcreteParameters.ToString(stressUnit, lengthUnit);
+		public string ToString(PressureUnit strengthUnit, LengthUnit aggregateUnit) => ConcreteParameters.ToString(strengthUnit, aggregateUnit);
 	}
 }

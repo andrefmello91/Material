@@ -1,4 +1,6 @@
 ﻿using System;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Material
 {
@@ -109,6 +111,31 @@ namespace Material
 				       "Hardening parameters:\n" +
 				       "Esh = "          + HardeningModule + " MPa\n" +
 				       epsilon + "sh = " + esh             + " E-03";
+			}
+
+			return msg;
+		}
+
+		public string ToString(PressureUnit unit)
+		{
+			char epsilon = (char) Characters.Epsilon;
+
+			double ey = Math.Round(1000 * YieldStrain, 2);
+
+			string msg =
+				"Steel Parameters:\n" +
+				"fy = " + Pressure.FromMegapascals(YieldStress).ToUnit(unit)   + "\n" +
+				"Es = " + Pressure.FromMegapascals(ElasticModule).ToUnit(unit) + "\n" +
+				epsilon + "y = " + ey + " E-03";
+
+			if (ConsiderStrainHardening)
+			{
+				double esh = Math.Round(1000 * HardeningStrain, 2);
+
+				msg += "\n\n" +
+				       "Hardening parameters:\n" +
+				       "Esh = "          + Pressure.FromMegapascals(HardeningModule).ToUnit(unit) + "\n" + 
+				       epsilon + "sh = " + esh + " E-03";
 			}
 
 			return msg;

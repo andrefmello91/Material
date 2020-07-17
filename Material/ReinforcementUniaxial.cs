@@ -1,5 +1,7 @@
 ﻿using System;
 using MathNet.Numerics;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Material
 {
@@ -120,6 +122,26 @@ namespace Material
 				return
 					"Reinforcement: " + NumberOfBars + " " + phi + BarDiameter + " mm (" + As +
 					" mm²)\n\n" + Steel;
+			}
+
+            public string ToString(LengthUnit diameterUnit, PressureUnit strengthUnit)
+            {
+	            var areaUnit = AreaUnit.SquareMeter;
+
+	            if (diameterUnit == LengthUnit.Millimeter)
+		            areaUnit = AreaUnit.SquareMillimeter;
+
+				else if (diameterUnit == LengthUnit.Centimeter)
+		            areaUnit = AreaUnit.SquareCentimeter;
+
+	            var d  = Length.FromMillimeters(BarDiameter).ToUnit(diameterUnit);
+	            var As = UnitsNet.Area.FromSquareMillimeters(Area).ToUnit(areaUnit);
+
+				char phi = (char) Characters.Phi;
+
+				return
+					"Reinforcement: " + NumberOfBars + " " + phi + d + " (" + As +
+					")\n\n" + Steel.ToString(strengthUnit);
 			}
 		}
 	}

@@ -1,6 +1,8 @@
 ﻿using System;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Material
 {
@@ -206,6 +208,30 @@ namespace Material
 
 					"\n\nReinforcement (y) = " + phi + BarDiameter.Y + " mm, s = " + BarSpacing.Y + " mm (" +
 					rho + "sy = " + psy + ")\n" + Steel.Y;
+			}
+
+			public string ToString(LengthUnit diameterUnit, LengthUnit spacingUnit, PressureUnit strengthUnit)
+			{
+				Length
+					phiX = Length.FromMillimeters(BarDiameter.X).ToUnit(diameterUnit),
+					phiY = Length.FromMillimeters(BarDiameter.Y).ToUnit(diameterUnit),
+					sX   = Length.FromMillimeters(BarSpacing.X).ToUnit(spacingUnit),
+					sY   = Length.FromMillimeters(BarSpacing.Y).ToUnit(spacingUnit);
+
+				// Approximate reinforcement ratio
+				double
+					psx = Math.Round(Ratio.X, 3),
+					psy = Math.Round(Ratio.Y, 3);
+
+				char rho = (char) Characters.Rho;
+				char phi = (char) Characters.Phi;
+
+				return
+					"Reinforcement (x): " + phi + phiX + ", s = " + sX +
+					" (" + rho + "sx = " + psx + ")\n" + Steel.X.ToString(strengthUnit) + "\n\n" +
+
+					"Reinforcement (y) = " + phi + phiY + ", s = " + sY + " (" +
+					rho + "sy = " + psy + ")\n" + Steel.Y.ToString(strengthUnit);
 			}
 		}
 	}
