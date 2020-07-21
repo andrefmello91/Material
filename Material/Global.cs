@@ -20,11 +20,19 @@ namespace Material
 
 	public abstract class Relations
 	{
-		// Verify if a number is zero
-		public bool NotZero(double num) => num != 0;
+        /// <summary>
+        /// Verify if a number is zero (true for not zero)
+        /// </summary>
+        /// <param name="num">The number.</param>
+        /// <returns></returns>
+        public bool NotZero(double num) => num != 0;
 
-		// Get the direction cosines of an angle
-		public (double cos, double sin) DirectionCosines(double angle)
+        /// <summary>
+        /// Calculate the direction cosines of an angle (cos, sin)
+        /// </summary>
+        /// <param name="angle">Angle in radians</param>
+        /// <returns></returns>
+        public (double cos, double sin) DirectionCosines(double angle)
 		{
 			double
 				cos = Trig.Cos(angle).CoerceZero(1E-6),

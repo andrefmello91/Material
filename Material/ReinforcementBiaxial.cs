@@ -11,24 +11,31 @@ namespace Material
 		public class Biaxial : Relations
 		{
 			// Properties
-			public (double X, double Y) BarDiameter { get; }
-			public (double X, double Y) BarSpacing  { get; }
-			public (Steel X, Steel Y)   Steel       { get; }
-			public (double X, double Y) Ratio       { get; }
-			public Matrix<double>       Stiffness   { get; set; }
-			public Vector<double>       Strains     { get; set; }
-			private double              PanelWidth  { get; }
+			public (double X, double Y) BarDiameter  { get; }
+			public (double X, double Y) BarSpacing   { get; }
+			public (Steel X, Steel Y)   Steel        { get; }
+			public (double X, double Y) Ratio        { get; }
+			public Matrix<double>       Stiffness    { get; set; }
+			public Vector<double>       Strains      { get; set; }
+			private double              SectionWidth { get; }
 
-			// Constructor
-			public Biaxial((double X, double Y) barDiameter, (double X, double Y) barSpacing,
-				(Steel X, Steel Y) steel, double panelWidth)
+            // Constructor
+            /// <summary>
+            /// Reinforcement for biaxial calculations, for horizontal (X) and vertical (Y) directions.
+            /// </summary>
+            /// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
+            /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
+            /// <param name="steel">The steel objects for directions X and Y.</param>
+            /// <param name="sectionWidth">The width (in mm) of cross-section.</param>
+            public Biaxial((double X, double Y) barDiameter, (double X, double Y) barSpacing,
+				(Steel X, Steel Y) steel, double sectionWidth)
 			{
-				BarDiameter = barDiameter;
-				BarSpacing  = barSpacing;
-				Steel       = steel;
-				PanelWidth  = panelWidth;
-				Ratio       = CalculateRatio();
-				Stiffness   = InitialStiffness();
+				BarDiameter  = barDiameter;
+				BarSpacing   = barSpacing;
+				Steel        = steel;
+				SectionWidth = sectionWidth;
+				Ratio        = CalculateRatio();
+				Stiffness    = InitialStiffness();
 			}
 
 			// Verify if reinforcement is set
@@ -73,10 +80,10 @@ namespace Material
 					psy = 0;
 
 				if (xSet)
-					psx = 0.5 * Constants.Pi * BarDiameter.X * BarDiameter.X / (BarSpacing.X * PanelWidth);
+					psx = 0.5 * Constants.Pi * BarDiameter.X * BarDiameter.X / (BarSpacing.X * SectionWidth);
 
 				if (ySet)
-					psy = 0.5 * Constants.Pi * BarDiameter.Y * BarDiameter.Y / (BarSpacing.Y * PanelWidth);
+					psy = 0.5 * Constants.Pi * BarDiameter.Y * BarDiameter.Y / (BarSpacing.Y * SectionWidth);
 
 				return
 					(psx, psy);
@@ -192,25 +199,19 @@ namespace Material
 				SetStresses(strains);
 			}
 
-			public override string ToString()
-			{
-				// Approximate reinforcement ratio
-				double
-					psx = Math.Round(Ratio.X, 3),
-					psy = Math.Round(Ratio.Y, 3);
+			/// <summary>
+			/// Write string with default units (mm and MPa).
+			/// </summary>
+			public override string ToString() => ToString();
 
-				char rho = (char) Characters.Rho;
-				char phi = (char) Characters.Phi;
-
-				return
-					"Reinforcement (x): " + phi + BarDiameter.X + " mm, s = " + BarSpacing.X +
-					" mm (" + rho + "sx = " + psx + ")\n" + Steel.X +
-
-					"\n\nReinforcement (y) = " + phi + BarDiameter.Y + " mm, s = " + BarSpacing.Y + " mm (" +
-					rho + "sy = " + psy + ")\n" + Steel.Y;
-			}
-
-			public string ToString(LengthUnit diameterUnit, LengthUnit spacingUnit, PressureUnit strengthUnit)
+            /// <summary>
+            /// Write string with custom units.
+            /// </summary>
+            /// <param name="diameterUnit">The unit of bar diameter (default: mm).</param>
+            /// <param name="spacingUnit">The unit of bar spacing (default: mm).</param>
+            /// <param name="strengthUnit">The unit of steel strength (default: MPa).</param>
+            /// <returns></returns>
+            public string ToString(LengthUnit diameterUnit = LengthUnit.Millimeter, LengthUnit spacingUnit = LengthUnit.Millimeter, PressureUnit strengthUnit = PressureUnit.Megapascal)
 			{
 				Length
 					phiX = Length.FromMillimeters(BarDiameter.X).ToUnit(diameterUnit),

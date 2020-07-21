@@ -21,13 +21,22 @@ namespace Material
 		private double HardeningStrain         { get; }
 
         // Read the steel parameters
-        public Steel(double yieldStressMPa, double elasticModuleMPa = 210000, double ultimateStrain = 0.01, bool considerStrainHardening = false, double hardeningModuleMPa = 0, double hardeningStrain = 0)
+        /// <summary>
+        /// Steel behavior.
+        /// </summary>
+        /// <param name="yieldStress">Steel yield stress in MPa</param>
+        /// <param name="elasticModule">Steel elastic module in MPa (default: 210000 MPa)</param>
+        /// <param name="ultimateStrain">Steel ultimate strain in MPa (default: 0.01)</param>
+        /// <param name="considerStrainHardening">If considered, hardening module and hardening strain must be set (default: false)</param>
+        /// <param name="hardeningModule">Steel hardening module in MPa</param>
+        /// <param name="hardeningStrain">Steel strain at the beginning of hardening</param>
+        public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01, bool considerStrainHardening = false, double hardeningModule = 0, double hardeningStrain = 0)
 		{
-			YieldStress             = yieldStressMPa;
-			ElasticModule           = elasticModuleMPa;
+			YieldStress             = yieldStress;
+			ElasticModule           = elasticModule;
 			UltimateStrain          = ultimateStrain;
 			ConsiderStrainHardening = considerStrainHardening;
-			HardeningModule         = hardeningModuleMPa;
+			HardeningModule         = hardeningModule;
 			HardeningStrain         = hardeningStrain;
 		}
 
@@ -91,32 +100,18 @@ namespace Material
 			}
 		}
 
-		public override string ToString()
-		{
-			char epsilon = (char) Characters.Epsilon;
 
-			double ey = Math.Round(1000 * YieldStrain, 2);
+        /// <summary>
+        /// Write string with default unit (MPa)
+        /// </summary>
+        public override string ToString() => ToString();
 
-			string msg =
-				"Steel Parameters:\n" +
-				"fy = "          + YieldStress   + " MPa\n" +
-				"Es = "          + ElasticModule + " MPa\n" +
-				epsilon + "y = " + ey            + " E-03";
-
-			if (ConsiderStrainHardening)
-			{
-				double esh = Math.Round(1000 * HardeningStrain, 2);
-
-				msg += "\n\n" +
-				       "Hardening parameters:\n" +
-				       "Esh = "          + HardeningModule + " MPa\n" +
-				       epsilon + "sh = " + esh             + " E-03";
-			}
-
-			return msg;
-		}
-
-		public string ToString(PressureUnit unit)
+		/// <summary>
+        /// Write string with custom unit (default: MPa)
+        /// </summary>
+        /// <param name="unit">The stress unit.</param>
+        /// <returns></returns>
+		public string ToString(PressureUnit unit = PressureUnit.Megapascal)
 		{
 			char epsilon = (char) Characters.Epsilon;
 

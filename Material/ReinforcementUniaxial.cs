@@ -17,6 +17,13 @@ namespace Material
 			private double ConcreteArea  { get; }
 
             // Constructor
+			/// <summary>
+            /// Reinforcement for uniaxial calculations
+            /// </summary>
+            /// <param name="numberOfBars">The number of bars of the reinforcement.</param>
+            /// <param name="barDiameter">The bar diameter (in mm).</param>
+            /// <param name="concreteArea">The concrete area (in mm2).</param>
+            /// <param name="steel">The steel object.</param>
             public Uniaxial(int numberOfBars, double barDiameter, double concreteArea = 0, Steel steel = null)
 			{
 				NumberOfBars = numberOfBars;
@@ -112,19 +119,18 @@ namespace Material
 				SetStress(strain);
 			}
 
-            public override string ToString()
-			{
-				// Approximate steel area
-				double As = Math.Round(Area, 2);
+			/// <summary>
+			/// Write string with default units (mm and MPa).
+			/// </summary>
+			public override string ToString() => ToString();
 
-				char phi = (char) Characters.Phi;
-
-				return
-					"Reinforcement: " + NumberOfBars + " " + phi + BarDiameter + " mm (" + As +
-					" mm²)\n\n" + Steel;
-			}
-
-            public string ToString(LengthUnit diameterUnit, PressureUnit strengthUnit)
+			/// <summary>
+            /// Write string with custom units.
+            /// </summary>
+            /// <param name="diameterUnit">The bar diameter unit (default: mm).</param>
+            /// <param name="strengthUnit">The steel strength unit (default: MPa).</param>
+            /// <returns></returns>
+            public string ToString(LengthUnit diameterUnit = LengthUnit.Millimeter, PressureUnit strengthUnit = PressureUnit.Megapascal)
             {
 	            var areaUnit = AreaUnit.SquareMeter;
 

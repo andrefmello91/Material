@@ -10,16 +10,28 @@
             public double Stress  { get; set; }
             public double Area    { get; }
 
+            ///<inheritdoc/>
+            /// <summary>
+            /// Concrete for uniaxial calculations.
+            /// </summary>
             public Uniaxial(double strength, double aggregateDiameter, double concreteArea, ParameterModel parameterModel = ParameterModel.MCFT, BehaviorModel behavior = BehaviorModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, parameterModel, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
             {
 	            Area = concreteArea;
             }
 
+            ///<inheritdoc/>
+            /// <summary>
+            /// Concrete for uniaxial calculations.
+            /// </summary>
             public Uniaxial(Parameters parameters, double concreteArea, BehaviorModel behavior = BehaviorModel.MCFT) : base(parameters, behavior)
             {
 	            Area = concreteArea;
             }
 
+            ///<inheritdoc/>
+            /// <summary>
+            /// Concrete for uniaxial calculations.
+            /// </summary>
             public Uniaxial(Parameters parameters, double concreteArea, Behavior concreteBehavior) : base(parameters, concreteBehavior)
             {
 	            Area = concreteArea;

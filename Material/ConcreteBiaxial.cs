@@ -18,16 +18,27 @@ namespace Material
             public (double fc1, double fc2)       PrincipalStresses { get; set; }
 			public Matrix<double>                 Stiffness         { get; set; }
 
+            ///<inheritdoc/>
+            /// <summary>
+            /// Concrete for membrane calculations.
+            /// </summary>
             public Biaxial(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, BehaviorModel behavior = BehaviorModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, parameterModel, behavior, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
             {
 	            Stiffness = InitialStiffness();
             }
 
-            // Alternate
+            ///<inheritdoc/>
+            /// <summary>
+            /// Concrete for membrane calculations.
+            /// </summary>
             public Biaxial(Parameters parameters, BehaviorModel behavior = BehaviorModel.MCFT) : base(parameters, behavior)
             {
             }
 
+            ///<inheritdoc/>
+            /// <summary>
+            /// Concrete for membrane calculations.
+            /// </summary>
             public Biaxial(Parameters parameters, Behavior concreteBehavior) : base(parameters, concreteBehavior)
             {
             }

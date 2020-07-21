@@ -16,6 +16,18 @@ namespace Material
 		public double        AggregateDiameter => ConcreteParameters.AggregateDiameter;
 
         // Read the concrete parameters
+        /// <summary>
+        /// General concrete class.
+        /// </summary>
+        /// <param name="strength">Concrete compressive strength in MPa.</param>
+        /// <param name="aggregateDiameter">Maximum aggregate diameter in mm.</param>
+        /// <param name="parameterModel">The model for calculating concrete parameters.</param>
+        /// <param name="behavior">The base model of concrete behavior.</param>
+        /// <param name="aggregateType">The type of aggregate.</param>
+        /// <param name="tensileStrength">Concrete tensile strength in MPa.</param>
+        /// <param name="elasticModule">Concrete initial elastic module in MPa.</param>
+        /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
+        /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
         public Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, BehaviorModel behavior = BehaviorModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
 		{
 			// Initiate parameters
@@ -25,8 +37,13 @@ namespace Material
 			ConcreteBehavior        = Concrete_Behavior();
 		}
 
-		// Alternates
-		public Concrete(Parameters parameters, BehaviorModel behavior = BehaviorModel.MCFT)
+        // Alternates
+        /// <summary>
+        /// General concrete class.
+        /// </summary>
+        /// <param name="parameters">Concrete parameters object.</param>
+        /// <param name="behavior">The base model of concrete behavior.</param>
+        public Concrete(Parameters parameters, BehaviorModel behavior = BehaviorModel.MCFT)
 		{
 			// Initiate parameters
 			ConcreteParameters    = parameters;
@@ -34,7 +51,12 @@ namespace Material
 			ConcreteBehavior      = Concrete_Behavior();
 		}
 
-		public Concrete(Parameters parameters, Behavior concreteBehavior)
+        /// <summary>
+        /// General concrete class.
+        /// </summary>
+        /// <param name="parameters">Concrete parameters object.</param>
+        /// <param name="concreteBehavior">Concrete behavior object.</param>
+        public Concrete(Parameters parameters, Behavior concreteBehavior)
 		{           
 			// Initiate parameters
 			ConcreteParameters = parameters;
@@ -91,8 +113,16 @@ namespace Material
 		public double ecr => ConcreteParameters.CrackStrain;
 		public double nu  => ConcreteParameters.Poisson;
 
-		public override string ToString() => ConcreteParameters.ToString();
+        /// <summary>
+        /// Write string with default units (MPa and mm).
+        /// </summary>
+        public override string ToString() => ToString();
 
-		public string ToString(PressureUnit strengthUnit, LengthUnit aggregateUnit) => ConcreteParameters.ToString(strengthUnit, aggregateUnit);
+		/// <summary>
+		/// Write string with custom units.
+		/// </summary>
+		/// <param name="strengthUnit">The stress unit for strength (default: MPa)</param>
+		/// <param name="aggregateUnit">The aggregate dimension unit (default: mm)</param>
+		public string ToString(PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit aggregateUnit = LengthUnit.Millimeter) => ConcreteParameters.ToString(strengthUnit, aggregateUnit);
 	}
 }
