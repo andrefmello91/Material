@@ -6,8 +6,14 @@ using UnitsNet.Units;
 
 namespace Material
 {
+	/// <summary>
+    /// Reinforcement base class.
+    /// </summary>
 	public abstract partial class Reinforcement
 	{
+		/// <summary>
+        /// Biaxial reinforcement class.
+        /// </summary>
 		public class Biaxial : Relations
 		{
 			// Properties
@@ -19,7 +25,6 @@ namespace Material
 			public Vector<double>       Strains      { get; set; }
 			private double              SectionWidth { get; }
 
-            // Constructor
             /// <summary>
             /// Reinforcement for biaxial calculations, for horizontal (X) and vertical (Y) directions.
             /// </summary>
@@ -27,8 +32,7 @@ namespace Material
             /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
             /// <param name="steel">The steel objects for directions X and Y.</param>
             /// <param name="sectionWidth">The width (in mm) of cross-section.</param>
-            public Biaxial((double X, double Y) barDiameter, (double X, double Y) barSpacing,
-				(Steel X, Steel Y) steel, double sectionWidth)
+            public Biaxial((double X, double Y) barDiameter, (double X, double Y) barSpacing, (Steel X, Steel Y) steel, double sectionWidth)
 			{
 				BarDiameter  = barDiameter;
 				BarSpacing   = barSpacing;
@@ -49,13 +53,19 @@ namespace Material
 			public double fyy  => Steel.Y.YieldStress;
 			public double Esyi => Steel.Y.ElasticModule;
 
-            // Get reinforcement stresses
-			public (double fsx, double fsy) SteelStresses => (Steel.X.Stress, Steel.Y.Stress);
+            /// <summary>
+            /// Get reinforcement current stresses, in MPa.
+            /// </summary>
+            public (double fsx, double fsy) SteelStresses => (Steel.X.Stress, Steel.Y.Stress);
 
-			// Get reinforcement secant module
+            /// <summary>
+            /// Get reinforcement current secant module, in MPa.
+            /// </summary>
 			public (double Esx, double Esy) SecantModule => (Steel.X.SecantModule, Steel.Y.SecantModule);
 
-			// Get stress vector
+            /// <summary>
+            /// Get reinforcement current stress vector, in MPa.
+            /// </summary>
 			public Vector<double> Stresses
 			{
 				get
@@ -71,7 +81,9 @@ namespace Material
 				}
 			}
 
-            // Calculate the panel reinforcement ratio
+            /// <summary>
+            /// Calculate reinforcement ratios, in X and Y, in the cross-section.
+            /// </summary>
             public (double X, double Y) CalculateRatio()
 			{
 				// Initialize psx and psy
@@ -89,8 +101,11 @@ namespace Material
 					(psx, psy);
 			}
 
-			// Calculate angles related to crack
-			public (double X, double Y) Angles(double theta1)
+            /// <summary>
+            /// Calculate angles (in radians) related to crack angle.
+            /// </summary>
+            /// <param name="theta1">Principal tensile strain angle, in radians.</param>
+            public (double X, double Y) Angles(double theta1)
 			{
 				// Calculate angles
 				double
@@ -101,8 +116,11 @@ namespace Material
 					(thetaNx, thetaNy);
 			}
 
-			// Calculate Stresses
-			public void CalculateStresses(Vector<double> strains)
+            /// <summary>
+            /// Calculate current stresses, in MPs.
+            /// </summary>
+            /// <param name="strains">Current strains.</param>
+            public void CalculateStresses(Vector<double> strains)
 			{
 				Strains = strains;
 				
@@ -110,8 +128,11 @@ namespace Material
 				SetStrainsAndStresses(Strains);
 			}
 
-			// Calculate reinforcement stiffness matrix
-			public void CalculateStiffness((double Esx, double Esy)? steelSecantModule = null)
+            /// <summary>
+            /// Calculate current reinforcement stiffness matrix.
+            /// </summary>
+            /// <param name="steelSecantModule">Current secant modules, in MPa (default: <see cref="SecantModule"/>).</param>
+            public void CalculateStiffness((double Esx, double Esy)? steelSecantModule = null)
 			{
 				var (psx, psy) = Ratio;
 
@@ -125,7 +146,9 @@ namespace Material
 				Stiffness = Ds;
 			}
 
-            // Initial reinforcement stiffness
+            /// <summary>
+            /// Calculate initial reinforcement stiffness matrix.
+            /// </summary>
             public Matrix<double> InitialStiffness()
 			{
 				var (psx, psy) = Ratio;
@@ -138,7 +161,11 @@ namespace Material
 				return Ds;
 			}
 
-            // Calculate tension stiffening coefficient
+            /// <summary>
+            /// Calculate tension stiffening coefficient (for DSFM).
+            /// </summary>
+            /// <param name="theta1">Principal tensile strain angle, in radians.</param>
+            /// <returns></returns>
             public double TensionStiffeningCoefficient(double theta1)
 			{
 				// Get reinforcement angles and stresses
@@ -155,8 +182,11 @@ namespace Material
 					0.25 / (psx / phiX * cosNx + psy / phiY * cosNy);
 			}
 
-			// Calculate maximum value of fc1 that can be transmitted across cracks
-			public double MaximumPrincipalTensileStress(double theta1)
+            /// <summary>
+            /// Calculate maximum value of principal tensile strength (fc1, in MPa) that can be transmitted across cracks.
+            /// </summary>
+            /// <param name="theta1">Principal tensile strain angle, in radians.</param>
+            public double MaximumPrincipalTensileStress(double theta1)
 			{
 				// Get reinforcement angles and stresses
 				var (thetaNx, thetaNy) = Angles(theta1);
@@ -178,21 +208,30 @@ namespace Material
 					psx * (fyx - fsx) * cos2x + psy * (fyy - fsy) * cos2y;
 			}
 
-			// Set steel strains
-			public void SetStrains(Vector<double> strains)
+            /// <summary>
+            /// Set steel strains.
+            /// </summary>
+            /// <param name="strains">Current strains.</param>
+            public void SetStrains(Vector<double> strains)
 			{
 				Steel.X.SetStrain(strains[0]);
 				Steel.Y.SetStrain(strains[1]);
 			}
 
-			// Set steel stresses
+            /// <summary>
+            /// Set steel stresses, given strains.
+            /// </summary>
+            /// <param name="strains">Current strains.</param>
 			public void SetStresses(Vector<double> strains)
 			{
 				Steel.X.SetStress(strains[0]);
 				Steel.Y.SetStress(strains[1]);
 			}
 
-			// Set steel strain and stresses
+            /// <summary>
+            /// Set steel strains and calculate stresses, in MPa.
+            /// </summary>
+            /// <param name="strains">Current strains.</param>
 			public void SetStrainsAndStresses(Vector<double> strains)
 			{
 				SetStrains(strains);

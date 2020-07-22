@@ -29,7 +29,10 @@ namespace Material
 			Custom
 		}
 
-        // Implementation of concrete parameters
+
+        /// <summary>
+        ///Base class for implementation of concrete parameters.
+        /// </summary>
         public abstract class Parameters
         {
 	        public AggregateType Type              { get; set; }
@@ -50,7 +53,9 @@ namespace Material
 	        // Verify if concrete was set
 	        public bool IsSet => Strength > 0;
 
-            // Constructor (strength in MPa and aggregate diameter im mm)
+            /// <summary>
+            /// Base object of concrete parameters.
+            /// </summary>
             /// <param name="strength">Concrete compressive strength in MPa.</param>
             /// <param name="aggregateDiameter">Maximum aggregate diameter in mm.</param>
             /// <param name="aggregateType">The type of aggregate.</param>
@@ -169,23 +174,29 @@ namespace Material
 
 		        public override double FractureParameter => 0.073 * Math.Pow(Strength, 0.18);
 
-		        // Array of high strength concrete classes, C50 to C90 (MC2010)
-		        private readonly double[] classes =
+                /// <summary>
+                /// Array of high strength concrete classes, C50 to C90 (MC2010).
+                /// </summary>
+                private readonly double[] classes =
 		        {
 			        50, 55, 60, 70, 80, 90
 		        };
 
-		        // Array of ultimate strains for each concrete class, C50 to C90 (MC2010)
-		        private readonly double[] ultimateStrain =
+                /// <summary>
+                /// Array of ultimate strains for each concrete class, C50 to C90 (MC2010).
+                /// </summary>
+                private readonly double[] ultimateStrain =
 		        {
 			        -0.0034, -0.0034, -0.0033, -0.0032, -0.0031, -0.003
 		        };
 
-		        // Interpolation for ultimate strains
-		        private CubicSpline UltimateStrainSpline() => CubicSpline.InterpolateAkimaSorted(classes, ultimateStrain);
+                /// <summary>
+                /// Interpolation for ultimate strains.
+                /// </summary>
+                private CubicSpline UltimateStrainSpline() => CubicSpline.InterpolateAkimaSorted(classes, ultimateStrain);
 
-		        // Update concrete parameters
-		        public override void UpdateParameters()
+                ///<inheritdoc/>
+                public override void UpdateParameters()
 		        {
 			        TensileStrength = fctm();
 			        PlasticStrain   = ec1();
@@ -268,7 +279,7 @@ namespace Material
 				        -0.0026 - 0.035 * Math.Pow(0.01 * (90 - Strength), 4);
 		        }
 
-		        // Update concrete parameters
+                ///<inheritdoc/>
 		        public override void UpdateParameters()
 		        {
 			        TensileStrength = fctm();
@@ -295,7 +306,7 @@ namespace Material
 		        private double ecu   = -0.0035;
 		        private double Ec()  => -2 * Strength / ec;
 
-		        // Update concrete parameters
+		        ///<inheritdoc/>
 		        public override void UpdateParameters()
 		        {
 			        TensileStrength = fcr();
@@ -323,7 +334,7 @@ namespace Material
 		        private double ecu   = -0.0035;
 		        private double Ec()  => -2 * Strength / ec;
 
-		        // Update concrete parameters
+		        ///<inheritdoc/>
 		        public override void UpdateParameters()
 		        {
 			        TensileStrength = fcr();
@@ -354,7 +365,7 @@ namespace Material
 			        UltimateStrain  = ultimateStrain;
 		        }
 
-	            // Update concrete parameters
+                ///<inheritdoc/>
 	            public override void UpdateParameters()
 	            {
 	            }

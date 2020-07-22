@@ -4,15 +4,15 @@ using UnitsNet.Units;
 
 namespace Material
 {
-	// Steel
+	/// <summary>
+    /// Steel class.
+    /// </summary>
 	public class Steel
 	{
 		// Steel properties
 		public double YieldStress    { get; }
 		public double ElasticModule  { get; }
 		public double UltimateStrain { get; }
-		public double Strain         { get; set; }
-		public double Stress         { get; set; }
 		public double YieldStrain    => YieldStress / ElasticModule;
 
 		// Hardening properties
@@ -20,9 +20,19 @@ namespace Material
 		private double HardeningModule         { get; }
 		private double HardeningStrain         { get; }
 
+		/// <summary>
+		/// Current strain.
+		/// </summary>
+		public double Strain { get; set; }
+
+		/// <summary>
+		/// Current stress.
+		/// </summary>
+		public double Stress { get; set; }
+
         // Read the steel parameters
         /// <summary>
-        /// Steel behavior.
+        /// Steel object.
         /// </summary>
         /// <param name="yieldStress">Steel yield stress in MPa</param>
         /// <param name="elasticModule">Steel elastic module in MPa (default: 210000 MPa)</param>
@@ -40,26 +50,38 @@ namespace Material
 			HardeningStrain         = hardeningStrain;
 		}
 
-		// Set steel strain
+        /// <summary>
+        /// Set steel strain.
+        /// </summary>
+        /// <param name="strain">Current strain.</param>
 		public void SetStrain(double strain)
 		{
 			Strain = strain;
 		}
 
-		// Calculate stress in reinforcement given strain
+        /// <summary>
+        /// Set steel stress, given strain.
+        /// </summary>
+        /// <param name="strain">Current strain.</param>
 		public void SetStress(double strain)
 		{
 			Stress = CalculateStress(strain);
 		}
 
-		// Set Strain and calculate stress
+        /// <summary>
+        /// Set steel strain and stress.
+        /// </summary>
+        /// <param name="strain">Current strain.</param>
 		public void SetStrainAndStress(double strain)
 		{
 			SetStrain(strain);
 			SetStress(strain);
 		}
 
-		// Calculate stress
+        /// <summary>
+        /// Calculate stress (in MPa), given strain.
+        /// </summary>
+        /// <param name="strain">Current strain.</param>
 		public double CalculateStress(double strain)
 		{
 			// Compression yielding
@@ -86,7 +108,9 @@ namespace Material
             return 0;
 		}
 
-        // Calculate secant module of steel
+        /// <summary>
+        /// Get current steel secant module, in MPa.
+        /// </summary>
         public double SecantModule
 		{
 			get

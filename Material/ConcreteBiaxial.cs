@@ -43,7 +43,9 @@ namespace Material
             {
             }
 
-            // Calculate secant module of concrete
+            /// <summary>
+            /// Calculate current secant module of concrete, in MPa.
+            /// </summary>
             public (double Ec1, double Ec2) SecantModule
             {
 	            get
@@ -63,10 +65,17 @@ namespace Material
 	            }
             }
 
-			// Get stresses
-			public Vector<double> Stresses => Stiffness * Strains;
+            /// <summary>
+            /// Get current stresses
+            /// </summary>
+            public Vector<double> Stresses => Stiffness * Strains;
 
-            // Set concrete stresses given strains
+            /// <summary>
+            /// Set concrete stresses given strains
+            /// </summary>
+            /// <param name="strains">Current strains.</param>
+            /// <param name="referenceLength">The reference length (only for DSFM).</param>
+            /// <param name="reinforcement">The biaxial reinforcement (only for DSFM)</param>
             public void CalculatePrincipalStresses(Vector<double> strains, double referenceLength = 0, Reinforcement.Biaxial reinforcement = null)
             {
 				// Get strains and principals
@@ -82,7 +91,11 @@ namespace Material
                 PrincipalStresses = (fc1, fc2);
             }
 
-            // Calculate concrete stiffness matrix
+            /// <summary>
+            /// Calculate concrete stiffness matrix
+            /// </summary>
+            /// <param name="thetaC1">Principal tensile strain angle (radians).</param>
+            /// <param name="concreteSecantModule">Current secant module, in MPa.</param>
             public void CalculateStiffness(double? thetaC1 = null, (double Ec1, double Ec2)? concreteSecantModule = null)
             {
 	            var (Ec1, Ec2) = concreteSecantModule ?? SecantModule;
@@ -102,7 +115,10 @@ namespace Material
 	            Stiffness = T.Transpose() * Dc1 * T;
             }
 
-            // Set tensile stress limited by crack check
+            /// <summary>
+            /// Set tensile stress.
+            /// </summary>
+            /// <param name="fc1">Concrete tensile stress, in MPa.</param>
             public void SetTensileStress(double fc1)
             {
 	            // Get compressive stress
@@ -112,7 +128,11 @@ namespace Material
 	            PrincipalStresses = (fc1, fc2);
             }
 
-            // Calculate tensile strain angle
+            /// <summary>
+            /// Calculate principal strain angles, in radians.
+			/// </summary>
+			/// <param name="strains">Current strains.</param>
+			/// <param name="principalStrains">Current principal strains.</param>
             public (double theta1, double theta2) StrainAngles(Vector<double> strains = null, (double ec1, double ec2)? principalStrains = null)
             {
 	            var e  = strains          ?? Strains;
@@ -122,7 +142,11 @@ namespace Material
 		            Strain.PrincipalAngles(e, e1);
             }
 
-            // Calculate principal strains
+            /// <summary>
+            /// Calculate principal strains.
+            /// </summary>
+            /// <param name="strains">Current strains.</param>
+            /// <returns></returns>
             public (double ec1, double ec2) Principal_Strains(Vector<double> strains = null)
             {
 	            var e = strains ?? Strains;
@@ -131,7 +155,10 @@ namespace Material
                     Strain.PrincipalStrains(e);
             }
 
-            // Calculate initial stiffness
+            /// <summary>
+            /// Calculate concrete initial stiffness.
+            /// </summary>
+            /// <returns>Initial stiffness matrix.</returns>
             public Matrix<double> InitialStiffness()
             {
 	            // Concrete matrix
@@ -148,8 +175,12 @@ namespace Material
 		            T.Transpose() * Dc1 * T;
             }
 
-            // Calculate stresses/strains transformation matrix
-            // This matrix transforms from x-y to 1-2 coordinates
+            /// <summary>
+            /// Calculate stresses/strains transformation matrix.
+            /// <para>This matrix transforms from x-y to 1-2 coordinates.</para>
+            /// </summary>
+            /// <param name="theta1">Principal tensile strain angle, in radians.</param>
+            /// <returns></returns>
             public Matrix<double> TransformationMatrix(double? theta1 = null)
             {
 	            double theta = theta1 ?? PrincipalAngles.theta1;

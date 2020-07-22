@@ -13,7 +13,9 @@ namespace Material
 			DSFM
 		}
 
-        // Implementation of concrete parameters
+        /// <summary>
+        /// Base class for implementation of concrete parameters.
+        /// </summary>
         public abstract class Behavior
         {
 			// Properties
@@ -22,6 +24,11 @@ namespace Material
 			public bool       Cracked           { get; set; }
 
 			// Constructor
+			/// <summary>
+            /// Base class for concrete behavior
+            /// </summary>
+            /// <param name="parameters">Concrete parameters object.</param>
+            /// <param name="considerCrackSlip">Consider crack slip (only for DSFM) (default: false)</param>
 			public Behavior(Parameters parameters, bool considerCrackSlip = false)
 			{
 				Parameters        = parameters;
@@ -30,7 +37,7 @@ namespace Material
 
             // Get concrete parameters
             private double fc  => Parameters.Strength;
-            private double fcr => Parameters.TensileStrength;
+            private double ft  => Parameters.TensileStrength;
             private double Ec  => Parameters.InitialModule;
             private double ec  => Parameters.PlasticStrain;
             private double ecu => Parameters.UltimateStrain;
@@ -50,39 +57,78 @@ namespace Material
             }
 
             // Calculate concrete stresses
+            /// <summary>
+            /// For biaxial case.
+            /// </summary>
+            /// <param name="principalStrains">Principal strains in concrete.</param>
+            /// <param name="referenceLength">The reference length (only for DSFM).</param>
+            /// <param name="theta1">Principal tensile strain angle (radians).</param>
+            /// <param name="reinforcement">The biaxial reinforcement (only for DSFM).</param>
+            /// <returns>Tensile stress in MPa</returns>
             public abstract double TensileStress((double ec1, double ec2) principalStrains, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null);
-            public abstract double TensileStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null);
-	        public abstract double CompressiveStress((double ec1, double ec2) principalStrains);
-	        public abstract double CompressiveStress(double strain);
 
-			// Calculate secant module
+            /// <summary>
+            /// For uniaxial case.
+            /// </summary>
+            /// <param name="strain">Tensile strain in concrete.</param>
+            /// <param name="referenceLength">The reference length (only for DSFM).</param>
+            /// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
+            /// <returns>Tensile stress in MPa</returns>
+            public abstract double TensileStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null);
+
+            /// <summary>
+            /// For biaxial case.
+            /// </summary>
+            /// <param name="principalStrains">Principal strains in concrete.</param>
+            /// <returns>Compressive stress in MPa</returns>
+            public abstract double CompressiveStress((double ec1, double ec2) principalStrains);
+
+            /// <summary>
+            /// For uniaxial case.
+            /// </summary>
+            /// <param name="strain">Compressive strain in concrete.</param>
+            /// <returns>Compressive stress in MPa</returns>
+            public abstract double CompressiveStress(double strain);
+
+			/// <summary>
+            /// Calculate current secant module.
+            /// </summary>
+            /// <param name="stress">Current stress in MPa.</param>
+            /// <param name="strain">Current strain.</param>
+            /// <returns>Secant module in MPa</returns>
 			public double SecantModule(double stress, double strain)
 			{
 				if (stress == 0 || strain == 0)
 					return Ec;
-
 				return
 					stress / strain;
 			}
 
-			// Verify if concrete is cracked (uniaxial)
-			public void VerifyCracked(double strain)
+			/// <summary>
+            /// Check if concrete is cracked for uniaxial case and set cracked property.
+            /// </summary>
+            /// <param name="strain">Current strain</param>
+			public void VerifyCrackedState(double strain)
 			{
 				if (!Cracked && strain >= ecr)
 					Cracked = true;
 			}
 
-			// Verify if concrete is cracked (biaxial)
-			public void VerifyCracked(double fc1, double ec2)
+            /// <summary>
+            /// Check if concrete is cracked for biaxial case and set cracked property, from Gupta (1998) formulation.
+            /// </summary>
+            /// <param name="fc1">Principal tensile strain in MPa.</param>
+            /// <param name="ec2">Principal compressive strain.</param>
+            public void VerifyCrackedState(double fc1, double ec2)
 			{
 				if (!Cracked)
 				{
 					// Calculate current cracking stress
-					double fcr1 = this.fcr * (1 - ec2 / ec);
+					double fcr1 = ft * (1 - ec2 / ec);
 
 					// Verify limits
-					double fcr = Math.Max(fcr1, 0.25 * this.fcr);
-					fcr = Math.Min(fcr, this.fcr);
+					double fcr = Math.Max(fcr1, 0.25 * this.ft);
+					fcr = Math.Min(fcr, this.ft);
 
 					// Verify is concrete is cracked
 					if (fc1 >= fcr)
@@ -95,11 +141,13 @@ namespace Material
             public class MCFT : Behavior
 	        {
 		        // Constructor
+				/// <inheritdoc/>
 		        public MCFT(Parameters parameters, bool considerCrackSlip = false) : base(parameters, considerCrackSlip)
 		        {
 		        }
 
-		        #region Uniaxial
+                #region Uniaxial
+                /// <inheritdoc/>
                 public override double CompressiveStress(double strain)
                 {
 	                double n = strain / ec;
@@ -109,22 +157,24 @@ namespace Material
                 }
 
                 // Calculate tensile stress in concrete
+                /// <inheritdoc/>
                 public override double TensileStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
 		        {
                     // Constitutive relation
                     if (strain <= ecr) // Not cracked
 				        return
 					        strain * Ec;
-
+					
 			        // Else, cracked
 			        // Constitutive relation
 			        return
-				        fcr / (1 + Math.Sqrt(500 * strain));
+				        ft / (1 + Math.Sqrt(500 * strain));
 		        }
                 #endregion
 
                 #region Biaxial
                 // Principal stresses by classic formulation
+                /// <inheritdoc/>
                 public override double CompressiveStress((double ec1, double ec2) principalStrains)
                 {
 	                // Get the strains
@@ -142,6 +192,7 @@ namespace Material
 		                f2max * (2 * n - n * n);
                 }
 
+                /// <inheritdoc/>
                 public override double TensileStress((double ec1, double ec2) principalStrains, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null)
                 {
 	                var (ec1, ec2) = principalStrains;
@@ -150,7 +201,7 @@ namespace Material
 					double fc1 = ec1 * Ec;
 
 					// Verify if is cracked
-					VerifyCracked(fc1, ec2);
+					VerifyCrackedState(fc1, ec2);
 
 					// Not cracked
                     if (!Cracked)
@@ -158,7 +209,7 @@ namespace Material
 
 					// Else, cracked
 					return
-						fcr / (1 + Math.Sqrt(500 * ec1));
+						ft / (1 + Math.Sqrt(500 * ec1));
 
                 }
 
@@ -172,11 +223,15 @@ namespace Material
             public class DSFM : Behavior
 	        {
                 // Constructor
+                /// <inheritdoc/>
+                /// <param name="parameters">Concrete parameters object.</param>
+                /// <param name="considerCrackSlip">Consider crack slip (default: true)</param>
                 public DSFM(Parameters parameters, bool considerCrackSlip = true) : base(parameters, considerCrackSlip)
                 {
                 }
 
                 #region Uniaxial
+                /// <inheritdoc/>
                 public override double TensileStress(double strain, double referenceLength = 0, Reinforcement.Uniaxial reinforcement = null)
                 {
                     // Check if concrete is cracked
@@ -186,14 +241,14 @@ namespace Material
 
                     // Cracked
                     // Calculate concrete post-cracking stress associated with tension softening
-                    double ets = 2 * Gf / (fcr * referenceLength);
-                    double fc1a = fcr * (1 - (strain - ecr) / (ets - ecr));
+                    double ets = 2 * Gf / (ft * referenceLength);
+                    double fc1a = ft * (1 - (strain - ecr) / (ets - ecr));
 
                     // Calculate coefficient for tension stiffening effect
                     double m = reinforcement.TensionStiffeningCoefficient();
 
                     // Calculate concrete postcracking stress associated with tension stiffening
-                    double fc1b = fcr / (1 + Math.Sqrt(2.2 * m * strain));
+                    double fc1b = ft / (1 + Math.Sqrt(2.2 * m * strain));
 
                     // Calculate maximum tensile stress
                     double fc1c = Math.Max(fc1a, fc1b);
@@ -206,6 +261,7 @@ namespace Material
                         Math.Min(fc1c, fc1s);
                 }
 
+                /// <inheritdoc/>
                 public override double CompressiveStress(double strain)
                 {
                     // Calculate the principal compressive stress in concrete
@@ -215,6 +271,7 @@ namespace Material
                 #endregion
 
                 #region Biaxial
+                /// <inheritdoc/>
                 public override double CompressiveStress((double ec1, double ec2) principalStrains)
                 {
 	                // Get strains
@@ -252,6 +309,7 @@ namespace Material
 		                fp * n * ec2_ep / (n - 1 + Math.Pow(ec2_ep, n * k));
                 }
 
+                /// <inheritdoc/>
                 public override double TensileStress((double ec1, double ec2) principalStrains, double referenceLength = 0, double theta1 = Constants.PiOver4, Reinforcement.Biaxial reinforcement = null)
                 {
 	                var (ec1, ec2) = principalStrains;
@@ -260,7 +318,7 @@ namespace Material
 	                double fc1 = ec1 * Ec;
 
 	                // Verify if is cracked
-	                VerifyCracked(fc1, ec2);
+	                VerifyCrackedState(fc1, ec2);
 
 	                // Not cracked
 	                if (!Cracked)
@@ -268,14 +326,14 @@ namespace Material
 
 	                // Cracked
 	                // Calculate concrete post-cracking stress associated with tension softening
-	                double ets = 2 * Gf / (fcr * referenceLength);
-	                double fc1a = fcr * (1 - (ec1 - ecr) / (ets - ecr));
+	                double ets = 2 * Gf / (ft * referenceLength);
+	                double fc1a = ft * (1 - (ec1 - ecr) / (ets - ecr));
 
 	                // Calculate coefficient for tension stiffening effect
 	                double m = reinforcement.TensionStiffeningCoefficient(theta1);
 
 	                // Calculate concrete postcracking stress associated with tension stiffening
-	                double fc1b = fcr / (1 + Math.Sqrt(2.2 * m * ec1));
+	                double fc1b = ft / (1 + Math.Sqrt(2.2 * m * ec1));
 
 	                // Calculate maximum tensile stress
 	                double fc1c = Math.Max(fc1a, fc1b);

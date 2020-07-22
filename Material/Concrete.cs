@@ -2,7 +2,9 @@
 
 namespace Material
 {
-	// Concrete
+	/// <summary>
+    /// Base class for concrete object.
+    /// </summary>
 	public partial class Concrete : Relations
 	{
 		// Properties
@@ -15,17 +17,16 @@ namespace Material
         public AggregateType Type              => ConcreteParameters.Type;
 		public double        AggregateDiameter => ConcreteParameters.AggregateDiameter;
 
-        // Read the concrete parameters
         /// <summary>
-        /// General concrete class.
+        /// Base concrete object.
         /// </summary>
-        /// <param name="strength">Concrete compressive strength in MPa.</param>
-        /// <param name="aggregateDiameter">Maximum aggregate diameter in mm.</param>
+        /// <param name="strength">Concrete compressive strength, in MPa.</param>
+        /// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
         /// <param name="parameterModel">The model for calculating concrete parameters.</param>
         /// <param name="behavior">The base model of concrete behavior.</param>
         /// <param name="aggregateType">The type of aggregate.</param>
-        /// <param name="tensileStrength">Concrete tensile strength in MPa.</param>
-        /// <param name="elasticModule">Concrete initial elastic module in MPa.</param>
+        /// <param name="tensileStrength">Concrete tensile strength, in MPa.</param>
+        /// <param name="elasticModule">Concrete initial elastic module, in MPa.</param>
         /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
         /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
         public Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, BehaviorModel behavior = BehaviorModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
@@ -37,9 +38,8 @@ namespace Material
 			ConcreteBehavior        = Concrete_Behavior();
 		}
 
-        // Alternates
         /// <summary>
-        /// General concrete class.
+        /// Base concrete object.
         /// </summary>
         /// <param name="parameters">Concrete parameters object.</param>
         /// <param name="behavior">The base model of concrete behavior.</param>
@@ -52,7 +52,7 @@ namespace Material
 		}
 
         /// <summary>
-        /// General concrete class.
+        /// Base concrete object.
         /// </summary>
         /// <param name="parameters">Concrete parameters object.</param>
         /// <param name="concreteBehavior">Concrete behavior object.</param>
@@ -63,7 +63,16 @@ namespace Material
 			ConcreteBehavior   = concreteBehavior;
 		}
 
-        // Get parameters
+        /// <summary>
+        /// Get concrete parameters based on the enum type (<see cref="ConcreteParameterModel"/>).
+        /// </summary>
+        /// <param name="strength">Concrete compressive strength, in MPa.</param>
+        /// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
+        /// <param name="aggregateType">The type of aggregate.</param>
+        /// <param name="tensileStrength">Concrete tensile strength, in MPa.</param>
+        /// <param name="elasticModule">Concrete initial elastic module, in MPa.</param>
+        /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
+        /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
         private Parameters Concrete_Parameters(double strength, double aggregateDiameter, AggregateType aggregateType, double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain)
 		{
 			switch (ConcreteParameterModel)
@@ -85,7 +94,9 @@ namespace Material
             return new Parameters.Custom(strength, aggregateDiameter, tensileStrength, elasticModule, plasticStrain, ultimateStrain);
 		}
 
-		// Get parameters
+		/// <summary>
+        /// Get concrete behavior based on the enum type (<see cref="ConcreteBehaviorModel"/>).
+        /// </summary>
 		private Behavior Concrete_Behavior()
 		{
 			switch (ConcreteBehaviorModel)

@@ -18,20 +18,21 @@ namespace Material
 		Times   = '\u00D7'
 	}
 
+	/// <summary>
+    /// Auxiliary class.
+    /// </summary>
 	public abstract class Relations
 	{
         /// <summary>
         /// Verify if a number is zero (true for not zero)
         /// </summary>
-        /// <param name="num">The number.</param>
-        /// <returns></returns>
-        public bool NotZero(double num) => num != 0;
+        /// <param name="number">The number.</param>
+        public bool NotZero(double number) => number != 0;
 
         /// <summary>
-        /// Calculate the direction cosines of an angle (cos, sin)
+        /// Calculate the direction cosines of an angle (cos, sin).
         /// </summary>
-        /// <param name="angle">Angle in radians</param>
-        /// <returns></returns>
+        /// <param name="angle">Angle, in radians.</param>
         public (double cos, double sin) DirectionCosines(double angle)
 		{
 			double

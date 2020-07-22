@@ -7,6 +7,9 @@ namespace Material
 {
 	public abstract partial class Reinforcement
 	{
+		/// <summary>
+        /// Uniaxial reinforcement class.
+        /// </summary>
 		public class Uniaxial
 		{
 			// Properties
@@ -16,11 +19,10 @@ namespace Material
 			public  Steel  Steel         { get; }
 			private double ConcreteArea  { get; }
 
-            // Constructor
 			/// <summary>
             /// Reinforcement for uniaxial calculations
             /// </summary>
-            /// <param name="numberOfBars">The number of bars of the reinforcement.</param>
+            /// <param name="numberOfBars">The number of bars of reinforcement.</param>
             /// <param name="barDiameter">The bar diameter (in mm).</param>
             /// <param name="concreteArea">The concrete area (in mm2).</param>
             /// <param name="steel">The steel object.</param>
@@ -36,8 +38,10 @@ namespace Material
 			// Verify if reinforcement is set
 			public bool IsSet => NumberOfBars > 0 && BarDiameter > 0;
 
-			// Get reinforcement ratio
-			public double Ratio
+            /// <summary>
+            /// Get reinforcement ratio in the cross-section.
+            /// </summary>
+            public double Ratio
 			{
 				get
 				{
@@ -49,21 +53,26 @@ namespace Material
 				}
 			}
 
-			// Calculate normal stiffness
+			/// <summary>
+            /// Get normal stiffness, in N.
+            /// </summary>
 			public double Stiffness => Steel.ElasticModule * Area;
 
-			// Get strain and stress
-			public double Strain => Steel.Strain;
-			public double Stress => Steel.Stress;
+            /// <summary>
+            /// Get the yield force, in N.
+            /// </summary>
+            public double YieldForce => Area * Steel.YieldStress;
 
-			// Calculate yield force
-			public double YieldForce => Area * Steel.YieldStress;
+            /// <summary>
+            /// Get current force, in N.
+            /// </summary>
+			public double Force => Area * Steel.Stress;
 
-			// Calculate current force
-			public double Force => Area * Stress;
-
-			// Calculated reinforcement area
-			private double ReinforcementArea()
+            /// <summary>
+            /// Calculated reinforcement area, in mm2.
+            /// </summary>
+            /// <returns></returns>
+            private double ReinforcementArea()
 			{
 				if (IsSet)
 					return
@@ -72,14 +81,19 @@ namespace Material
 				return 0;
 			}
 
-			// Calculate current force
+            /// <summary>
+            /// Calculate current force, in N.
+            /// </summary>
+            /// <param name="strain">Current strain.</param>
 			public double CalculateForce(double strain)
 			{
 				return
 					Area * Steel.CalculateStress(strain);
 			}
 
-			// Calculate tension stiffening coefficient
+            /// <summary>
+            /// Calculate tension stiffening coefficient (for DSFM).
+            /// </summary>
 			public double TensionStiffeningCoefficient()
 			{
 				// Calculate coefficient for tension stiffening effect
@@ -87,12 +101,14 @@ namespace Material
 					0.25 * BarDiameter / Ratio;
 			}
 
-			// Calculate maximum value of fc1 that can be transmitted across cracks
+            /// <summary>
+            /// Calculate maximum value of tensile strength that can be transmitted across cracks.
+            /// </summary>
 			public double MaximumPrincipalTensileStress()
 			{
 				// Get reinforcement stress
 				double
-					fs = Stress,
+					fs = Steel.Stress,
 					fy = Steel.YieldStress;
 
 				// Check the maximum value of fc1 that can be transmitted across cracks
@@ -100,23 +116,31 @@ namespace Material
 					Ratio * (fy - fs);
 			}
 
-            // Set steel strains
+            /// <summary>
+            /// Set steel strain.
+            /// </summary>
+            /// <param name="strain">Current strain.</param>
             public void SetStrain(double strain)
 			{
 				Steel.SetStrain(strain);
 			}
 
-			// Set steel stresses
+            /// <summary>
+            /// Set steel stress, given strain.
+            /// </summary>
+            /// <param name="strain">Current strain.</param>
 			public void SetStress(double strain)
 			{
 				Steel.SetStress(strain);
 			}
 
-			// Set steel strain and stresses
-			public void SetStrainsAndStresses(double strain)
+            /// <summary>
+            /// Set steel strain and stress.
+            /// </summary>
+            /// <param name="strain">Current strain.</param>
+			public void SetStrainAndStress(double strain)
 			{
-				SetStrain(strain);
-				SetStress(strain);
+				Steel.SetStrainAndStress(strain);
 			}
 
 			/// <summary>
