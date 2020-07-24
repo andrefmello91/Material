@@ -16,9 +16,9 @@ namespace Material
 		public double YieldStrain    => YieldStress / ElasticModule;
 
 		// Hardening properties
-		private bool   ConsiderStrainHardening { get; }
-		private double HardeningModule         { get; }
-		private double HardeningStrain         { get; }
+		private bool   ConsiderTensileHardening { get; }
+		private double HardeningModule          { get; }
+		private double HardeningStrain          { get; }
 
 		/// <summary>
 		/// Current strain.
@@ -30,24 +30,36 @@ namespace Material
 		/// </summary>
 		public double Stress { get; set; }
 
-        // Read the steel parameters
         /// <summary>
-        /// Steel object.
+        /// Steel object with no tensile hardening.
         /// </summary>
         /// <param name="yieldStress">Steel yield stress in MPa</param>
         /// <param name="elasticModule">Steel elastic module in MPa (default: 210000 MPa)</param>
         /// <param name="ultimateStrain">Steel ultimate strain in MPa (default: 0.01)</param>
-        /// <param name="considerStrainHardening">If considered, hardening module and hardening strain must be set (default: false)</param>
+        public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01)
+		{
+			YieldStress              = yieldStress;
+			ElasticModule            = elasticModule;
+			UltimateStrain           = ultimateStrain;
+			ConsiderTensileHardening = false;
+		}
+
+        /// <summary>
+        /// Steel object with tensile hardening.
+        /// </summary>
+        /// <param name="yieldStress">Steel yield stress in MPa</param>
+        /// <param name="elasticModule">Steel elastic module in MPa (default: 210000 MPa)</param>
+        /// <param name="ultimateStrain">Steel ultimate strain in MPa (default: 0.01)</param>
         /// <param name="hardeningModule">Steel hardening module in MPa</param>
         /// <param name="hardeningStrain">Steel strain at the beginning of hardening</param>
-        public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01, bool considerStrainHardening = false, double hardeningModule = 0, double hardeningStrain = 0)
+        public Steel(double yieldStress, double hardeningModule, double hardeningStrain, double elasticModule = 210000, double ultimateStrain = 0.01)
 		{
-			YieldStress             = yieldStress;
-			ElasticModule           = elasticModule;
-			UltimateStrain          = ultimateStrain;
-			ConsiderStrainHardening = considerStrainHardening;
-			HardeningModule         = hardeningModule;
-			HardeningStrain         = hardeningStrain;
+			YieldStress              = yieldStress;
+			ElasticModule            = elasticModule;
+			UltimateStrain           = ultimateStrain;
+			ConsiderTensileHardening = true;
+			HardeningModule          = hardeningModule;
+			HardeningStrain          = hardeningStrain;
 		}
 
         /// <summary>
@@ -93,15 +105,15 @@ namespace Material
 				return ElasticModule * strain;
 
             // Tension yielding
-            if (!ConsiderStrainHardening && strain < UltimateStrain)
+            if (!ConsiderTensileHardening && strain < UltimateStrain)
 	            return YieldStress;
 
             // Tension yielding
-            if (ConsiderStrainHardening && strain < HardeningStrain)
+            if (ConsiderTensileHardening && strain < HardeningStrain)
 	            return YieldStress;
 
             // Tension hardening (if considered)
-            if (ConsiderStrainHardening && strain < UltimateStrain)
+            if (ConsiderTensileHardening && strain < UltimateStrain)
 	            return YieldStress + HardeningModule * (strain - HardeningStrain);
 
             // Failure
@@ -147,7 +159,7 @@ namespace Material
 				"Es = " + Pressure.FromMegapascals(ElasticModule).ToUnit(unit) + "\n" +
 				epsilon + "y = " + ey + " E-03";
 
-			if (ConsiderStrainHardening)
+			if (ConsiderTensileHardening)
 			{
 				double esh = Math.Round(1000 * HardeningStrain, 2);
 
