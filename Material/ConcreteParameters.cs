@@ -299,6 +299,7 @@ namespace Material
 		        /// </summary>
 		        public MCFT(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
 		        {
+					UpdateParameters();
 		        }
 
 		        private double fcr() => 0.33 * Math.Sqrt(Strength);

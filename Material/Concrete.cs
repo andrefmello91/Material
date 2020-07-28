@@ -116,7 +116,7 @@ namespace Material
 
         // Get parameters
         public double fc  => ConcreteParameters.Strength;
-        public double fcr => ConcreteParameters.TensileStrength;
+        public double ft  => ConcreteParameters.TensileStrength;
         public double Ec  => ConcreteParameters.InitialModule;
 		public double ec  => ConcreteParameters.PlasticStrain;
 		public double ecu => ConcreteParameters.UltimateStrain;
