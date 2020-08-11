@@ -2,7 +2,7 @@
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Material
+namespace Material.Reinforcement
 {
 	/// <summary>
     /// Steel class.
