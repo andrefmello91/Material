@@ -1,4 +1,6 @@
-﻿using UnitsNet.Units;
+﻿using System;
+using System.CodeDom;
+using UnitsNet.Units;
 
 namespace Material.Concrete
 {
@@ -14,7 +16,7 @@ namespace Material.Concrete
 	/// <summary>
     /// Base class for concrete object.
     /// </summary>
-	public class Concrete : Relations
+	public class Concrete : Relations, IEquatable<Concrete>
 	{
 		// Properties
 		public Parameters   Parameters      { get; }
@@ -104,5 +106,38 @@ namespace Material.Concrete
 		/// <param name="strengthUnit">The stress unit for strength (default: MPa)</param>
 		/// <param name="aggregateUnit">The aggregate dimension unit (default: mm)</param>
 		public string ToString(PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit aggregateUnit = LengthUnit.Millimeter) => Parameters.ToString(strengthUnit, aggregateUnit);
+
+		/// <summary>
+		/// Compare two concrete objects.
+		/// <para>Returns true if parameters and constitutive model are equal.</para>
+		/// </summary>
+		/// <param name="other">The other concrete object.</param>
+		public virtual bool Equals(Concrete other)
+		{
+			if (other != null)
+				return Parameters == other.Parameters && Constitutive == other.Constitutive;
+
+			return false;
+		}
+
+		public override bool Equals(object other)
+		{
+			if (other != null && other is Concrete concrete)
+				return Equals(concrete);
+
+			return false;
+		}
+
+		public override int GetHashCode() => Parameters.GetHashCode();
+
+        /// <summary>
+        /// Returns true if parameters and constitutive model are equal.
+        /// </summary>
+        public static bool operator == (Concrete left, Concrete right) => left != null && left.Equals(right);
+
+        /// <summary>
+        /// Returns true if parameters and constitutive model are different.
+        /// </summary>
+        public static bool operator != (Concrete left, Concrete right) => left != null && !left.Equals(right);
 	}
 }

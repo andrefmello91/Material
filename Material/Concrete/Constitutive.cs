@@ -17,7 +17,7 @@ namespace Material.Concrete
     /// <summary>
     /// Base class for concrete constitutive model.
     /// </summary>
-    public abstract class Constitutive
+    public abstract class Constitutive : IEquatable<Constitutive>
     {
 	    // Properties
 	    public Parameters Parameters        { get; }
@@ -169,9 +169,28 @@ namespace Material.Concrete
 				    Cracked = true;
 		    }
 	    }
+
+        /// <summary>
+        /// Compare two constitutive objects.
+        /// </summary>
+        /// <param name="other">The other constitutive object.</param>
+        public abstract bool Equals(Constitutive other);
+
+	    public override int GetHashCode() => Parameters.GetHashCode();
+
+	    /// <summary>
+	    /// Returns true if parameters are equal.
+	    /// </summary>
+	    public static bool operator == (Constitutive left, Constitutive right) => left.Equals(right);
+
+	    /// <summary>
+	    /// Returns true if parameters are different.
+	    /// </summary>
+	    public static bool operator != (Constitutive left, Constitutive right) => !left.Equals(right);
+
     }
 
-	/// <summary>
+    /// <summary>
     /// MCFT constitutive class.
     /// </summary>
     public class MCFTConstitutive : Constitutive
@@ -251,12 +270,34 @@ namespace Material.Concrete
 	    #endregion
 
 	    public override string ToString() => "MCFT";
+
+	    /// <summary>
+	    /// Compare two constitutive objects.
+	    /// </summary>
+	    /// <param name="other">The other constitutive object.</param>
+	    public override bool Equals(Constitutive other)
+	    {
+		    if (other is MCFTConstitutive)
+			    return true;
+
+		    return false;
+	    }
+
+	    public override bool Equals(object other)
+	    {
+		    if (other is MCFTConstitutive)
+			    return true;
+
+		    return false;
+	    }
+
+	    public override int GetHashCode() => base.GetHashCode();
     }
 
-	/// <summary>
-	/// DSFM constitutive class.
-	/// </summary>
-	public class DSFMConstitutive : Constitutive
+    /// <summary>
+    /// DSFM constitutive class.
+    /// </summary>
+    public class DSFMConstitutive : Constitutive
     {
         // Constructor
         /// <inheritdoc/>
@@ -384,5 +425,28 @@ namespace Material.Concrete
         #endregion
 
         public override string ToString() => "DSFM";
+
+        /// <summary>
+        /// Compare two constitutive objects.
+        /// </summary>
+        /// <param name="other">The other constitutive object.</param>
+        public override bool Equals(Constitutive other)
+        {
+	        if (other is DSFMConstitutive)
+		        return true;
+
+	        return false;
+        }
+
+        public override bool Equals(object other)
+        {
+	        if (other is DSFMConstitutive)
+		        return true;
+
+	        return false;
+        }
+
+        public override int GetHashCode() => base.GetHashCode();
+
     }
 }

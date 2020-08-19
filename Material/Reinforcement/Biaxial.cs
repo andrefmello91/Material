@@ -268,5 +268,39 @@ namespace Material.Reinforcement
 				"Reinforcement (y) = " + phi + phiY + ", s = " + sY + " (" +
 				rho + "sy = " + psy + ")\n" + Steel.Y.ToString(strengthUnit);
 		}
-	}
+
+		/// <summary>
+		/// Compare two reinforcement objects.
+		/// <para>Returns true if parameters are equal.</para>
+		/// </summary>
+		/// <param name="other">The other reinforcement object.</param>
+		public virtual bool Equals(BiaxialReinforcement other)
+		{
+			if (other != null)
+				return Ratio == other.Ratio && Steel.X == other.Steel.X && Steel.Y == other.Steel.Y;
+
+			return false;
+		}
+
+		public override bool Equals(object other)
+		{
+			if (other is BiaxialReinforcement reinforcement)
+				return Equals(reinforcement);
+
+			return false;
+		}
+
+		public override int GetHashCode() => (int)Math.Pow(BarDiameter.X, BarDiameter.Y);
+
+		/// <summary>
+		/// Returns true if steel parameters are equal.
+		/// </summary>
+		public static bool operator == (BiaxialReinforcement left, BiaxialReinforcement right) => left != null && left.Equals(right);
+
+		/// <summary>
+		/// Returns true if steel parameters are different.
+		/// </summary>
+		public static bool operator != (BiaxialReinforcement left, BiaxialReinforcement right) => left != null && !left.Equals(right);
+
+    }
 }

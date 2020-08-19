@@ -126,5 +126,24 @@ namespace Material.Concrete
 			SetStrain(strain);
 			SetStress(strain, referenceLength, reinforcement);
 		}
+
+		/// <inheritdoc/>
+		public override bool Equals(Concrete other)
+		{
+			if (other != null && other is UniaxialConcrete)
+				return Parameters == other.Parameters && Constitutive == other.Constitutive;
+
+			return false;
+		}
+
+		public override bool Equals(object other)
+		{
+			if (other != null && other is UniaxialConcrete concrete)
+				return Equals(concrete);
+
+			return false;
+		}
+
+		public override int GetHashCode() => Parameters.GetHashCode();
 	}
 }

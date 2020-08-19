@@ -184,5 +184,24 @@ namespace Material.Concrete
 			return
 				Strain.TransformationMatrix(theta);
 		}
+
+		/// <inheritdoc/>
+		public override bool Equals(Concrete other)
+		{
+			if (other != null && other is BiaxialConcrete)
+				return Parameters == other.Parameters && Constitutive == other.Constitutive;
+
+			return false;
+		}
+
+		public override bool Equals(object other)
+		{
+			if (other != null && other is BiaxialConcrete concrete)
+				return Equals(concrete);
+
+			return false;
+		}
+
+		public override int GetHashCode() => Parameters.GetHashCode();
 	}
 }

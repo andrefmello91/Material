@@ -1,6 +1,6 @@
 ﻿using System;
+using System.CodeDom;
 using System.Linq;
-using System.Security.Cryptography;
 using MathNet.Numerics.Interpolation;
 using UnitsNet;
 using UnitsNet.Units;
@@ -33,7 +33,7 @@ namespace Material.Concrete
     /// <summary>
     ///Base class for implementation of concrete parameters.
     /// </summary>
-    public abstract class Parameters
+    public abstract class Parameters : IEquatable<Parameters>
 	{
 		public AggregateType Type              { get; set; }
 		public double        AggregateDiameter { get; set; }
@@ -79,8 +79,8 @@ namespace Material.Concrete
         /// <param name="plasticStrain">Concrete peak strain (negative value) (only for custom parameters).</param>
         /// <param name="ultimateStrain">Concrete ultimate strain (negative value) (only for custom parameters).</param>
         public static Parameters ReadParameters(ParameterModel parameterModel, double strength, double aggregateDiameter, AggregateType aggregateType, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
-		{
-			switch (parameterModel)
+        {
+            switch (parameterModel)
 			{
 				case ParameterModel.MC2010:
 					return new MC2010Parameters(strength, aggregateDiameter, aggregateType);
@@ -158,9 +158,27 @@ namespace Material.Concrete
 				"\n" + eps + "cu = "  + Math.Round(1000 * UltimateStrain, 2) + " E-03" +
 				"\n" + phi + ",ag = " + phiAg;
 		}
+
+		/// <summary>
+		/// Compare two parameter objects.
+		/// </summary>
+		/// <param name="other">The other parameter object.</param>
+		public virtual bool Equals(Parameters other) => other != null && Strength == other.Strength && AggregateDiameter == other.AggregateDiameter && Type == other.Type;
+
+		public override int GetHashCode() => (int) Math.Pow(Strength, AggregateDiameter);
+
+		/// <summary>
+		/// Returns true if parameters are equal.
+		/// </summary>
+		public static bool operator == (Parameters left, Parameters right) => left != null && left.Equals(right);
+
+		/// <summary>
+		/// Returns true if parameters are different.
+		/// </summary>
+		public static bool operator != (Parameters left, Parameters right) => left != null && !left.Equals(right);
 	}
 
-	/// <summary>
+    /// <summary>
     /// Parameters calculated according to NBR6118:2014.
     /// </summary>
     public class NBR6118Parameters : Parameters
@@ -245,12 +263,31 @@ namespace Material.Concrete
             SecantModule = Ecs();
             UltimateStrain = ecu();
         }
+
+		/// <inheritdoc/>
+        public override bool Equals(Parameters other)
+        {
+	        if (other != null && other is NBR6118Parameters)
+		        return base.Equals(other);
+
+	        return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+	        if (obj != null && obj is NBR6118Parameters other)
+		        return base.Equals(other);
+
+	        return false;
+        }
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 
-	/// <summary>
-	/// Parameters calculated according to FIB Model Code 2010.
-	/// </summary>
-	public class MC2010Parameters : Parameters
+    /// <summary>
+    /// Parameters calculated according to FIB Model Code 2010.
+    /// </summary>
+    public class MC2010Parameters : Parameters
     {
         ///<inheritdoc/>
         /// <summary>
@@ -349,12 +386,31 @@ namespace Material.Concrete
             SecantModule = Ec1();
             UltimateStrain = ecu();
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(Parameters other)
+        {
+	        if (other != null && other is MC2010Parameters)
+		        return base.Equals(other);
+
+	        return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+	        if (obj != null && obj is MC2010Parameters other)
+		        return base.Equals(other);
+
+	        return false;
+        }
+
+        public override int GetHashCode() => base.GetHashCode();
     }
 
-	/// <summary>
-	/// Parameters calculated according to Modified Compression Field Theory.
-	/// </summary>
-	public class MCFTParameters : Parameters
+    /// <summary>
+    /// Parameters calculated according to Modified Compression Field Theory.
+    /// </summary>
+    public class MCFTParameters : Parameters
 	{
 		/// <inheritdoc/>
 		/// <summary>
@@ -374,10 +430,29 @@ namespace Material.Concrete
 		public override void UpdateParameters()
 		{
 			TensileStrength = fcr();
-			PlasticStrain = ec;
-			InitialModule = Ec();
-			UltimateStrain = ecu;
+			PlasticStrain   = ec;
+			InitialModule   = Ec();
+			UltimateStrain  = ecu;
 		}
+
+		/// <inheritdoc/>
+		public override bool Equals(Parameters other)
+		{
+			if (other != null && other is MCFTParameters)
+				return base.Equals(other);
+
+			return false;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj != null && obj is MCFTParameters other)
+				return base.Equals(other);
+
+			return false;
+		}
+
+		public override int GetHashCode() => base.GetHashCode();
 	}
 
     /// <summary>
@@ -408,6 +483,25 @@ namespace Material.Concrete
 			InitialModule   = Ec();
 			UltimateStrain  = ecu;
 		}
+
+		/// <inheritdoc/>
+		public override bool Equals(Parameters other)
+		{
+			if (other != null && other is DSFMParameters)
+				return base.Equals(other);
+
+			return false;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj != null && obj is DSFMParameters other)
+				return base.Equals(other);
+
+			return false;
+		}
+
+		public override int GetHashCode() => base.GetHashCode();
 	}
 
     /// <summary>
@@ -428,15 +522,38 @@ namespace Material.Concrete
 	    public CustomParameters(double strength, double aggregateDiameter, double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain) : base(strength, aggregateDiameter)
 	    {
 		    TensileStrength = tensileStrength;
-		    InitialModule = elasticModule;
-		    PlasticStrain = plasticStrain;
-		    UltimateStrain = ultimateStrain;
+		    InitialModule   = elasticModule;
+		    PlasticStrain   = plasticStrain;
+		    UltimateStrain  = ultimateStrain;
 	    }
 
 	    ///<inheritdoc/>
 	    public override void UpdateParameters()
 	    {
 	    }
+
+	    /// <inheritdoc/>
+	    public override bool Equals(Parameters other)
+	    {
+		    if (other != null && other is CustomParameters)
+			    return 
+				    base.Equals(other) && TensileStrength == other.TensileStrength && InitialModule == other.InitialModule && 
+				    PlasticStrain == other.PlasticStrain && UltimateStrain == other.UltimateStrain;
+
+		    return false;
+	    }
+
+	    public override bool Equals(object obj)
+	    {
+		    if (obj != null && obj is CustomParameters other)
+			    return
+				    base.Equals(other) && TensileStrength == other.TensileStrength && InitialModule == other.InitialModule &&
+				    PlasticStrain == other.PlasticStrain && UltimateStrain == other.UltimateStrain;
+
+		    return false;
+	    }
+
+	    public override int GetHashCode() => base.GetHashCode();
     }
 
 }

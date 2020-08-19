@@ -69,12 +69,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Stress-and-Strain-Relations\Relations\Relations.csproj">
-      <Project>{7df65381-8507-4f02-9c2b-2ae9a1e50efa}</Project>
-      <Name>Relations</Name>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

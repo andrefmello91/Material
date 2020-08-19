@@ -1,4 +1,5 @@
 ﻿using System;
+using Material.Concrete;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -171,5 +172,43 @@ namespace Material.Reinforcement
 
 			return msg;
 		}
+
+		/// <summary>
+		/// Compare two steel objects.
+		/// <para>Returns true if parameters are equal.</para>
+		/// </summary>
+		/// <param name="other">The other steel object.</param>
+		public virtual bool Equals(Steel other)
+		{
+			if (other is null)
+				return false;
+
+			bool basic = YieldStress == other.YieldStress && ElasticModule == other.ElasticModule && UltimateStrain == other.UltimateStrain;
+
+            if (!other.ConsiderTensileHardening)
+				return basic;
+
+            return basic && HardeningModule == other.HardeningModule && HardeningStrain == other.HardeningStrain;
+		}
+
+		public override bool Equals(object other)
+		{
+			if (other is Steel steel)
+				return Equals(steel);
+
+			return false;
+		}
+
+		public override int GetHashCode() => (int) Math.Pow(ElasticModule, YieldStress);
+
+		/// <summary>
+		/// Returns true if steel parameters are equal.
+		/// </summary>
+		public static bool operator == (Steel left, Steel right) => left != null && left.Equals(right);
+
+        /// <summary>
+        /// Returns true if steel parameters are different.
+		/// </summary>
+        public static bool operator != (Steel left, Steel right) => left != null && !left.Equals(right);
 	}
 }

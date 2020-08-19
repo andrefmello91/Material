@@ -171,5 +171,38 @@ namespace Material.Reinforcement
 				"Reinforcement: " + NumberOfBars + " " + phi + d + " (" + As +
 				")\n\n" + Steel.ToString(strengthUnit);
 		}
+
+		/// <summary>
+		/// Compare two reinforcement objects.
+		/// <para>Returns true if parameters are equal.</para>
+		/// </summary>
+		/// <param name="other">The other reinforcement object.</param>
+		public virtual bool Equals(UniaxialReinforcement other)
+		{
+			if (other != null)
+				return Area == other.Area && Steel == other.Steel;
+
+			return false;
+		}
+
+		public override bool Equals(object other)
+		{
+			if (other is UniaxialReinforcement reinforcement)
+				return Equals(reinforcement);
+
+			return false;
+		}
+
+		public override int GetHashCode() => (int)Math.Pow(BarDiameter, NumberOfBars);
+
+		/// <summary>
+		/// Returns true if steel parameters are equal.
+		/// </summary>
+		public static bool operator == (UniaxialReinforcement left, UniaxialReinforcement right) => left != null && left.Equals(right);
+
+		/// <summary>
+		/// Returns true if steel parameters are different.
+		/// </summary>
+		public static bool operator != (UniaxialReinforcement left, UniaxialReinforcement right) => left != null && !left.Equals(right);
 	}
 }
