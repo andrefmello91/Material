@@ -137,6 +137,20 @@ namespace Material.Reinforcement
 			}
 		}
 
+		/// <summary>
+        /// Return a new steel object with the same parameters.
+        /// </summary>
+        /// <param name="steelToCopy">The steel object to copy.</param>
+        /// <returns></returns>
+        public static Steel Copy(Steel steelToCopy)
+        {
+	        if (!steelToCopy.ConsiderTensileHardening)
+		        return
+			        new Steel(steelToCopy.YieldStress, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
+
+			return
+				new Steel(steelToCopy.YieldStress, steelToCopy.HardeningModule, steelToCopy.HardeningStrain, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
+        }
 
         /// <summary>
         /// Write string with default unit (MPa)
@@ -152,22 +166,18 @@ namespace Material.Reinforcement
 		{
 			char epsilon = (char) Characters.Epsilon;
 
-			double ey = Math.Round(1000 * YieldStrain, 2);
-
 			string msg =
 				"Steel Parameters:\n" +
 				"fy = " + Pressure.FromMegapascals(YieldStress).ToUnit(unit)   + "\n" +
 				"Es = " + Pressure.FromMegapascals(ElasticModule).ToUnit(unit) + "\n" +
-				epsilon + "y = " + ey + " E-03";
+				epsilon + "y = " + $"{YieldStrain:0.##E+00}";
 
 			if (ConsiderTensileHardening)
 			{
-				double esh = Math.Round(1000 * HardeningStrain, 2);
-
 				msg += "\n\n" +
 				       "Hardening parameters:\n" +
 				       "Esh = "          + Pressure.FromMegapascals(HardeningModule).ToUnit(unit) + "\n" + 
-				       epsilon + "sh = " + esh + " E-03";
+				       epsilon + "sh = " + $"{HardeningStrain:0.##E+00}" + " E-03";
 			}
 
 			return msg;

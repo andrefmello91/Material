@@ -127,8 +127,15 @@ namespace Material.Concrete
 			SetStress(strain, referenceLength, reinforcement);
 		}
 
-		/// <inheritdoc/>
-		public override bool Equals(Concrete other)
+		/// <summary>
+		/// Return a copy of a <see cref="UniaxialConcrete"/> object.
+		/// </summary>
+		/// <param name="concreteToCopy">The <see cref="UniaxialConcrete"/> object to copy.</param>
+		/// <returns></returns>
+		public static UniaxialConcrete Copy(UniaxialConcrete concreteToCopy) => new UniaxialConcrete(concreteToCopy.Parameters, concreteToCopy.Area, concreteToCopy.Constitutive);
+
+        /// <inheritdoc/>
+        public override bool Equals(Concrete other)
 		{
 			if (other != null && other is UniaxialConcrete)
 				return Parameters == other.Parameters && Constitutive == other.Constitutive;

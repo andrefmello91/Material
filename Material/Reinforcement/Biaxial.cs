@@ -1,8 +1,10 @@
 ﻿using System;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
+using OnPlaneComponents;
 
 namespace Material.Reinforcement
 {
@@ -12,88 +14,110 @@ namespace Material.Reinforcement
 	public class BiaxialReinforcement : Relations
 	{
 		// Properties
-		public (double X, double Y) BarDiameter  { get; }
-		public (double X, double Y) BarSpacing   { get; }
-		public (Steel X, Steel Y)   Steel        { get; }
-		public (double X, double Y) Ratio        { get; }
-		public Matrix<double>       Stiffness    { get; set; }
-		public Vector<double>       Strains      { get; set; }
-		private double              SectionWidth { get; }
+		/// <summary>
+        /// Get/set the web reinforcement of X direction.
+        /// </summary>
+		public WebReinforcementDirection DirectionX { get; set; }
 
 		/// <summary>
-		/// Reinforcement for biaxial calculations, for horizontal (X) and vertical (Y) directions.
+        /// Get/set the web reinforcement of Y direction.
+        /// </summary>
+		public WebReinforcementDirection DirectionY { get; set; }
+
+		/// <summary>
+        /// Get/set the stiffness matrix.
+        /// </summary>
+		public Matrix<double> Stiffness { get; set; }
+
+		/// <summary>
+        /// Get/set reinforcement strains.
+        /// </summary>
+		public Strain Strains { get; set; }
+
+		/// <summary>
+        /// Get cross-section width.
+        /// </summary>
+		private double Width { get; }
+
+		/// <summary>
+		/// Web reinforcement for biaxial calculations, for equal horizontal (X) and vertical (Y) directions.
 		/// </summary>
 		/// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
 		/// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
 		/// <param name="steel">The steel objects for directions X and Y.</param>
-		/// <param name="sectionWidth">The width (in mm) of cross-section.</param>
-		public BiaxialReinforcement((double X, double Y) barDiameter, (double X, double Y) barSpacing, (Steel X, Steel Y) steel, double sectionWidth)
+		/// <param name="width">The width (in mm) of cross-section.</param>
+		public BiaxialReinforcement(double barDiameter, double barSpacing, Steel steel, double width)
 		{
-			BarDiameter  = barDiameter;
-			BarSpacing   = barSpacing;
-			Steel        = steel;
-			SectionWidth = sectionWidth;
-			Ratio        = CalculateRatio();
-			Stiffness    = InitialStiffness();
+			// Get new steel for calculations
+			Steel
+				x = Steel.Copy(steel),
+				y = Steel.Copy(steel);
+
+			DirectionX = new WebReinforcementDirection(barDiameter, barSpacing, x, width);
+			DirectionY = new WebReinforcementDirection(barDiameter, barSpacing, y, width);
+			Width      = width;
 		}
 
-		// Verify if reinforcement is set
-		public bool xSet  => BarDiameter.X > 0 && BarSpacing.X > 0;
-		public bool ySet  => BarDiameter.Y > 0 && BarSpacing.Y > 0;
-		public bool IsSet => xSet || ySet;
+        /// <summary>
+        /// Web reinforcement for biaxial calculations, for different horizontal (X) and vertical (Y) directions.
+        /// </summary>
+        /// <param name="barDiameterX">The bar diameter (in mm) for horizontal (X) direction.</param>
+        /// <param name="barSpacingX">The bar spacing (in mm) for horizontal (X) direction.</param>
+        /// <param name="steelX">The steel objects for horizontal (X) direction.</param>
+        /// <param name="barDiameterY">The bar diameter (in mm) for vertical (Y) direction.</param>
+        /// <param name="barSpacingY">The bar spacing (in mm) for vertical (Y) direction.</param>
+        /// <param name="steelY">The steel objects for vertical (Y) direction.</param>
+        /// <param name="width">The width (in mm) of cross-section.</param>
+        public BiaxialReinforcement(double barDiameterX, double barSpacingX, Steel steelX, double barDiameterY, double barSpacingY, Steel steelY, double width)
+		{
+			DirectionX = new WebReinforcementDirection(barDiameterX, barSpacingX, steelX, width);
+			DirectionY = new WebReinforcementDirection(barDiameterY, barSpacingY, steelY, width);
+			Width      = width;
+		}
 
-		// Get steel parameters
-		public double fyx  => Steel.X.YieldStress;
-		public double Esxi => Steel.X.ElasticModule;
-		public double fyy  => Steel.Y.YieldStress;
-		public double Esyi => Steel.Y.ElasticModule;
+        /// <summary>
+        /// Reinforcement for biaxial calculations, for horizontal (X) and vertical (Y) directions.
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
+        /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
+        /// <param name="steel">The steel objects for directions X and Y.</param>
+        /// <param name="width">The width (in mm) of cross-section.</param>
+        public BiaxialReinforcement((double X, double Y) barDiameter, (double X, double Y) barSpacing, (Steel X, Steel Y) steel, double width)
+		{
+			DirectionX = new WebReinforcementDirection(barDiameter.X, barSpacing.X, steel.X, width);
+			DirectionY = new WebReinforcementDirection(barDiameter.Y, barSpacing.Y, steel.Y, width);
+			Width      = width;
+		}
+
+        // Verify if reinforcement is set
+        public bool xSet  => DirectionX != null && DirectionX.BarDiameter > 0 && DirectionX.BarSpacing > 0;
+		public bool ySet  => DirectionY != null && DirectionY.BarDiameter > 0 && DirectionY.BarSpacing > 0;
+        public bool IsSet => xSet || ySet;
 
 		/// <summary>
 		/// Get reinforcement current stresses, in MPa.
 		/// </summary>
-		public (double fsx, double fsy) SteelStresses => (Steel.X.Stress, Steel.Y.Stress);
+		public (double fsx, double fsy) SteelStresses => (DirectionX.Steel.Stress, DirectionY.Steel.Stress);
 
 		/// <summary>
 		/// Get reinforcement current secant module, in MPa.
 		/// </summary>
-		public (double Esx, double Esy) SecantModule => (Steel.X.SecantModule, Steel.Y.SecantModule);
+		public (double Esx, double Esy) SecantModule => (DirectionX.Steel.SecantModule, DirectionY.Steel.SecantModule);
 
 		/// <summary>
-		/// Get reinforcement current stress vector, in MPa.
+		/// Get reinforcement stresses, in MPa.
 		/// </summary>
-		public Vector<double> Stresses
+		public Stress Stresses
 		{
 			get
 			{
-				var (psx, psy) = Ratio;
-				var (fsx, fsy) = SteelStresses;
+				double
+					fsx = DirectionX?.Stress ?? 0,
+					fsy = DirectionY?.Stress ?? 0;
 
 				return
-					Vector<double>.Build.DenseOfArray(new[]
-					{
-						psx * fsx, psy * fsy, 0
-					});
+					new Stress(fsx, fsy, 0);
 			}
-		}
-
-		/// <summary>
-		/// Calculate reinforcement ratios, in X and Y, in the cross-section.
-		/// </summary>
-		public (double X, double Y) CalculateRatio()
-		{
-			// Initialize psx and psy
-			double
-				psx = 0,
-				psy = 0;
-
-			if (xSet)
-				psx = 0.5 * Constants.Pi * BarDiameter.X * BarDiameter.X / (BarSpacing.X * SectionWidth);
-
-			if (ySet)
-				psy = 0.5 * Constants.Pi * BarDiameter.Y * BarDiameter.Y / (BarSpacing.Y * SectionWidth);
-
-			return
-				(psx, psy);
 		}
 
 		/// <summary>
@@ -115,7 +139,7 @@ namespace Material.Reinforcement
 		/// Calculate current stresses, in MPs.
 		/// </summary>
 		/// <param name="strains">Current strains.</param>
-		public void CalculateStresses(Vector<double> strains)
+		public void CalculateStresses(Strain strains)
 		{
 			Strains = strains;
 				
@@ -126,19 +150,15 @@ namespace Material.Reinforcement
 		/// <summary>
 		/// Calculate current reinforcement stiffness matrix.
 		/// </summary>
-		/// <param name="steelSecantModule">Current secant modules, in MPa (default: <see cref="SecantModule"/>).</param>
-		public void CalculateStiffness((double Esx, double Esy)? steelSecantModule = null)
+		public void CalculateStiffness()
 		{
-			var (psx, psy) = Ratio;
-
-			var (Esx, Esy) = steelSecantModule ?? SecantModule;
-
 			// Steel matrix
 			var Ds = Matrix<double>.Build.Dense(3, 3);
-			Ds[0, 0] = psx * Esx;
-			Ds[1, 1] = psy * Esy;
 
-			Stiffness = Ds;
+			Ds[0, 0] = DirectionX?.Stiffness ?? 0;
+			Ds[1, 1] = DirectionY?.Stiffness ?? 0;
+			
+            Stiffness = Ds;
 		}
 
 		/// <summary>
@@ -146,14 +166,13 @@ namespace Material.Reinforcement
 		/// </summary>
 		public Matrix<double> InitialStiffness()
 		{
-			var (psx, psy) = Ratio;
-
 			// Steel matrix
 			var Ds = Matrix<double>.Build.Dense(3, 3);
-			Ds[0, 0] = psx * Esxi;
-			Ds[1, 1] = psy * Esyi;
 
-			return Ds;
+			Ds[0, 0] = DirectionX?.InitialStiffness ?? 0;
+			Ds[1, 1] = DirectionY?.InitialStiffness ?? 0;
+
+            return Ds;
 		}
 
 		/// <summary>
@@ -163,18 +182,29 @@ namespace Material.Reinforcement
 		/// <returns></returns>
 		public double TensionStiffeningCoefficient(double theta1)
 		{
+			if (DirectionX is null && DirectionY is null)
+				return 0;
+
 			// Get reinforcement angles and stresses
 			var (thetaNx, thetaNy)     = Angles(theta1);
-			(double psx, double psy)   = Ratio;
-			(double phiX, double phiY) = BarDiameter;
+
+			double
+				psx  = DirectionX?.Ratio       ?? 0,
+				phiX = DirectionX?.BarDiameter ?? 0,
+				psy  = DirectionY?.Ratio       ?? 0,
+				phiY = DirectionY?.BarDiameter ?? 0;
 
 			double
 				cosNx = Math.Abs(DirectionCosines(thetaNx).cos),
 				cosNy = Math.Abs(DirectionCosines(thetaNy).cos);
 
 			// Calculate coefficient for tension stiffening effect
-			return
-				0.25 / (psx / phiX * cosNx + psy / phiY * cosNy);
+			double m = 0.25 / (psx / phiX * cosNx + psy / phiY * cosNy);
+
+			if (double.IsNaN(m))
+				m = 0;
+
+            return m;
 		}
 
 		/// <summary>
@@ -183,12 +213,17 @@ namespace Material.Reinforcement
 		/// <param name="theta1">Principal tensile strain angle, in radians.</param>
 		public double MaximumPrincipalTensileStress(double theta1)
 		{
-			// Get reinforcement angles and stresses
-			var (thetaNx, thetaNy) = Angles(theta1);
-			(double psx, double psy) = Ratio;
-			(double fsx, double fsy) = SteelStresses;
-			double fyx = Steel.X.YieldStress;
-			double fyy = Steel.Y.YieldStress;
+			if (DirectionX is null && DirectionY is null)
+				return 0;
+
+            // Get reinforcement angles and stresses
+            var (thetaNx, thetaNy) = Angles(theta1);
+
+            double
+	            fsx = DirectionX?.Stress      ?? 0,
+	            fyx = DirectionX?.YieldStress ?? 0,
+	            fsy = DirectionY?.Stress      ?? 0,
+	            fyy = DirectionY?.YieldStress ?? 0;
 
 			double
 				cosNx = Math.Abs(DirectionCosines(thetaNx).cos),
@@ -200,37 +235,51 @@ namespace Material.Reinforcement
 				cos2y = cosNy * cosNy;
 
 			return
-				psx * (fyx - fsx) * cos2x + psy * (fyy - fsy) * cos2y;
+				(fyx - fsx) * cos2x + (fyy - fsy) * cos2y;
 		}
 
 		/// <summary>
 		/// Set steel strains.
 		/// </summary>
 		/// <param name="strains">Current strains.</param>
-		public void SetStrains(Vector<double> strains)
+		public void SetStrains(Strain strains)
 		{
-			Steel.X.SetStrain(strains[0]);
-			Steel.Y.SetStrain(strains[1]);
+			DirectionX.Steel.SetStrain(strains.EpsilonX);
+			DirectionY.Steel.SetStrain(strains.EpsilonY);
 		}
 
 		/// <summary>
 		/// Set steel stresses, given strains.
 		/// </summary>
 		/// <param name="strains">Current strains.</param>
-		public void SetStresses(Vector<double> strains)
+		public void SetStresses(Strain strains)
 		{
-			Steel.X.SetStress(strains[0]);
-			Steel.Y.SetStress(strains[1]);
+			DirectionX.Steel.SetStress(strains.EpsilonX);
+			DirectionY.Steel.SetStress(strains.EpsilonY);
 		}
 
 		/// <summary>
 		/// Set steel strains and calculate stresses, in MPa.
 		/// </summary>
 		/// <param name="strains">Current strains.</param>
-		public void SetStrainsAndStresses(Vector<double> strains)
+		public void SetStrainsAndStresses(Strain strains)
 		{
 			SetStrains(strains);
 			SetStresses(strains);
+		}
+
+        /// <summary>
+        /// Return a copy of a <see cref="BiaxialReinforcement"/>.
+        /// </summary>
+        /// <param name="reinforcementToCopy">The <see cref="BiaxialReinforcement"/> to copy.</param>
+        /// <returns></returns>
+        public static BiaxialReinforcement Copy(BiaxialReinforcement reinforcementToCopy)
+		{
+			var x = reinforcementToCopy.DirectionX;
+			var y = reinforcementToCopy.DirectionY;
+
+			return
+				new BiaxialReinforcement(x.BarDiameter, x.BarSpacing, Steel.Copy(x.Steel), y.BarDiameter, y.BarSpacing, Steel.Copy(y.Steel), reinforcementToCopy.Width);
 		}
 
 		/// <summary>
@@ -247,37 +296,23 @@ namespace Material.Reinforcement
 		/// <returns></returns>
 		public string ToString(LengthUnit diameterUnit = LengthUnit.Millimeter, LengthUnit spacingUnit = LengthUnit.Millimeter, PressureUnit strengthUnit = PressureUnit.Megapascal)
 		{
-			Length
-				phiX = Length.FromMillimeters(BarDiameter.X).ToUnit(diameterUnit),
-				phiY = Length.FromMillimeters(BarDiameter.Y).ToUnit(diameterUnit),
-				sX   = Length.FromMillimeters(BarSpacing.X).ToUnit(spacingUnit),
-				sY   = Length.FromMillimeters(BarSpacing.Y).ToUnit(spacingUnit);
-
-			// Approximate reinforcement ratio
-			double
-				psx = Math.Round(Ratio.X, 3),
-				psy = Math.Round(Ratio.Y, 3);
-
-			char rho = (char) Characters.Rho;
-			char phi = (char) Characters.Phi;
-
 			return
-				"Reinforcement (x): " + phi + phiX + ", s = " + sX +
-				" (" + rho + "sx = " + psx + ")\n" + Steel.X.ToString(strengthUnit) + "\n\n" +
+				"Reinforcement (x): " + "\n" +
+				DirectionX.ToString(diameterUnit, spacingUnit, strengthUnit) + "\n\n" +
 
-				"Reinforcement (y) = " + phi + phiY + ", s = " + sY + " (" +
-				rho + "sy = " + psy + ")\n" + Steel.Y.ToString(strengthUnit);
+				"Reinforcement (y): " + "\n" +
+				DirectionY.ToString(diameterUnit, spacingUnit, strengthUnit);
 		}
 
-		/// <summary>
-		/// Compare two reinforcement objects.
-		/// <para>Returns true if parameters are equal.</para>
-		/// </summary>
-		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool Equals(BiaxialReinforcement other)
+        /// <summary>
+        /// Compare two reinforcement objects.
+        /// <para>Returns true if parameters are equal.</para>
+        /// </summary>
+        /// <param name="other">The other reinforcement object.</param>
+        public virtual bool Equals(BiaxialReinforcement other)
 		{
 			if (other != null)
-				return Ratio == other.Ratio && Steel.X == other.Steel.X && Steel.Y == other.Steel.Y;
+				return DirectionX == other.DirectionX && DirectionY == other.DirectionY;
 
 			return false;
 		}
@@ -290,7 +325,7 @@ namespace Material.Reinforcement
 			return false;
 		}
 
-		public override int GetHashCode() => (int)Math.Pow(BarDiameter.X, BarDiameter.Y);
+		public override int GetHashCode() => DirectionX?.GetHashCode()?? 1 * DirectionY?.GetHashCode() ?? 1 * (int)Width;
 
 		/// <summary>
 		/// Returns true if steel parameters are equal.

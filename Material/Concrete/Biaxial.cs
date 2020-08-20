@@ -1,18 +1,26 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
-using Relations;
 using Material.Reinforcement;
+using OnPlaneComponents;
 
 namespace Material.Concrete
 {
 	public class BiaxialConcrete : Concrete
 	{
-		// Properties
-		public Vector<double>                 Strains           { get; set; }
-		public (double theta1, double theta2) PrincipalAngles   { get; set; }
-		public (double ec1, double ec2)       PrincipalStrains  { get; set; }
-		public (double fc1, double fc2)       PrincipalStresses { get; set; }
-		public Matrix<double>                 Stiffness         { get; set; }
+		/// <summary>
+        /// Get/set concrete strains.
+        /// </summary>
+		public Strain Strains { get; set; }
+
+		/// <summary>
+        /// Get/set concrete stresses.
+        /// </summary>
+		public Stress Stresses { get; set; }
+
+		/// <summary>
+        /// Get/set concrete stiffness
+        /// </summary>
+		public Matrix<double> Stiffness { get; set; }
 
 		///<inheritdoc/>
 		/// <summary>
@@ -48,8 +56,8 @@ namespace Material.Concrete
 			{
 				// Verify strains
 				// Get values
-				var (ec1, ec2) = PrincipalStrains;
-				var (fc1, fc2) = PrincipalStresses;
+				var (ec1, ec2) = Strains.PrincipalStrains;
+				var (fc1, fc2) = Stresses.PrincipalStresses;
 
 				// Calculate modules
 				double
@@ -62,39 +70,33 @@ namespace Material.Concrete
 		}
 
 		/// <summary>
-		/// Get current stresses
-		/// </summary>
-		public Vector<double> Stresses => Stiffness * Strains;
-
-		/// <summary>
 		/// Set concrete stresses given strains
 		/// </summary>
-		/// <param name="strains">Current strains.</param>
+		/// <param name="strains">Current strains in concrete.</param>
 		/// <param name="referenceLength">The reference length (only for DSFM).</param>
 		/// <param name="reinforcement">The biaxial reinforcement (only for DSFM)</param>
-		public void CalculatePrincipalStresses(Vector<double> strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+		public void CalculatePrincipalStresses(Strain strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 		{
 			// Get strains and principals
-			Strains          = strains;
-			PrincipalStrains = Principal_Strains();
-			PrincipalAngles  = StrainAngles();
+			Strains = strains;
+
+			var principalStrains = Strains.PrincipalStrains;
+			var principalAngles  = Strains.PrincipalAngles;
 
 			// Calculate stresses
 			double
-				fc1 = Constitutive.TensileStress(PrincipalStrains, referenceLength, PrincipalAngles.theta1, reinforcement),
-				fc2 = Constitutive.CompressiveStress(PrincipalStrains);
+				fc1 = Constitutive.TensileStress(principalStrains, referenceLength, principalAngles.theta1, reinforcement),
+				fc2 = Constitutive.CompressiveStress(principalStrains);
 
-			PrincipalStresses = (fc1, fc2);
+			Stresses = Stress.FromPrincipal(fc1, fc2, principalAngles.theta1);
 		}
 
 		/// <summary>
 		/// Calculate concrete stiffness matrix
 		/// </summary>
-		/// <param name="thetaC1">Principal tensile strain angle (radians).</param>
-		/// <param name="concreteSecantModule">Current secant module, in MPa.</param>
-		public void CalculateStiffness(double? thetaC1 = null, (double Ec1, double Ec2)? concreteSecantModule = null)
+		public void CalculateStiffness()
 		{
-			var (Ec1, Ec2) = concreteSecantModule ?? SecantModule;
+			var (Ec1, Ec2) = SecantModule;
 
 			double Gc = Ec1 * Ec2 / (Ec1 + Ec2);
 
@@ -105,7 +107,7 @@ namespace Material.Concrete
 			Dc1[2, 2] = Gc;
 
 			// Get transformation matrix
-			var T = TransformationMatrix(thetaC1);
+			var T = Strains.TransformationMatrix;
 
 			// Calculate Dc
 			Stiffness = T.Transpose() * Dc1 * T;
@@ -118,37 +120,10 @@ namespace Material.Concrete
 		public void SetTensileStress(double fc1)
 		{
 			// Get compressive stress
-			double fc2 = PrincipalStresses.fc2;
+			double fc2 = Stresses.PrincipalStresses.sigma2;
 
 			// Set
-			PrincipalStresses = (fc1, fc2);
-		}
-
-		/// <summary>
-		/// Calculate principal strain angles, in radians.
-		/// </summary>
-		/// <param name="strains">Current strains.</param>
-		/// <param name="principalStrains">Current principal strains.</param>
-		public (double theta1, double theta2) StrainAngles(Vector<double> strains = null, (double ec1, double ec2)? principalStrains = null)
-		{
-			var e  = strains          ?? Strains;
-			var e1 = principalStrains ?? PrincipalStrains;
-
-			return
-				Strain.PrincipalAngles(e, e1);
-		}
-
-		/// <summary>
-		/// Calculate principal strains.
-		/// </summary>
-		/// <param name="strains">Current strains.</param>
-		/// <returns></returns>
-		public (double ec1, double ec2) Principal_Strains(Vector<double> strains = null)
-		{
-			var e = strains ?? Strains;
-
-			return
-				Strain.PrincipalStrains(e);
+			Stresses = Stress.FromPrincipal(fc1, fc2, Strains.PrincipalAngles.theta1);
 		}
 
 		/// <summary>
@@ -164,29 +139,22 @@ namespace Material.Concrete
 			Dc1[2, 2] = 0.5 * Ec;
 
 			// Get transformation matrix
-			var T = TransformationMatrix(Constants.PiOver4);
+			var T = StrainRelations.TransformationMatrix(Constants.PiOver4);
 
 			// Calculate Dc
 			return
 				T.Transpose() * Dc1 * T;
 		}
 
-		/// <summary>
-		/// Calculate stresses/strains transformation matrix.
-		/// <para>This matrix transforms from x-y to 1-2 coordinates.</para>
-		/// </summary>
-		/// <param name="theta1">Principal tensile strain angle, in radians.</param>
-		/// <returns></returns>
-		public Matrix<double> TransformationMatrix(double? theta1 = null)
-		{
-			double theta = theta1 ?? PrincipalAngles.theta1;
+        /// <summary>
+        /// Return a copy of a <see cref="BiaxialConcrete"/> object.
+        /// </summary>
+        /// <param name="concreteToCopy">The <see cref="BiaxialConcrete"/> object to copy.</param>
+        /// <returns></returns>
+        public static BiaxialConcrete Copy(BiaxialConcrete concreteToCopy) => new BiaxialConcrete(concreteToCopy.Parameters, concreteToCopy.Constitutive);
 
-			return
-				Strain.TransformationMatrix(theta);
-		}
-
-		/// <inheritdoc/>
-		public override bool Equals(Concrete other)
+        /// <inheritdoc/>
+        public override bool Equals(Concrete other)
 		{
 			if (other != null && other is BiaxialConcrete)
 				return Parameters == other.Parameters && Constitutive == other.Constitutive;
