@@ -10,12 +10,22 @@ namespace Material.Concrete
 		/// <summary>
         /// Get/set concrete strains.
         /// </summary>
-		public Strain Strains { get; set; }
+		public StrainState Strains { get; set; }
+
+		/// <summary>
+        /// Get/set concrete principal strains.
+        /// </summary>
+		public PrincipalStrainState PrincipalStrains { get; set; }
 
 		/// <summary>
         /// Get/set concrete stresses.
         /// </summary>
-		public Stress Stresses { get; set; }
+		public StressState Stresses { get; set; }
+
+		/// <summary>
+        /// Get/set concrete principal stresses.
+        /// </summary>
+		public PrincipalStressState PrincipalStresses { get; set; }
 
 		/// <summary>
         /// Get/set concrete stiffness
@@ -54,10 +64,12 @@ namespace Material.Concrete
 		{
 			get
 			{
-				// Verify strains
 				// Get values
-				var (ec1, ec2) = Strains.PrincipalStrains;
-				var (fc1, fc2) = Stresses.PrincipalStresses;
+				double
+					ec1 = PrincipalStrains.Epsilon1,
+					ec2 = PrincipalStrains.Epsilon2,
+					fc1 = PrincipalStresses.Sigma1,
+					fc2 = PrincipalStresses.Sigma2;
 
 				// Calculate modules
 				double
@@ -72,23 +84,25 @@ namespace Material.Concrete
 		/// <summary>
 		/// Set concrete stresses given strains
 		/// </summary>
-		/// <param name="strains">Current strains in concrete.</param>
+		/// <param name="strainsState">Current strains in concrete.</param>
 		/// <param name="referenceLength">The reference length (only for DSFM).</param>
 		/// <param name="reinforcement">The biaxial reinforcement (only for DSFM)</param>
-		public void CalculatePrincipalStresses(Strain strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+		public void CalculatePrincipalStresses(StrainState strainsState, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 		{
-			// Get strains and principals
-			Strains = strains;
+			// Get strains
+			Strains = strainsState;
 
-			var principalStrains = Strains.PrincipalStrains;
-			var principalAngles  = Strains.PrincipalAngles;
+			// Calculate principal strains
+			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
 
-			// Calculate stresses
+			// Get stresses from constitutive model
 			double
-				fc1 = Constitutive.TensileStress(principalStrains, referenceLength, principalAngles.theta1, reinforcement),
-				fc2 = Constitutive.CompressiveStress(principalStrains);
+				fc1 = Constitutive.TensileStress(PrincipalStrains, referenceLength, reinforcement),
+				fc2 = Constitutive.CompressiveStress(PrincipalStrains);
 
-			Stresses = Stress.FromPrincipal(fc1, fc2, principalAngles.theta1);
+			// Set stresses
+			PrincipalStresses = new PrincipalStressState(fc1, fc2, PrincipalStrains.Theta1);
+			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
 		/// <summary>
@@ -119,11 +133,14 @@ namespace Material.Concrete
 		/// <param name="fc1">Concrete tensile stress, in MPa.</param>
 		public void SetTensileStress(double fc1)
 		{
-			// Get compressive stress
-			double fc2 = Stresses.PrincipalStresses.sigma2;
+			// Get compressive stress and theta1
+			double
+				fc2    = PrincipalStresses.Sigma2,
+				theta1 = PrincipalStresses.Theta1;
 
-			// Set
-			Stresses = Stress.FromPrincipal(fc1, fc2, Strains.PrincipalAngles.theta1);
+			// Set new state
+			PrincipalStresses = new PrincipalStressState(fc1, fc2, theta1);
+			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
 		/// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using MathNet.Numerics;
 using Material.Reinforcement;
+using OnPlaneComponents;
 
 namespace Material.Concrete
 {
@@ -95,10 +96,9 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="principalStrains">Principal strains in concrete.</param>
         /// <param name="referenceLength">The reference length (only for DSFM).</param>
-        /// <param name="theta1">Principal tensile strain angle (radians).</param>
         /// <param name="reinforcement">The biaxial reinforcement (only for DSFM).</param>
         /// <returns>Tensile stress in MPa</returns>
-        public abstract double TensileStress((double ec1, double ec2) principalStrains, double referenceLength = 0, double theta1 = Constants.PiOver4, BiaxialReinforcement reinforcement = null);
+        public abstract double TensileStress(PrincipalStrainState principalStrains, double referenceLength = 0, BiaxialReinforcement reinforcement = null);
 
         /// <summary>
         /// Calculate tensile stress for uniaxial case.
@@ -114,7 +114,7 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="principalStrains">Principal strains in concrete.</param>
         /// <returns>Compressive stress in MPa</returns>
-        public abstract double CompressiveStress((double ec1, double ec2) principalStrains);
+        public abstract double CompressiveStress(PrincipalStrainState principalStrains);
 
         /// <summary>
         /// Calculate compressive stress for uniaxial case.
@@ -230,14 +230,16 @@ namespace Material.Concrete
 	    #region Biaxial
 	    // Principal stresses by classic formulation
 	    /// <inheritdoc/>
-	    public override double CompressiveStress((double ec1, double ec2) principalStrains)
+	    public override double CompressiveStress(PrincipalStrainState principalStrains)
 	    {
-		    // Get the strains
-		    var (ec1, ec2) = principalStrains;
-
-		    // Calculate the maximum concrete compressive stress
+		    // Get strains
 		    double
-			    f2maxA = -fc / (0.8 - 0.34 * ec1 / ec),
+			    ec1 = principalStrains.Epsilon1,
+			    ec2 = principalStrains.Epsilon2;
+
+            // Calculate the maximum concrete compressive stress
+            double
+                f2maxA = -fc / (0.8 - 0.34 * ec1 / ec),
 			    f2max = Math.Max(f2maxA, -fc);
 
 		    // Calculate the principal compressive stress in concrete
@@ -248,12 +250,15 @@ namespace Material.Concrete
 	    }
 
 	    /// <inheritdoc/>
-	    public override double TensileStress((double ec1, double ec2) principalStrains, double referenceLength = 0, double theta1 = Constants.PiOver4, BiaxialReinforcement reinforcement = null)
+	    public override double TensileStress(PrincipalStrainState principalStrains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 	    {
-		    var (ec1, ec2) = principalStrains;
+		    // Get strains
+		    double
+			    ec1 = principalStrains.Epsilon1,
+			    ec2 = principalStrains.Epsilon2;
 
-		    // Calculate initial uncracked state
-		    double fc1 = ec1 * Ec;
+            // Calculate initial uncracked state
+            double fc1 = ec1 * Ec;
 
 		    // Verify if is cracked
 		    VerifyCrackedState(fc1, ec2);
@@ -343,16 +348,18 @@ namespace Material.Concrete
         {
             // Calculate the principal compressive stress in concrete
             return
-                CompressiveStress((0, strain));
+                CompressiveStress(new PrincipalStrainState(0, strain));
         }
         #endregion
 
         #region Biaxial
         /// <inheritdoc/>
-        public override double CompressiveStress((double ec1, double ec2) principalStrains)
+        public override double CompressiveStress(PrincipalStrainState principalStrains)
         {
             // Get strains
-            var (ec1, ec2) = principalStrains;
+            double
+	            ec1 = principalStrains.Epsilon1,
+	            ec2 = principalStrains.Epsilon2;
 
             //if (ec2 >= 0)
             //    return 0;
@@ -360,7 +367,7 @@ namespace Material.Concrete
             // Calculate the coefficients
             //double Cd = 0.27 * (ec1 / ec - 0.37);
             double Cd = 0.35 * Math.Pow(-ec1 / ec2 - 0.28, 0.8);
-            if (Double.IsNaN(Cd))
+            if (double.IsNaN(Cd))
                 Cd = 1;
 
             double betaD = Math.Min(1 / (1 + Cs * Cd), 1);
@@ -387,9 +394,12 @@ namespace Material.Concrete
         }
 
         /// <inheritdoc/>
-        public override double TensileStress((double ec1, double ec2) principalStrains, double referenceLength = 0, double theta1 = Constants.PiOver4, BiaxialReinforcement reinforcement = null)
+        public override double TensileStress(PrincipalStrainState principalStrains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
         {
-            var (ec1, ec2) = principalStrains;
+	        // Get strains
+	        double
+		        ec1 = principalStrains.Epsilon1,
+		        ec2 = principalStrains.Epsilon2;
 
             // Calculate initial uncracked state
             double fc1 = ec1 * Ec;
@@ -407,7 +417,7 @@ namespace Material.Concrete
             double fc1a = ft * (1 - (ec1 - ecr) / (ets - ecr));
 
             // Calculate coefficient for tension stiffening effect
-            double m = reinforcement.TensionStiffeningCoefficient(theta1);
+            double m = reinforcement.TensionStiffeningCoefficient(principalStrains.Theta1);
 
             // Calculate concrete postcracking stress associated with tension stiffening
             double fc1b = ft / (1 + Math.Sqrt(2.2 * m * ec1));
@@ -416,7 +426,7 @@ namespace Material.Concrete
             double fc1c = Math.Max(fc1a, fc1b);
 
             // Check the maximum value of fc1 that can be transmitted across cracks
-            double fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
+            double fc1s = reinforcement.MaximumPrincipalTensileStress(principalStrains.Theta1);
 
             // Calculate concrete tensile stress
             return

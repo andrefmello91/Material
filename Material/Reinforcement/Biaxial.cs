@@ -32,7 +32,7 @@ namespace Material.Reinforcement
 		/// <summary>
         /// Get/set reinforcement strains.
         /// </summary>
-		public Strain Strains { get; set; }
+		public StrainState Strains { get; set; }
 
 		/// <summary>
         /// Get cross-section width.
@@ -95,19 +95,9 @@ namespace Material.Reinforcement
         public bool IsSet => xSet || ySet;
 
 		/// <summary>
-		/// Get reinforcement current stresses, in MPa.
-		/// </summary>
-		public (double fsx, double fsy) SteelStresses => (DirectionX.Steel.Stress, DirectionY.Steel.Stress);
-
-		/// <summary>
-		/// Get reinforcement current secant module, in MPa.
-		/// </summary>
-		public (double Esx, double Esy) SecantModule => (DirectionX.Steel.SecantModule, DirectionY.Steel.SecantModule);
-
-		/// <summary>
 		/// Get reinforcement stresses, in MPa.
 		/// </summary>
-		public Stress Stresses
+		public StressState Stresses
 		{
 			get
 			{
@@ -116,7 +106,7 @@ namespace Material.Reinforcement
 					fsy = DirectionY?.Stress ?? 0;
 
 				return
-					new Stress(fsx, fsy, 0);
+					new StressState(fsx, fsy, 0);
 			}
 		}
 
@@ -138,10 +128,10 @@ namespace Material.Reinforcement
 		/// <summary>
 		/// Calculate current stresses, in MPs.
 		/// </summary>
-		/// <param name="strains">Current strains.</param>
-		public void CalculateStresses(Strain strains)
+		/// <param name="strainsState">Current strains.</param>
+		public void CalculateStresses(StrainState strainsState)
 		{
-			Strains = strains;
+			Strains = strainsState;
 				
 			// Calculate stresses in steel
 			SetStrainsAndStresses(Strains);
@@ -241,31 +231,31 @@ namespace Material.Reinforcement
 		/// <summary>
 		/// Set steel strains.
 		/// </summary>
-		/// <param name="strains">Current strains.</param>
-		public void SetStrains(Strain strains)
+		/// <param name="strainsState">Current strains.</param>
+		public void SetStrains(StrainState strainsState)
 		{
-			DirectionX.Steel.SetStrain(strains.EpsilonX);
-			DirectionY.Steel.SetStrain(strains.EpsilonY);
+			DirectionX.Steel.SetStrain(strainsState.EpsilonX);
+			DirectionY.Steel.SetStrain(strainsState.EpsilonY);
 		}
 
 		/// <summary>
 		/// Set steel stresses, given strains.
 		/// </summary>
-		/// <param name="strains">Current strains.</param>
-		public void SetStresses(Strain strains)
+		/// <param name="strainsState">Current strains.</param>
+		public void SetStresses(StrainState strainsState)
 		{
-			DirectionX.Steel.SetStress(strains.EpsilonX);
-			DirectionY.Steel.SetStress(strains.EpsilonY);
+			DirectionX.Steel.SetStress(strainsState.EpsilonX);
+			DirectionY.Steel.SetStress(strainsState.EpsilonY);
 		}
 
 		/// <summary>
 		/// Set steel strains and calculate stresses, in MPa.
 		/// </summary>
-		/// <param name="strains">Current strains.</param>
-		public void SetStrainsAndStresses(Strain strains)
+		/// <param name="strainsState">Current strains.</param>
+		public void SetStrainsAndStresses(StrainState strainsState)
 		{
-			SetStrains(strains);
-			SetStresses(strains);
+			SetStrains(strainsState);
+			SetStresses(strainsState);
 		}
 
         /// <summary>
