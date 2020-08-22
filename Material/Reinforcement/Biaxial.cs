@@ -15,22 +15,22 @@ namespace Material.Reinforcement
 	{
 		// Properties
 		/// <summary>
-        /// Get/set the web reinforcement of X direction.
+        /// Get/set the <see cref="WebReinforcementDirection"/> on X direction.
         /// </summary>
 		public WebReinforcementDirection DirectionX { get; set; }
 
-		/// <summary>
-        /// Get/set the web reinforcement of Y direction.
+        /// <summary>
+        /// Get/set the <see cref="WebReinforcementDirection"/> on Y direction.
         /// </summary>
-		public WebReinforcementDirection DirectionY { get; set; }
+        public WebReinforcementDirection DirectionY { get; set; }
 
 		/// <summary>
-        /// Get/set the stiffness matrix.
+        /// Get/set the stiffness <see cref="Matrix"/>.
         /// </summary>
 		public Matrix<double> Stiffness { get; set; }
 
 		/// <summary>
-        /// Get/set reinforcement strains.
+        /// Get/set reinforcement <see cref="StrainState"/>.
         /// </summary>
 		public StrainState Strains { get; set; }
 
@@ -105,7 +105,7 @@ namespace Material.Reinforcement
 		public bool XYReinforced => XReinforced && YReinforced;
 
 		/// <summary>
-		/// Get reinforcement stresses, in MPa.
+		/// Get reinforcement <see cref="StressState"/>, in MPa.
 		/// </summary>
 		public StressState Stresses
 		{
@@ -136,9 +136,9 @@ namespace Material.Reinforcement
 		}
 
 		/// <summary>
-		/// Calculate current stresses, in MPs.
+		/// Calculate current <see cref="StressState"/>, in MPs.
 		/// </summary>
-		/// <param name="strainsState">Current strains.</param>
+		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void CalculateStresses(StrainState strainsState)
 		{
 			Strains = strainsState;
@@ -148,7 +148,7 @@ namespace Material.Reinforcement
 		}
 
 		/// <summary>
-		/// Calculate current reinforcement stiffness matrix.
+		/// Calculate current reinforcement stiffness <see cref="Matrix"/>.
 		/// </summary>
 		public void CalculateStiffness()
 		{
@@ -162,12 +162,12 @@ namespace Material.Reinforcement
 		}
 
 		/// <summary>
-		/// Calculate initial reinforcement stiffness matrix.
+		/// Calculate initial reinforcement stiffness <see cref="Matrix"/>.
 		/// </summary>
 		public Matrix<double> InitialStiffness()
 		{
 			// Steel matrix
-			var Ds = Matrix<double>.Build.Dense(3, 3);
+            var Ds = Matrix<double>.Build.Dense(3, 3);
 
 			Ds[0, 0] = DirectionX?.InitialStiffness ?? 0;
 			Ds[1, 1] = DirectionY?.InitialStiffness ?? 0;
@@ -237,9 +237,9 @@ namespace Material.Reinforcement
 		}
 
 		/// <summary>
-		/// Set steel strains.
+		/// Set steel <see cref="StrainState"/>.
 		/// </summary>
-		/// <param name="strainsState">Current strains.</param>
+		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void SetStrains(StrainState strainsState)
 		{
 			DirectionX.Steel.SetStrain(strainsState.EpsilonX);
@@ -247,9 +247,9 @@ namespace Material.Reinforcement
 		}
 
 		/// <summary>
-		/// Set steel stresses, given strains.
+		/// Set steel <see cref="StressState"/>, given <see cref="StrainState"/>.
 		/// </summary>
-		/// <param name="strainsState">Current strains.</param>
+		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void SetStresses(StrainState strainsState)
 		{
 			DirectionX.Steel.SetStress(strainsState.EpsilonX);
@@ -257,9 +257,9 @@ namespace Material.Reinforcement
 		}
 
 		/// <summary>
-		/// Set steel strains and calculate stresses, in MPa.
+		/// Set steel <see cref="StrainState"/> and calculate <see cref="StressState"/>, in MPa.
 		/// </summary>
-		/// <param name="strainsState">Current strains.</param>
+		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void SetStrainsAndStresses(StrainState strainsState)
 		{
 			SetStrains(strainsState);

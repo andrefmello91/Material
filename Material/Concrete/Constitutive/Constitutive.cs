@@ -94,7 +94,7 @@ namespace Material.Concrete
         /// <summary>
         /// Calculate tensile stress for biaxial case.
         /// </summary>
-        /// <param name="principalStrains">Principal strains in concrete.</param>
+        /// <param name="principalStrains"><see cref="PrincipalStrainState"/> in concrete.</param>
         /// <param name="referenceLength">The reference length (only for DSFM).</param>
         /// <param name="reinforcement">The biaxial reinforcement (only for DSFM).</param>
         /// <returns>Tensile stress in MPa</returns>
@@ -112,7 +112,7 @@ namespace Material.Concrete
         /// <summary>
         /// Calculate compressive stress for biaxial case.
         /// </summary>
-        /// <param name="principalStrains">Principal strains in concrete.</param>
+        /// <param name="principalStrains"><see cref="PrincipalStrainState"/> in concrete.</param>
         /// <returns>Compressive stress in MPa</returns>
         public abstract double CompressiveStress(PrincipalStrainState principalStrains);
 

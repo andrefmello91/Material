@@ -8,22 +8,22 @@ namespace Material.Concrete
 	public class BiaxialConcrete : Concrete
 	{
 		/// <summary>
-        /// Get/set concrete strains.
+        /// Get/set concrete <see cref="StrainState"/>.
         /// </summary>
 		public StrainState Strains { get; set; }
 
 		/// <summary>
-        /// Get/set concrete principal strains.
+        /// Get/set concrete <see cref="PrincipalStrainState"/>.
         /// </summary>
 		public PrincipalStrainState PrincipalStrains { get; set; }
 
 		/// <summary>
-        /// Get/set concrete stresses.
+        /// Get/set concrete <see cref="StressState"/>.
         /// </summary>
 		public StressState Stresses { get; set; }
 
 		/// <summary>
-        /// Get/set concrete principal stresses.
+        /// Get/set concrete <see cref="PrincipalStressState"/>.
         /// </summary>
 		public PrincipalStressState PrincipalStresses { get; set; }
 
@@ -81,13 +81,13 @@ namespace Material.Concrete
 			}
 		}
 
-		/// <summary>
-		/// Set concrete stresses given strains
-		/// </summary>
-		/// <param name="strains">Current strains in concrete.</param>
-		/// <param name="referenceLength">The reference length (only for DSFM).</param>
-		/// <param name="reinforcement">The biaxial reinforcement (only for DSFM)</param>
-		public void CalculatePrincipalStresses(StrainState strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+        /// <summary>
+        /// Set concrete <see cref="StressState"/> given <see cref="StrainState"/>
+        /// </summary>
+        /// <param name="strains">Current <see cref="StrainState"/> in concrete.</param>
+        /// <param name="referenceLength">The reference length (only for DSFM).</param>
+        /// <param name="reinforcement">The biaxial reinforcement (only for DSFM)</param>
+        public void CalculatePrincipalStresses(StrainState strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 		{
 			// Get strains
 			Strains = strains;
@@ -106,7 +106,7 @@ namespace Material.Concrete
 		}
 
 		/// <summary>
-		/// Calculate concrete stiffness matrix
+		/// Calculate concrete stiffness <see cref="Matrix"/>.
 		/// </summary>
 		public void CalculateStiffness()
 		{
@@ -143,11 +143,10 @@ namespace Material.Concrete
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
-		/// <summary>
-		/// Calculate concrete initial stiffness.
-		/// </summary>
-		/// <returns>Initial stiffness matrix.</returns>
-		public Matrix<double> InitialStiffness()
+        /// <summary>
+        /// Calculate concrete initial stiffness <see cref="Matrix"/>.
+        /// </summary>
+        public Matrix<double> InitialStiffness()
 		{
 			// Concrete matrix
 			var Dc1 = Matrix<double>.Build.Dense(3, 3);
