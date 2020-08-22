@@ -160,8 +160,8 @@ namespace Material.Concrete
 			    double fcr1 = ft * (1 - ec2 / ec);
 
 			    // Verify limits
-			    double fcr = Math.Max(fcr1, 0.25 * this.ft);
-			    fcr = Math.Min(fcr, this.ft);
+			    double fcr = Math.Max(fcr1, 0.25 * ft);
+			    fcr = Math.Min(fcr, ft);
 
 			    // Verify is concrete is cracked
 			    if (fc1 >= fcr)

@@ -62,7 +62,7 @@ namespace Material.Reinforcement
 		/// <summary>
         /// Get reinforcement yield stress (ratio multiplied by steel yield stress).
         /// </summary>
-		public double YieldStress => Ratio * Steel.Stress;
+		public double YieldStress => Ratio * Steel.YieldStress;
 
         /// <summary>
         /// Get reinforcement capacity reserve
@@ -115,7 +115,7 @@ namespace Material.Reinforcement
         /// <param name="width">The width of cross-section.</param>
         public static double CalculateRatio(double barDiameter, double barSpacing, double width)
         {
-	        if (barDiameter == 0 || barSpacing == 0)
+	        if (barDiameter == 0 || barSpacing == 0 || width == 0)
 		        return 0;
 
 	        return

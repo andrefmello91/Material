@@ -84,13 +84,13 @@ namespace Material.Concrete
 		/// <summary>
 		/// Set concrete stresses given strains
 		/// </summary>
-		/// <param name="strainsState">Current strains in concrete.</param>
+		/// <param name="strains">Current strains in concrete.</param>
 		/// <param name="referenceLength">The reference length (only for DSFM).</param>
 		/// <param name="reinforcement">The biaxial reinforcement (only for DSFM)</param>
-		public void CalculatePrincipalStresses(StrainState strainsState, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+		public void CalculatePrincipalStresses(StrainState strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 		{
 			// Get strains
-			Strains = strainsState;
+			Strains = strains;
 
 			// Calculate principal strains
 			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
@@ -121,7 +121,7 @@ namespace Material.Concrete
 			Dc1[2, 2] = Gc;
 
 			// Get transformation matrix
-			var T = Strains.TransformationMatrix;
+			var T = PrincipalStrains.TransformationMatrix;
 
 			// Calculate Dc
 			Stiffness = T.Transpose() * Dc1 * T;

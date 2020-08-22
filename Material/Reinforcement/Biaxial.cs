@@ -210,10 +210,8 @@ namespace Material.Reinforcement
             var (thetaNx, thetaNy) = Angles(theta1);
 
             double
-	            fsx = DirectionX?.Stress      ?? 0,
-	            fyx = DirectionX?.YieldStress ?? 0,
-	            fsy = DirectionY?.Stress      ?? 0,
-	            fyy = DirectionY?.YieldStress ?? 0;
+	            fcx = DirectionX?.CapacityReserve ?? 0,
+	            fcy = DirectionY?.CapacityReserve ?? 0;
 
 			double
 				cosNx = Math.Abs(DirectionCosines(thetaNx).cos),
@@ -225,7 +223,7 @@ namespace Material.Reinforcement
 				cos2y = cosNy * cosNy;
 
 			return
-				(fyx - fsx) * cos2x + (fyy - fsy) * cos2y;
+				fcx * cos2x + fcy * cos2y;
 		}
 
 		/// <summary>
