@@ -89,10 +89,20 @@ namespace Material.Reinforcement
 			Width      = width;
 		}
 
-        // Verify if reinforcement is set
-        public bool xSet  => DirectionX != null && DirectionX.BarDiameter > 0 && DirectionX.BarSpacing > 0;
-		public bool ySet  => DirectionY != null && DirectionY.BarDiameter > 0 && DirectionY.BarSpacing > 0;
-        public bool IsSet => xSet || ySet;
+		/// <summary>
+        /// Returns true if reinforcement <see cref="DirectionX"/> exists.
+        /// </summary>
+        public bool XReinforced  => DirectionX != null && DirectionX.BarDiameter > 0 && DirectionX.BarSpacing > 0;
+
+		/// <summary>
+		/// Returns true if reinforcement <see cref="DirectionY"/> exists.
+		/// </summary>
+		public bool YReinforced  => DirectionY != null && DirectionY.BarDiameter > 0 && DirectionY.BarSpacing > 0;
+
+		/// <summary>
+		/// Returns true if reinforcement <see cref="DirectionX"/> and <see cref="DirectionY"/> exist.
+		/// </summary>
+		public bool XYReinforced => XReinforced && YReinforced;
 
 		/// <summary>
 		/// Get reinforcement stresses, in MPa.

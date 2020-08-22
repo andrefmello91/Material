@@ -99,7 +99,6 @@ namespace Material.Concrete
         /// Return a copy of a <see cref="Concrete"/> object.
         /// </summary>
         /// <param name="concreteToCopy">The <see cref="Concrete"/> object to copy.</param>
-        /// <returns></returns>
         public static Concrete Copy(Concrete concreteToCopy) => new Concrete(concreteToCopy.Parameters, concreteToCopy.Constitutive);
 
         /// <summary>

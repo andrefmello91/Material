@@ -56,9 +56,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Concrete\Concrete.cs" />
-    <Compile Include="Concrete\Constitutive.cs" />
+    <Compile Include="Concrete\Constitutive\Constitutive.cs" />
     <Compile Include="Concrete\Biaxial.cs" />
-    <Compile Include="Concrete\Parameters.cs" />
+    <Compile Include="Concrete\Constitutive\DSFM.cs" />
+    <Compile Include="Concrete\Constitutive\MCFT.cs" />
+    <Compile Include="Concrete\Parameters\Custom.cs" />
+    <Compile Include="Concrete\Parameters\DSFM.cs" />
+    <Compile Include="Concrete\Parameters\MC2010.cs" />
+    <Compile Include="Concrete\Parameters\MCFT.cs" />
+    <Compile Include="Concrete\Parameters\NBR6118.cs" />
+    <Compile Include="Concrete\Parameters\Parameters.cs" />
     <Compile Include="Concrete\Uniaxial.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Reinforcement\Biaxial.cs" />
@@ -76,5 +83,6 @@
       <Name>OnPlaneComponents</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
