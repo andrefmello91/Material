@@ -47,18 +47,9 @@ namespace Material.Concrete
 	    protected double ecr => Parameters.CrackStrain;
 	    protected double nu  => Parameters.Poisson;
 	    protected double Gf  => Parameters.FractureParameter;
-	    protected double Cs
-	    {
-		    get
-		    {
-			    if (ConsiderCrackSlip)
-				    return 0.55;
+	    protected double Cs  => ConsiderCrackSlip ? 0.55 : 1;
 
-			    return 1;
-		    }
-	    }
-
-        /// <summary>
+	    /// <summary>
         /// Get concrete <see cref="Constitutive"/> object based on the <see cref="ConstitutiveModel"/>.
         /// </summary>
         /// <param name="constitutiveModel">The <see cref="ConstitutiveModel"/> for concrete.</param>

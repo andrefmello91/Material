@@ -67,12 +67,8 @@ namespace Material.Concrete
 				ec1 = transverseStrain,
 				ec2 = strain;
 
-			// Calculate the coefficients
-			double Cd = 0.35 * Math.Pow(-ec1 / ec2 - 0.28, 0.8);
-			if (double.IsNaN(Cd))
-				Cd = 1;
-
-			double betaD = Math.Min(1 / (1 + Cs * Cd), 1);
+			// Calculate beta D
+			double betaD = SofteningFactor(ec2, ec1);
 
 			// Calculate fp and ep
 			double
@@ -80,11 +76,7 @@ namespace Material.Concrete
 				ep =  betaD * ec * confinementFactor;
 
 			// Calculate parameters of concrete
-			double k;
-			if (ep <= ec2)
-				k = 1;
-			else
-				k = 0.67 - fp / 62;
+			double k = ep <= ec2 ? 1 : 0.67 - fp / 62;
 
 			double
 				n = 0.8 - fp / 17,
@@ -95,7 +87,7 @@ namespace Material.Concrete
 				fp * n * ec2_ep / (n - 1 + Math.Pow(ec2_ep, n * k));
 		}
 
-        /// <inheritdoc/>
+		/// <inheritdoc/>
         protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 		{
 			// Get strains
@@ -134,9 +126,29 @@ namespace Material.Concrete
 			return
 				Math.Min(fc1c, fc1s);
 		}
-		#endregion
+        #endregion
 
-		public override string ToString() => "DSFM";
+        /// <summary>
+        /// Calculate compression softening factor (beta D).
+        /// </summary>
+        /// <param name="strain">The compressive strain (negative) to calculate stress.</param>
+        /// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain"/>.</param>
+		private double SofteningFactor(double strain, double transverseStrain)
+		{
+			// Calculate strain ratio
+			double r  = Math.Min(-transverseStrain / strain, 400);
+
+			if (r < 0.28) // Cd = 0
+				return 1;
+
+			// Calculate Cd
+            double Cd = 0.35 * Math.Pow(r - 0.28, 0.8);
+
+			return
+				Math.Min(1 / (1 + Cs * Cd), 1);
+		}
+
+        public override string ToString() => "DSFM";
 
 		/// <summary>
 		/// Compare two constitutive objects.
