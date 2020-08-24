@@ -1,5 +1,6 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using Material.Reinforcement;
 using OnPlaneComponents;
 
@@ -85,8 +86,8 @@ namespace Material.Concrete
         /// Set concrete <see cref="StressState"/> given <see cref="StrainState"/>
         /// </summary>
         /// <param name="strains">Current <see cref="StrainState"/> in concrete.</param>
-        /// <param name="referenceLength">The reference length (only for DSFM).</param>
-        /// <param name="reinforcement">The biaxial reinforcement (only for DSFM)</param>
+        /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
+        /// <param name="reinforcement">The <see cref="BiaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>)</param>
         public void CalculatePrincipalStresses(StrainState strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 		{
 			// Get strains
@@ -96,12 +97,7 @@ namespace Material.Concrete
 			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
 
 			// Get stresses from constitutive model
-			double
-				fc1 = Constitutive.TensileStress(PrincipalStrains, referenceLength, reinforcement),
-				fc2 = Constitutive.CompressiveStress(PrincipalStrains);
-
-			// Set stresses
-			PrincipalStresses = new PrincipalStressState(fc1, fc2, PrincipalStrains.Theta1);
+			PrincipalStresses = Constitutive.CalculateStresses(PrincipalStrains, referenceLength, reinforcement);
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 

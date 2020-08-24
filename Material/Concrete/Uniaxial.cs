@@ -76,24 +76,13 @@ namespace Material.Concrete
 				stress * Area;
 		}
 
-		/// <summary>
-		/// Calculate stress (in MPa) given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		/// <param name="referenceLength">The reference length (only for DSFM).</param>
-		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
-		public double CalculateStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
-		{
-			if (strain == 0)
-				return 0;
-
-			if (strain > 0)
-				return
-					Constitutive.TensileStress(strain, referenceLength, reinforcement);
-
-			return
-				Constitutive.CompressiveStress(strain);
-		}
+        /// <summary>
+        /// Calculate stress (in MPa) given strain.
+        /// </summary>
+        /// <param name="strain">Current strain.</param>
+        /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
+        /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
+        public double CalculateStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null) => Constitutive.CalculateStress(strain, referenceLength, reinforcement);
 
 		/// <summary>
 		/// Set concrete strain.
@@ -104,23 +93,23 @@ namespace Material.Concrete
 			Strain = strain;
 		}
 
-		/// <summary>
-		/// Set concrete stress (in MPa) given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		/// <param name="referenceLength">The reference length (only for DSFM).</param>
-		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
+        /// <summary>
+        /// Set concrete stress (in MPa) given strain.
+        /// </summary>
+        /// <param name="strain">Current strain.</param>
+        /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
+        /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
 		public void SetStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
 		{
 			Stress = CalculateStress(strain, referenceLength, reinforcement);
 		}
 
-		/// <summary>
-		/// Set concrete strain and calculate stress, in MPa.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		/// <param name="referenceLength">The reference length (only for DSFM).</param>
-		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
+        /// <summary>
+        /// Set concrete strain and calculate stress, in MPa.
+        /// </summary>
+        /// <param name="strain">Current strain.</param>
+        /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
+        /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
 		public void SetStrainsAndStresses(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
 		{
 			SetStrain(strain);

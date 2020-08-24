@@ -1,5 +1,6 @@
 ﻿using System;
 using Material.Reinforcement;
+using MathNet.Numerics;
 using OnPlaneComponents;
 
 namespace Material.Concrete
@@ -19,7 +20,7 @@ namespace Material.Concrete
 
 		#region Uniaxial
 		/// <inheritdoc/>
-		public override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
+		protected override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
 		{
 			// Check if concrete is cracked
 			if (strain <= ecr) // Not cracked
@@ -48,29 +49,25 @@ namespace Material.Concrete
 				Math.Min(fc1c, fc1s);
 		}
 
-		/// <inheritdoc/>
-		public override double CompressiveStress(double strain)
+        /// <inheritdoc/>
+        protected override double CompressiveStress(double strain)
 		{
 			// Calculate the principal compressive stress in concrete
 			return
-				CompressiveStress(new PrincipalStrainState(0, strain));
+				CompressiveStress(strain, 0);
 		}
-		#endregion
+        #endregion
 
-		#region Biaxial
-		/// <inheritdoc/>
-		public override double CompressiveStress(PrincipalStrainState principalStrains)
+        #region Biaxial
+        /// <inheritdoc/>
+        protected override double CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 		{
 			// Get strains
 			double
-				ec1 = principalStrains.Epsilon1,
-				ec2 = principalStrains.Epsilon2;
-
-			//if (ec2 >= 0)
-			//    return 0;
+				ec1 = transverseStrain,
+				ec2 = strain;
 
 			// Calculate the coefficients
-			//double Cd = 0.27 * (ec1 / ec - 0.37);
 			double Cd = 0.35 * Math.Pow(-ec1 / ec2 - 0.28, 0.8);
 			if (double.IsNaN(Cd))
 				Cd = 1;
@@ -79,8 +76,8 @@ namespace Material.Concrete
 
 			// Calculate fp and ep
 			double
-				fp = -betaD * fc,
-				ep = betaD * ec;
+				fp = -betaD * fc * confinementFactor,
+				ep =  betaD * ec * confinementFactor;
 
 			// Calculate parameters of concrete
 			double k;
@@ -98,13 +95,13 @@ namespace Material.Concrete
 				fp * n * ec2_ep / (n - 1 + Math.Pow(ec2_ep, n * k));
 		}
 
-		/// <inheritdoc/>
-		public override double TensileStress(PrincipalStrainState principalStrains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+        /// <inheritdoc/>
+        protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
 		{
 			// Get strains
 			double
-				ec1 = principalStrains.Epsilon1,
-				ec2 = principalStrains.Epsilon2;
+				ec1 = strain,
+				ec2 = transverseStrain;
 
 			// Calculate initial uncracked state
 			double fc1 = ec1 * Ec;
@@ -122,7 +119,7 @@ namespace Material.Concrete
 			double fc1a = ft * (1 - (ec1 - ecr) / (ets - ecr));
 
 			// Calculate coefficient for tension stiffening effect
-			double m = reinforcement.TensionStiffeningCoefficient(principalStrains.Theta1);
+			double m = reinforcement.TensionStiffeningCoefficient(theta1);
 
 			// Calculate concrete postcracking stress associated with tension stiffening
 			double fc1b = ft / (1 + Math.Sqrt(2.2 * m * ec1));
@@ -131,7 +128,7 @@ namespace Material.Concrete
 			double fc1c = Math.Max(fc1a, fc1b);
 
 			// Check the maximum value of fc1 that can be transmitted across cracks
-			double fc1s = reinforcement.MaximumPrincipalTensileStress(principalStrains.Theta1);
+			double fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
 
 			// Calculate concrete tensile stress
 			return
