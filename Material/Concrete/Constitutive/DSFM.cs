@@ -1,7 +1,6 @@
 ﻿using System;
 using Material.Reinforcement;
 using MathNet.Numerics;
-using OnPlaneComponents;
 
 namespace Material.Concrete
 {

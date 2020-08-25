@@ -53,8 +53,8 @@ namespace Material.Reinforcement
 				x = Steel.Copy(steel),
 				y = Steel.Copy(steel);
 
-			DirectionX = new WebReinforcementDirection(barDiameter, barSpacing, x, width);
-			DirectionY = new WebReinforcementDirection(barDiameter, barSpacing, y, width);
+			DirectionX = ReadReinforcementDirection(barDiameter, barSpacing, x, width);
+			DirectionY = ReadReinforcementDirection(barDiameter, barSpacing, y, width);
 			Width      = width;
 		}
 
@@ -70,8 +70,8 @@ namespace Material.Reinforcement
         /// <param name="width">The width (in mm) of cross-section.</param>
         public BiaxialReinforcement(double barDiameterX, double barSpacingX, Steel steelX, double barDiameterY, double barSpacingY, Steel steelY, double width)
 		{
-			DirectionX = new WebReinforcementDirection(barDiameterX, barSpacingX, steelX, width);
-			DirectionY = new WebReinforcementDirection(barDiameterY, barSpacingY, steelY, width);
+			DirectionX = ReadReinforcementDirection(barDiameterX, barSpacingX, steelX, width);
+			DirectionY = ReadReinforcementDirection(barDiameterY, barSpacingY, steelY, width);
 			Width      = width;
 		}
 
@@ -84,8 +84,8 @@ namespace Material.Reinforcement
         /// <param name="width">The width (in mm) of cross-section.</param>
         public BiaxialReinforcement((double X, double Y) barDiameter, (double X, double Y) barSpacing, (Steel X, Steel Y) steel, double width)
 		{
-			DirectionX = new WebReinforcementDirection(barDiameter.X, barSpacing.X, steel.X, width);
-			DirectionY = new WebReinforcementDirection(barDiameter.Y, barSpacing.Y, steel.Y, width);
+			DirectionX = ReadReinforcementDirection(barDiameter.X, barSpacing.X, steel.X, width);
+			DirectionY = ReadReinforcementDirection(barDiameter.Y, barSpacing.Y, steel.Y, width);
 			Width      = width;
 		}
 
@@ -118,6 +118,23 @@ namespace Material.Reinforcement
 				return
 					new StressState(fsx, fsy, 0);
 			}
+		}
+
+        /// <summary>
+        /// Read the <see cref="WebReinforcementDirection"/>.
+        /// <para>Returns null if <paramref name="barDiameter"/> or <paramref name="barSpacing"/> are zero, or if <paramref name="steel"/> is null.</para>
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
+        /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
+        /// <param name="steel">The steel objects for directions X and Y.</param>
+        /// <param name="width">The width (in mm) of cross-section.</param>
+		private WebReinforcementDirection ReadReinforcementDirection(double barDiameter, double barSpacing, Steel steel, double width)
+		{
+			if (barDiameter == 0 || barSpacing == 0 || steel is null)
+				return null;
+
+			return
+				new WebReinforcementDirection(barDiameter, barSpacing, steel, width);
 		}
 
 		/// <summary>
@@ -242,8 +259,8 @@ namespace Material.Reinforcement
 		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void SetStrains(StrainState strainsState)
 		{
-			DirectionX.Steel.SetStrain(strainsState.EpsilonX);
-			DirectionY.Steel.SetStrain(strainsState.EpsilonY);
+			DirectionX?.Steel?.SetStrain(strainsState.EpsilonX);
+			DirectionY?.Steel?.SetStrain(strainsState.EpsilonY);
 		}
 
 		/// <summary>
@@ -252,8 +269,8 @@ namespace Material.Reinforcement
 		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void SetStresses(StrainState strainsState)
 		{
-			DirectionX.Steel.SetStress(strainsState.EpsilonX);
-			DirectionY.Steel.SetStress(strainsState.EpsilonY);
+			DirectionX?.Steel?.SetStress(strainsState.EpsilonX);
+			DirectionY?.Steel?.SetStress(strainsState.EpsilonY);
 		}
 
 		/// <summary>
@@ -272,12 +289,15 @@ namespace Material.Reinforcement
         /// <param name="reinforcementToCopy">The <see cref="BiaxialReinforcement"/> to copy.</param>
         /// <returns></returns>
         public static BiaxialReinforcement Copy(BiaxialReinforcement reinforcementToCopy)
-		{
+        {
+	        if (reinforcementToCopy is null)
+		        return null;
+
 			var x = reinforcementToCopy.DirectionX;
 			var y = reinforcementToCopy.DirectionY;
 
 			return
-				new BiaxialReinforcement(x.BarDiameter, x.BarSpacing, Steel.Copy(x.Steel), y.BarDiameter, y.BarSpacing, Steel.Copy(y.Steel), reinforcementToCopy.Width);
+				new BiaxialReinforcement(x?.BarDiameter ?? 0, x?.BarSpacing ?? 0, Steel.Copy(x?.Steel), y?.BarDiameter ?? 0, y?.BarSpacing ?? 0, Steel.Copy(y?.Steel), reinforcementToCopy.Width);
 		}
 
 		/// <summary>

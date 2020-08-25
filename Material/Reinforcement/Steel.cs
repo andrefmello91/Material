@@ -143,7 +143,10 @@ namespace Material.Reinforcement
         /// <param name="steelToCopy">The steel object to copy.</param>
         /// <returns></returns>
         public static Steel Copy(Steel steelToCopy)
-        {
+		{
+			if (steelToCopy is null)
+				return null;
+
 	        if (!steelToCopy.ConsiderTensileHardening)
 		        return
 			        new Steel(steelToCopy.YieldStress, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
