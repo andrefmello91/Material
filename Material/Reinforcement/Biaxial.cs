@@ -203,25 +203,33 @@ namespace Material.Reinforcement
 				return 0;
 
 			// Get reinforcement angles and stresses
-			var (thetaNx, thetaNy)     = Angles(theta1);
+			var (thetaNx, thetaNy) = Angles(theta1);
 
-			double
-				psx  = DirectionX?.Ratio       ?? 0,
-				phiX = DirectionX?.BarDiameter ?? 0,
-				psy  = DirectionY?.Ratio       ?? 0,
-				phiY = DirectionY?.BarDiameter ?? 0;
+			double den = 0;
 
-			double
-				cosNx = Math.Abs(DirectionCosines(thetaNx).cos),
-				cosNy = Math.Abs(DirectionCosines(thetaNy).cos);
+			if (!(DirectionX is null))
+			{
+				double
+					psx   = DirectionX.Ratio,
+					phiX  = DirectionX.BarDiameter,
+					cosNx = Math.Abs(DirectionCosines(thetaNx).cos);
 
-			// Calculate coefficient for tension stiffening effect
-			double m = 0.25 / (psx / phiX * cosNx + psy / phiY * cosNy);
+				den += psx / phiX * cosNx;
+			}
 
-			if (double.IsNaN(m))
-				m = 0;
+			if (!(DirectionY is null))
+			{
+				double
+					psy   = DirectionY.Ratio,
+					phiY  = DirectionY.BarDiameter,
+					cosNy = Math.Abs(DirectionCosines(thetaNy).cos);
 
-            return m;
+				den += psy / phiY * cosNy;
+			}
+
+			// Return m
+            return
+	            0.25 / den;
 		}
 
 		/// <summary>
