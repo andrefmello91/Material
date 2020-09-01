@@ -21,9 +21,9 @@ namespace Material.Concrete
     public abstract class Constitutive : IEquatable<Constitutive>
     {
 	    // Properties
-	    public Parameters Parameters        { get; }
-	    public bool       ConsiderCrackSlip { get; set; }
-	    public bool       Cracked           { get; set; }
+	    public Parameters     Parameters        { get; }
+	    public bool           ConsiderCrackSlip { get; set; }
+	    public bool           Cracked           { get; set; }
 
 	    // Constructor
 	    /// <summary>
@@ -107,12 +107,12 @@ namespace Material.Concrete
 	        double fc1, fc2;
 
 			// Verify case
-			if (principalStrains.TensionCompression)
+			if (principalStrains.Case is PrincipalCase.TensionCompression)
 			{
 				fc1 = TensileStress(ec1, ec2, principalStrains.Theta1, referenceLength, reinforcement);
 				fc2 = CompressiveStress(ec2, ec1);
 			}
-			else if (principalStrains.PureTension)
+			else if (principalStrains.Case is PrincipalCase.PureTension)
 			{
 				fc1 = TensileStress(ec1, ec2, principalStrains.Theta1, referenceLength, reinforcement);
 				fc2 = TensileStress(ec2, ec1, principalStrains.Theta1, referenceLength, reinforcement);
@@ -152,7 +152,6 @@ namespace Material.Concrete
         /// <param name="theta1">The angle of maximum principal strain, in radians.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
         /// <param name="reinforcement">The <see cref="BiaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
-        /// <returns>Tensile stress in MPa</returns>
         protected abstract double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, BiaxialReinforcement reinforcement = null);
 
         /// <summary>
@@ -161,7 +160,6 @@ namespace Material.Concrete
         /// <param name="strain">Tensile strain in concrete.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
         /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
-        /// <returns>Tensile stress in MPa</returns>
         protected abstract double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null);
 
         /// <summary>
@@ -191,6 +189,30 @@ namespace Material.Concrete
 			    return Ec;
 		    return
 			    stress / strain;
+	    }
+
+        /// <summary>
+        /// Calculate concrete stress for uncracked state.
+        /// </summary>
+        /// <param name="strain">Current tensile strain.</param>
+        /// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain"/>.</param>
+        protected double UncrackedStress(double strain, double transverseStrain)
+	    {
+		    if (Cracked)
+			    return 0;
+
+		    // Get strains
+		    double
+			    ec1 = strain,
+			    ec2 = transverseStrain;
+
+		    // Calculate initial uncracked state
+		    double fc1 = ec1 * Ec;
+
+		    // Verify if fc1 cracks concrete
+		    VerifyCrackedState(fc1, ec2);
+
+		    return fc1;
 	    }
 
         /// <summary>

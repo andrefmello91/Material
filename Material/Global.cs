@@ -33,13 +33,18 @@ namespace Material
         /// Calculate the direction cosines of an angle (cos, sin).
         /// </summary>
         /// <param name="angle">Angle, in radians.</param>
-        public (double cos, double sin) DirectionCosines(double angle)
+        /// <param name="absoluteValue">Return absolute values? (default: false).</param>
+        public (double cos, double sin) DirectionCosines(double angle, bool absoluteValue = false)
 		{
 			double
 				cos = Trig.Cos(angle).CoerceZero(1E-6),
 				sin = Trig.Sin(angle).CoerceZero(1E-6);
 
-			return (cos, sin);
+			if (!absoluteValue)
+				return (cos, sin);
+
+			return
+				(Math.Abs(cos), Math.Abs(sin));
 		}
 	}
 }

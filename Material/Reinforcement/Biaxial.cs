@@ -146,7 +146,7 @@ namespace Material.Reinforcement
 			// Calculate angles
 			double
 				thetaNx = theta1,
-				thetaNy = theta1 - Constants.PiOver2;
+				thetaNy = Constants.PiOver2 - theta1;
 
 			return
 				(thetaNx, thetaNy);
@@ -212,7 +212,7 @@ namespace Material.Reinforcement
 				double
 					psx   = DirectionX.Ratio,
 					phiX  = DirectionX.BarDiameter,
-					cosNx = Math.Abs(DirectionCosines(thetaNx).cos);
+					cosNx = DirectionCosines(thetaNx, true).cos;
 
 				den += psx / phiX * cosNx;
 			}
@@ -222,7 +222,7 @@ namespace Material.Reinforcement
 				double
 					psy   = DirectionY.Ratio,
 					phiY  = DirectionY.BarDiameter,
-					cosNy = Math.Abs(DirectionCosines(thetaNy).cos);
+					cosNy = DirectionCosines(thetaNy, true).cos;
 
 				den += psy / phiY * cosNy;
 			}
@@ -249,8 +249,8 @@ namespace Material.Reinforcement
 	            fcy = DirectionY?.CapacityReserve ?? 0;
 
 			double
-				cosNx = Math.Abs(DirectionCosines(thetaNx).cos),
-				cosNy = Math.Abs(DirectionCosines(thetaNy).cos);
+				cosNx = DirectionCosines(thetaNx, true).cos,
+				cosNy = DirectionCosines(thetaNy, true).cos;
 
 			// Check the maximum value of fc1 that can be transmitted across cracks
 			double
@@ -306,6 +306,32 @@ namespace Material.Reinforcement
 
 			return
 				new BiaxialReinforcement(x?.BarDiameter ?? 0, x?.BarSpacing ?? 0, Steel.Copy(x?.Steel), y?.BarDiameter ?? 0, y?.BarSpacing ?? 0, Steel.Copy(y?.Steel), reinforcementToCopy.Width);
+		}
+
+        /// <summary>
+        /// Return a <see cref="BiaxialReinforcement"/> with <see cref="DirectionX"/> only..
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter (in mm) for X direction.</param>
+        /// <param name="barSpacing">The bar spacing (in mm) for  X direction.</param>
+        /// <param name="steel">The steel objects for X direction.</param>
+        /// <param name="width">The width (in mm) of cross-section.</param>
+        public static BiaxialReinforcement HorizontalOnly(double barDiameter, double barSpacing, Steel steel, double width)
+        {
+			return
+				new BiaxialReinforcement(barDiameter, barSpacing, steel, 0, 0, null, width);
+		}
+
+        /// <summary>
+        /// Return a <see cref="BiaxialReinforcement"/> with <see cref="DirectionY"/> only..
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter (in mm) for Y direction.</param>
+        /// <param name="barSpacing">The bar spacing (in mm) for  Y direction.</param>
+        /// <param name="steel">The steel objects for Y direction.</param>
+        /// <param name="width">The width (in mm) of cross-section.</param>
+        public static BiaxialReinforcement TransversalOnly(double barDiameter, double barSpacing, Steel steel, double width)
+        {
+			return
+				new BiaxialReinforcement(0, 0, null, barDiameter, barSpacing, steel, width);
 		}
 
 		/// <summary>

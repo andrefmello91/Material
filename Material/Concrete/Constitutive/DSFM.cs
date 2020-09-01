@@ -28,24 +28,14 @@ namespace Material.Concrete
 
 			// Cracked
 			// Calculate concrete post-cracking stress associated with tension softening
-			double ets = 2 * Gf / (ft * referenceLength);
-			double fc1a = ft * (1 - (strain - ecr) / (ets - ecr));
-
-			// Calculate coefficient for tension stiffening effect
-			double m = reinforcement.TensionStiffeningCoefficient();
+			double fc1a = TensionSoftening(strain, referenceLength);
 
 			// Calculate concrete postcracking stress associated with tension stiffening
-			double fc1b = ft / (1 + Math.Sqrt(2.2 * m * strain));
+			double fc1b = TensionStiffening(strain, reinforcement);
 
-			// Calculate maximum tensile stress
-			double fc1c = Math.Max(fc1a, fc1b);
-
-			// Check the maximum value of fc1 that can be transmitted across cracks
-			double fc1s = reinforcement.MaximumPrincipalTensileStress();
-
-			// Calculate concrete tensile stress
+			// Return maximum
 			return
-				Math.Min(fc1c, fc1s);
+				Math.Max(fc1a, fc1b);
 		}
 
         /// <inheritdoc/>
@@ -55,6 +45,28 @@ namespace Material.Concrete
 			return
 				CompressiveStress(strain, 0);
 		}
+
+        /// <summary>
+        /// Calculate concrete post-cracking stress associated with tension stiffening (for <see cref="UniaxialConcrete"/>).
+        /// </summary>
+        /// <param name="strain">The tensile strain to calculate stress.</param>
+        /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/>.</param>
+        private double TensionStiffening(double strain, UniaxialReinforcement reinforcement)
+        {
+	        // Calculate coefficient for tension stiffening effect
+	        double m = reinforcement.TensionStiffeningCoefficient();
+
+	        // Calculate concrete postcracking stress associated with tension stiffening
+	        double fc1b = ft / (1 + Math.Sqrt(2.2 * m * strain));
+
+	        // Check the maximum value of fc1 that can be transmitted across cracks
+	        double fc1s = reinforcement.MaximumPrincipalTensileStress();
+
+	        // Return minimum
+	        return
+		        Math.Min(fc1b, fc1s);
+        }
+
         #endregion
 
         #region Biaxial
@@ -95,10 +107,7 @@ namespace Material.Concrete
 				ec2 = transverseStrain;
 
 			// Calculate initial uncracked state
-			double fc1 = ec1 * Ec;
-
-			// Verify if is cracked
-			VerifyCrackedState(fc1, ec2);
+			double fc1 = UncrackedStress(ec1, ec2);
 
 			// Not cracked
 			if (!Cracked)
@@ -106,25 +115,38 @@ namespace Material.Concrete
 
 			// Cracked
 			// Calculate concrete post-cracking stress associated with tension softening
-			double ets = 2 * Gf / (ft * referenceLength);
-			double fc1a = ft * (1 - (ec1 - ecr) / (ets - ecr));
+			double fc1a = TensionSoftening(ec1, referenceLength);
 
+			// Calculate concrete post-cracking stress associated with tension stiffening.
+			double fc1b = TensionStiffening(ec1, theta1, reinforcement);
+
+            // Return maximum
+            return
+                Math.Max(fc1a, fc1b);
+		}
+
+		/// <summary>
+		/// Calculate concrete post-cracking stress associated with tension stiffening (for <see cref="BiaxialConcrete"/>).
+		/// </summary>
+		/// <param name="strain">The tensile strain to calculate stress.</param>
+		/// <param name="theta1">The angle of maximum principal strain, in radians.</param>
+		/// <param name="reinforcement">The <see cref="BiaxialReinforcement"/>.</param>
+		private double TensionStiffening(double strain, double theta1, BiaxialReinforcement reinforcement)
+		{
 			// Calculate coefficient for tension stiffening effect
 			double m = reinforcement.TensionStiffeningCoefficient(theta1);
 
 			// Calculate concrete postcracking stress associated with tension stiffening
-			double fc1b = ft / (1 + Math.Sqrt(2.2 * m * ec1));
-
-			// Calculate maximum tensile stress
-			double fc1c = Math.Max(fc1a, fc1b);
+			double fc1b = ft / (1 + Math.Sqrt(2.2 * m * strain));
 
 			// Check the maximum value of fc1 that can be transmitted across cracks
 			double fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
 
-			// Calculate concrete tensile stress
+			// Return minimum
 			return
-				Math.Min(fc1c, fc1s);
+				Math.Min(fc1b, fc1s);
 		}
+
         #endregion
 
         /// <summary>
@@ -146,6 +168,19 @@ namespace Material.Concrete
 			return
 				Math.Min(1 / (1 + Cs * Cd), 1);
 		}
+
+        /// <summary>
+        /// Calculate concrete post-cracking stress associated with tension softening.
+        /// </summary>
+        /// <param name="strain">The tensile strain to calculate stress.</param>
+        /// <param name="referenceLength">The reference length.</param>
+        private double TensionSoftening(double strain, double referenceLength)
+        {
+	        double ets = 2 * Gf / (ft * referenceLength);
+
+	        return
+		        ft * (1 - (strain - ecr) / (ets - ecr));
+        }
 
         public override string ToString() => "DSFM";
 

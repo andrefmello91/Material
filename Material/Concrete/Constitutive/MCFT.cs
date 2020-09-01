@@ -28,18 +28,8 @@ namespace Material.Concrete
 
         // Calculate tensile stress in concrete
         /// <inheritdoc/>
-        protected override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
-		{
-			// Constitutive relation
-			if (strain <= ecr) // Not cracked
-				return
-					strain * Ec;
-					
-			// Else, cracked
-			// Constitutive relation
-			return
-				ft / (1 + Math.Sqrt(500 * strain));
-		}
+        protected override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null) => strain <= ecr ? strain * Ec : CrackedStress(strain);
+
         #endregion
 
         #region Biaxial
@@ -72,10 +62,7 @@ namespace Material.Concrete
 				ec2 = transverseStrain;
 
 			// Calculate initial uncracked state
-			double fc1 = ec1 * Ec;
-
-			// Verify if is cracked
-			VerifyCrackedState(fc1, ec2);
+			double fc1 = UncrackedStress(ec1, ec2);
 
 			// Not cracked
 			if (!Cracked)
@@ -83,12 +70,17 @@ namespace Material.Concrete
 
 			// Else, cracked
 			return
-				ft / (1 + Math.Sqrt(500 * ec1));
-
+				CrackedStress(ec1);
 		}
 		#endregion
 
-		public override string ToString() => "MCFT";
+		/// <summary>
+        /// Calculate tensile stress for cracked concrete.
+        /// </summary>
+        /// <param name="strain">Current tensile strain.</param>
+		private double CrackedStress(double strain) => ft / (1 + Math.Sqrt(500 * strain));
+
+        public override string ToString() => "MCFT";
 
 		/// <summary>
 		/// Compare two constitutive objects.

@@ -107,6 +107,12 @@ namespace Material.Reinforcement
 			Steel.SetStrainAndStress(strain);
 		}
 
+		/// <summary>
+		/// Return the reinforcement stress, given <paramref name="strain"/>.
+		/// </summary>
+		/// <param name="strain">The strain for calculating stress.</param>
+		public double CalculateStress(double strain) => Ratio * Steel.CalculateStress(strain);
+
         /// <summary>
         /// Calculate reinforcement ratio for distributed reinforcement.
         /// </summary>
