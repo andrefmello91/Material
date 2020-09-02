@@ -28,18 +28,12 @@ namespace Material.Concrete
         /// </summary>
 		public PrincipalStressState PrincipalStresses { get; set; }
 
-		/// <summary>
-        /// Get/set concrete stiffness
-        /// </summary>
-		public Matrix<double> Stiffness { get; set; }
-
 		///<inheritdoc/>
 		/// <summary>
 		/// Concrete for membrane calculations.
 		/// </summary>
 		public BiaxialConcrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, parameterModel, constitutiveModel, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
 		{
-			Stiffness = InitialStiffness();
 		}
 
 		///<inheritdoc/>
@@ -58,10 +52,58 @@ namespace Material.Concrete
 		{
 		}
 
-		/// <summary>
-		/// Calculate current secant module of concrete, in MPa.
-		/// </summary>
-		public (double Ec1, double Ec2) SecantModule
+        /// <summary>
+        /// Get concrete stiffness <see cref="Matrix"/>.
+        /// </summary>
+        public Matrix<double> Stiffness
+		{
+			get
+			{
+				var (Ec1, Ec2) = SecantModule;
+
+				double Gc = Ec1 * Ec2 / (Ec1 + Ec2);
+
+				// Concrete matrix
+				var Dc1 = Matrix<double>.Build.Dense(3, 3);
+				Dc1[0, 0] = Ec1;
+				Dc1[1, 1] = Ec2;
+				Dc1[2, 2] = Gc;
+
+				// Get transformation matrix
+				var T = PrincipalStrains.TransformationMatrix;
+
+				// Calculate Dc
+				return
+					T.Transpose() * Dc1 * T;
+			}
+        }
+
+        /// <summary>
+        /// Get concrete initial stiffness <see cref="Matrix"/>.
+        /// </summary>
+        public Matrix<double> InitialStiffness
+        {
+	        get
+	        {
+		        // Concrete matrix
+		        var Dc1 = Matrix<double>.Build.Dense(3, 3);
+		        Dc1[0, 0] = Ec;
+		        Dc1[1, 1] = Ec;
+		        Dc1[2, 2] = 0.5 * Ec;
+
+		        // Get transformation matrix
+		        var T = StrainRelations.TransformationMatrix(Constants.PiOver4);
+
+		        // Calculate Dc
+		        return
+			        T.Transpose() * Dc1 * T;
+	        }
+        }
+
+        /// <summary>
+        /// Calculate current secant module of concrete, in MPa.
+        /// </summary>
+        public (double Ec1, double Ec2) SecantModule
 		{
 			get
 			{
@@ -102,28 +144,6 @@ namespace Material.Concrete
 		}
 
 		/// <summary>
-		/// Calculate concrete stiffness <see cref="Matrix"/>.
-		/// </summary>
-		public void CalculateStiffness()
-		{
-			var (Ec1, Ec2) = SecantModule;
-
-			double Gc = Ec1 * Ec2 / (Ec1 + Ec2);
-
-			// Concrete matrix
-			var Dc1 = Matrix<double>.Build.Dense(3, 3);
-			Dc1[0, 0] = Ec1;
-			Dc1[1, 1] = Ec2;
-			Dc1[2, 2] = Gc;
-
-			// Get transformation matrix
-			var T = PrincipalStrains.TransformationMatrix;
-
-			// Calculate Dc
-			Stiffness = T.Transpose() * Dc1 * T;
-		}
-
-		/// <summary>
 		/// Set tensile stress.
 		/// </summary>
 		/// <param name="fc1">Concrete tensile stress, in MPa.</param>
@@ -137,25 +157,6 @@ namespace Material.Concrete
 			// Set new state
 			PrincipalStresses = new PrincipalStressState(fc1, fc2, theta1);
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
-		}
-
-        /// <summary>
-        /// Calculate concrete initial stiffness <see cref="Matrix"/>.
-        /// </summary>
-        public Matrix<double> InitialStiffness()
-		{
-			// Concrete matrix
-			var Dc1 = Matrix<double>.Build.Dense(3, 3);
-			Dc1[0, 0] = Ec;
-			Dc1[1, 1] = Ec;
-			Dc1[2, 2] = 0.5 * Ec;
-
-			// Get transformation matrix
-			var T = StrainRelations.TransformationMatrix(Constants.PiOver4);
-
-			// Calculate Dc
-			return
-				T.Transpose() * Dc1 * T;
 		}
 
         /// <summary>

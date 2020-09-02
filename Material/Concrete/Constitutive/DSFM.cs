@@ -87,9 +87,8 @@ namespace Material.Concrete
 				ep =  betaD * ec * confinementFactor;
 
 			// Calculate parameters of concrete
-			double k = ep <= ec2 ? 1 : 0.67 - fp / 62;
-
-			double
+			double 
+				k = ep <= ec2 ? 1 : 0.67 - fp / 62,
 				n = 0.8 - fp / 17,
 				ec2_ep = ec2 / ep;
 
@@ -113,17 +112,17 @@ namespace Material.Concrete
 			if (!Cracked)
 				return fc1;
 
-			// Cracked
-			// Calculate concrete post-cracking stress associated with tension softening
-			double fc1a = TensionSoftening(ec1, referenceLength);
+            // Cracked
+            // Calculate concrete post-cracking stress associated with tension softening
+            double fc1a = TensionSoftening(ec1, referenceLength);
 
-			// Calculate concrete post-cracking stress associated with tension stiffening.
-			double fc1b = TensionStiffening(ec1, theta1, reinforcement);
+            // Calculate concrete post-cracking stress associated with tension stiffening.
+            double fc1b = TensionStiffening(ec1, theta1, reinforcement);
 
             // Return maximum
             return
                 Math.Max(fc1a, fc1b);
-		}
+        }
 
 		/// <summary>
 		/// Calculate concrete post-cracking stress associated with tension stiffening (for <see cref="BiaxialConcrete"/>).

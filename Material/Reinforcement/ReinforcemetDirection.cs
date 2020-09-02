@@ -129,6 +129,19 @@ namespace Material.Reinforcement
         }
 
         /// <summary>
+        /// Return a copy of a <see cref="WebReinforcementDirection"/>.
+        /// </summary>
+        /// <param name="reinforcementToCopy">The <see cref="WebReinforcementDirection"/> to copy.</param>
+        public static WebReinforcementDirection Copy(WebReinforcementDirection reinforcementToCopy)
+        {
+	        if (reinforcementToCopy is null)
+		        return null;
+
+			return
+				new WebReinforcementDirection(reinforcementToCopy.BarDiameter, reinforcementToCopy.BarSpacing, reinforcementToCopy.Steel, reinforcementToCopy.Width);
+        }
+
+        /// <summary>
         /// Write string with default units (mm and MPa).
         /// </summary>
         public override string ToString() => ToString();

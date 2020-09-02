@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -23,11 +24,6 @@ namespace Material.Reinforcement
         /// Get/set the <see cref="WebReinforcementDirection"/> on Y direction.
         /// </summary>
         public WebReinforcementDirection DirectionY { get; set; }
-
-		/// <summary>
-        /// Get/set the stiffness <see cref="Matrix"/>.
-        /// </summary>
-		public Matrix<double> Stiffness { get; set; }
 
 		/// <summary>
         /// Get/set reinforcement <see cref="StrainState"/>.
@@ -120,7 +116,41 @@ namespace Material.Reinforcement
 			}
 		}
 
-        /// <summary>
+		/// <summary>
+		/// Get current <see cref="BiaxialReinforcement"/> stiffness <see cref="Matrix"/>.
+		/// </summary>
+		public Matrix<double> Stiffness
+		{
+			get
+			{
+				// Steel matrix
+				var Ds = Matrix<double>.Build.Dense(3, 3);
+
+				Ds[0, 0] = DirectionX?.Stiffness ?? 0;
+				Ds[1, 1] = DirectionY?.Stiffness ?? 0;
+
+				return Ds;
+			}
+		}
+
+		/// <summary>
+		/// Get initial <see cref="BiaxialReinforcement"/> stiffness <see cref="Matrix"/>.
+		/// </summary>
+		public Matrix<double> InitialStiffness
+		{
+			get
+			{
+				// Steel matrix
+				var Ds = Matrix<double>.Build.Dense(3, 3);
+
+				Ds[0, 0] = DirectionX?.InitialStiffness ?? 0;
+				Ds[1, 1] = DirectionY?.InitialStiffness ?? 0;
+
+				return Ds;
+			}
+		}
+
+		/// <summary>
         /// Read the <see cref="WebReinforcementDirection"/>.
         /// <para>Returns null if <paramref name="barDiameter"/> or <paramref name="barSpacing"/> are zero, or if <paramref name="steel"/> is null.</para>
         /// </summary>
@@ -146,14 +176,14 @@ namespace Material.Reinforcement
 			// Calculate angles
 			double
 				thetaNx = theta1,
-				thetaNy = Constants.PiOver2 - theta1;
+				thetaNy = theta1 - Constants.PiOver2;
 
 			return
 				(thetaNx, thetaNy);
 		}
 
 		/// <summary>
-		/// Calculate current <see cref="StressState"/>, in MPs.
+		/// Calculate current <see cref="StressState"/>, in MPa.
 		/// </summary>
 		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void CalculateStresses(StrainState strainsState)
@@ -162,34 +192,6 @@ namespace Material.Reinforcement
 				
 			// Calculate stresses in steel
 			SetStrainsAndStresses(Strains);
-		}
-
-		/// <summary>
-		/// Calculate current reinforcement stiffness <see cref="Matrix"/>.
-		/// </summary>
-		public void CalculateStiffness()
-		{
-			// Steel matrix
-			var Ds = Matrix<double>.Build.Dense(3, 3);
-
-			Ds[0, 0] = DirectionX?.Stiffness ?? 0;
-			Ds[1, 1] = DirectionY?.Stiffness ?? 0;
-			
-            Stiffness = Ds;
-		}
-
-		/// <summary>
-		/// Calculate initial reinforcement stiffness <see cref="Matrix"/>.
-		/// </summary>
-		public Matrix<double> InitialStiffness()
-		{
-			// Steel matrix
-            var Ds = Matrix<double>.Build.Dense(3, 3);
-
-			Ds[0, 0] = DirectionX?.InitialStiffness ?? 0;
-			Ds[1, 1] = DirectionY?.InitialStiffness ?? 0;
-
-            return Ds;
 		}
 
 		/// <summary>
@@ -298,14 +300,20 @@ namespace Material.Reinforcement
         /// <returns></returns>
         public static BiaxialReinforcement Copy(BiaxialReinforcement reinforcementToCopy)
         {
-	        if (reinforcementToCopy is null)
+	        var x = reinforcementToCopy?.DirectionX;
+	        var y = reinforcementToCopy?.DirectionY;
+
+            if (reinforcementToCopy is null || (x is null && y is null))
 		        return null;
 
-			var x = reinforcementToCopy.DirectionX;
-			var y = reinforcementToCopy.DirectionY;
+            if (x is null)
+	            return TransversalOnly(y.BarDiameter, y.BarSpacing, y.Steel, y.Width);
 
+            if (y is null)
+	            return HorizontalOnly(x.BarDiameter, x.BarSpacing, x.Steel, x.Width);
+			
 			return
-				new BiaxialReinforcement(x?.BarDiameter ?? 0, x?.BarSpacing ?? 0, Steel.Copy(x?.Steel), y?.BarDiameter ?? 0, y?.BarSpacing ?? 0, Steel.Copy(y?.Steel), reinforcementToCopy.Width);
+				new BiaxialReinforcement(x.BarDiameter, x.BarSpacing, Steel.Copy(x.Steel), y.BarDiameter, y.BarSpacing, Steel.Copy(y.Steel), reinforcementToCopy.Width);
 		}
 
         /// <summary>
