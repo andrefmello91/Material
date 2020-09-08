@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using MathNet.Numerics.Interpolation;
+using UnitsNet;
 
 namespace Material.Concrete
 {
@@ -9,17 +10,55 @@ namespace Material.Concrete
 	/// </summary>
 	public class MC2010Parameters : Parameters
 	{
-		///<inheritdoc/>
 		/// <summary>
-		/// Parameters based on fib Model Code 2010.
+		/// Array of high strength concrete classes, C50 to C90 (MC2010).
 		/// </summary>
-		public MC2010Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+		private readonly double[] _classes =
 		{
-			UpdateParameters();
-		}
+			50, 55, 60, 70, 80, 90
+		};
 
-		// Parameter calculation using MC2010 nomenclature
-		private double AlphaE()
+		/// <summary>
+		/// Array of ultimate strains for each concrete class, C50 to C90 (MC2010).
+		/// </summary>
+		private readonly double[] _ultimateStrain =
+		{
+			-0.0034, -0.0034, -0.0033, -0.0032, -0.0031, -0.003
+		};
+
+        ///<inheritdoc/>
+        public override double FractureParameter => 0.073 * Math.Pow(Strength, 0.18);
+
+        /// <summary>
+        /// Parameters based on fib Model Code 2010.
+        /// </summary>
+        ///<inheritdoc/>
+        public MC2010Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+	        : this(Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), aggregateType)
+        {
+        }
+
+        /// <summary>
+        /// Parameters based on fib Model Code 2010.
+        /// </summary>
+        /// <inheritdoc/>
+        public MC2010Parameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+        {
+	        UpdateParameters();
+        }
+
+        ///<inheritdoc/>
+        public sealed override void UpdateParameters()
+        {
+	        TensileStrength = fctm();
+	        PlasticStrain   = ec1();
+	        InitialModule   = Eci();
+	        SecantModule    = Ec1();
+	        UltimateStrain  = ecu();
+        }
+
+        #region ModelCode2010 Parameters
+        private double AlphaE()
 		{
 			switch (Type)
 			{
@@ -61,12 +100,12 @@ namespace Material.Concrete
 					-0.003;
 
 			// Get classes and ultimate strains
-			if (classes.Contains(Strength))
+			if (_classes.Contains(Strength))
 			{
-				int i = Array.IndexOf(classes, Strength);
+				int i = Array.IndexOf(_classes, Strength);
 
 				return
-					ultimateStrain[i];
+					_ultimateStrain[i];
 			}
 
 			// Interpolate values
@@ -74,38 +113,11 @@ namespace Material.Concrete
 				UltimateStrainSpline().Interpolate(Strength);
 		}
 
-		public override double FractureParameter => 0.073 * Math.Pow(Strength, 0.18);
-
-		/// <summary>
-		/// Array of high strength concrete classes, C50 to C90 (MC2010).
-		/// </summary>
-		private readonly double[] classes =
-		{
-			50, 55, 60, 70, 80, 90
-		};
-
-		/// <summary>
-		/// Array of ultimate strains for each concrete class, C50 to C90 (MC2010).
-		/// </summary>
-		private readonly double[] ultimateStrain =
-		{
-			-0.0034, -0.0034, -0.0033, -0.0032, -0.0031, -0.003
-		};
-
 		/// <summary>
 		/// Interpolation for ultimate strains.
 		/// </summary>
-		private CubicSpline UltimateStrainSpline() => CubicSpline.InterpolateAkimaSorted(classes, ultimateStrain);
-
-		///<inheritdoc/>
-		public override void UpdateParameters()
-		{
-			TensileStrength = fctm();
-			PlasticStrain = ec1();
-			InitialModule = Eci();
-			SecantModule = Ec1();
-			UltimateStrain = ecu();
-		}
+		private CubicSpline UltimateStrainSpline() => CubicSpline.InterpolateAkimaSorted(_classes, _ultimateStrain);
+		#endregion
 
 		/// <inheritdoc/>
 		public override bool Equals(Parameters other)

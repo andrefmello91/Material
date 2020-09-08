@@ -1,4 +1,5 @@
 ﻿using System;
+using UnitsNet;
 
 namespace Material.Concrete
 {
@@ -7,22 +8,33 @@ namespace Material.Concrete
 	/// </summary>
 	public class MCFTParameters : Parameters
 	{
-		/// <inheritdoc/>
-		/// <summary>
-		/// Parameters based on Classic MCFT formulation.
-		/// </summary>
-		public MCFTParameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
-		{
-			UpdateParameters();
-		}
+		// Strains
+		private const double ec  = -0.002;
+		private const double ecu = -0.0035;
 
-		private double fcr() => 0.33 * Math.Sqrt(Strength);
-		private double ec = -0.002;
-		private double ecu = -0.0035;
-		private double Ec() => -2 * Strength / ec;
+        /// <summary>
+        /// Parameters based on Classic MCFT formulation.
+        /// </summary>
+        /// <inheritdoc/>
+        public MCFTParameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+	        : this(Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), aggregateType)
+        {
+        }
+
+        /// <summary>
+        /// Parameters based on Classic MCFT formulation.
+        /// </summary>
+        /// <inheritdoc/>
+        public MCFTParameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+        {
+	        UpdateParameters();
+        }
+
+        private double fcr() => 0.33 * Math.Sqrt(Strength);
+        private double Ec()  => -2 * Strength / ec;
 
 		///<inheritdoc/>
-		public override void UpdateParameters()
+		public sealed override void UpdateParameters()
 		{
 			TensileStrength = fcr();
 			PlasticStrain   = ec;

@@ -1,30 +1,46 @@
-﻿namespace Material.Concrete
+﻿using UnitsNet;
+
+namespace Material.Concrete
 {
 	/// <summary>
 	/// Custom concrete parameters.
 	/// </summary>
 	public class CustomParameters : Parameters
 	{
-		/// <inheritdoc/>
 		/// <summary>
-		/// Create custom concrete parameters
+		/// Create custom concrete parameters.
 		/// </summary>
-		/// <param name="strength">Concrete compressive strength in MPa.</param>
-		/// <param name="aggregateDiameter">Maximum aggregate diameter in mm.</param>
-		/// <param name="tensileStrength">Concrete tensile strength in MPa.</param>
-		/// <param name="elasticModule">Concrete initial elastic module in MPa.</param>
+		/// <param name="strength">Concrete compressive strength, in MPa.</param>
+		/// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
+		/// <param name="tensileStrength">Concrete tensile strength, in MPa.</param>
+		/// <param name="elasticModule">Concrete initial elastic module, in MPa.</param>
 		/// <param name="plasticStrain">Concrete peak strain (negative value).</param>
 		/// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
-		public CustomParameters(double strength, double aggregateDiameter, double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain) : base(strength, aggregateDiameter)
+		public CustomParameters(double strength, double aggregateDiameter, double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain)
+			: this (Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), Pressure.FromMegapascals(tensileStrength), Pressure.FromMegapascals(elasticModule), plasticStrain, ultimateStrain)
 		{
-			TensileStrength = tensileStrength;
-			InitialModule   = elasticModule;
-			PlasticStrain   = plasticStrain;
-			UltimateStrain  = ultimateStrain;
 		}
 
-		///<inheritdoc/>
-		public override void UpdateParameters()
+        /// <summary>
+        /// Create custom concrete parameters.
+		/// </summary>
+        /// <param name="strength">Concrete compressive strength.</param>
+        /// <param name="aggregateDiameter">Maximum aggregate diameter.</param>
+        /// <param name="tensileStrength">Concrete tensile strength.</param>
+        /// <param name="elasticModule">Concrete initial elastic module.</param>
+        /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
+        /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
+        public CustomParameters(Pressure strength, Length aggregateDiameter, Pressure tensileStrength, Pressure elasticModule, double plasticStrain, double ultimateStrain) : base(strength, aggregateDiameter)
+		{
+			_ft  = tensileStrength;
+			_Eci = elasticModule;
+
+			PlasticStrain  = plasticStrain;
+			UltimateStrain = ultimateStrain;
+		}
+
+        ///<inheritdoc/>
+        public override void UpdateParameters()
 		{
 		}
 

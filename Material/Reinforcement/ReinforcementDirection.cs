@@ -14,25 +14,46 @@ namespace Material.Reinforcement
     /// </summary>
     public class WebReinforcementDirection
     {
-	    /// <summary>
-        /// Get/set the bar diameter, in mm.
+		// Auxiliary fields
+		private Length _phi, _s, _w;
+		private double? _ps;
+
+		/// <summary>
+        /// Get the <see cref="LengthUnit"/> that this was constructed with.
         /// </summary>
-	    public double BarDiameter { get; set; }
+		public LengthUnit Unit => _phi.Unit;
 
-	    /// <summary>
-	    /// Get/set the bar spacing, in mm.
-	    /// </summary>
-	    public double BarSpacing  { get; set; }
+		/// <summary>
+		/// Get/set the bar diameter, in mm.
+		/// </summary>
+		public double BarDiameter
+		{
+			get => _phi.Millimeters; 
+			set => _phi = Length.FromMillimeters(value).ToUnit(Unit);
+		}
 
-	    /// <summary>
-	    /// Get/set the cross-section width, in mm.
-	    /// </summary>
-	    public double Width       { get; set; }
+		/// <summary>
+		/// Get/set the bar spacing, in mm.
+		/// </summary>
+		public double BarSpacing
+		{
+			get => _s.Millimeters; 
+			set => _s = Length.FromMillimeters(value).ToUnit(Unit);
+		}
 
-	    /// <summary>
-	    /// Get/set the steel object.
-	    /// </summary>
-	    public Steel  Steel       { get; set; }
+		/// <summary>
+		/// Get/set the cross-section width, in mm.
+		/// </summary>
+		public double Width
+		{
+			get => _w.Millimeters;
+			set => _w = Length.FromMillimeters(value).ToUnit(Unit);
+		}
+
+        /// <summary>
+        /// Get/set the steel object.
+        /// </summary>
+        public Steel Steel { get; set; }
 
         /// <summary>
         /// Reinforcement direction object for web reinforcement.
@@ -42,17 +63,29 @@ namespace Material.Reinforcement
         /// <param name="steel">The steel object.</param>
         /// <param name="width">The width of cross-section (in mm).</param>
         public WebReinforcementDirection(double barDiameter, double barSpacing, Steel steel, double width)
+			: this (Length.FromMillimeters(barDiameter), Length.FromMillimeters(barSpacing), steel, Length.FromMillimeters(width))
         {
-	        BarDiameter = barDiameter;
-	        BarSpacing  = barSpacing;
-	        Steel       = steel;
-	        Width       = width;
+        }
+
+        /// <summary>
+        /// Reinforcement direction object for web reinforcement.
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter.</param>
+        /// <param name="barSpacing">The bar spacing.</param>
+        /// <param name="steel">The steel object.</param>
+        /// <param name="width">The width of cross-section.</param>
+        public WebReinforcementDirection(Length barDiameter, Length barSpacing, Steel steel, Length width)
+        {
+	        _phi  = barDiameter;
+	        _s    = barSpacing;
+	        Steel = steel;
+	        _w    = width;
         }
 
 		/// <summary>
         /// Get reinforcement ratio.
         /// </summary>
-        public double Ratio => CalculateRatio(BarDiameter, BarSpacing, Width);
+        public double Ratio => _ps ?? CalculateRatio();
 
 		/// <summary>
         /// Get reinforcement stress (ratio multiplied by steel stress).
@@ -65,10 +98,10 @@ namespace Material.Reinforcement
 		public double YieldStress => Ratio * Steel.YieldStress;
 
         /// <summary>
-        /// Get reinforcement capacity reserve
+        /// Get reinforcement capacity reserve for tension.
         /// <para>(<see cref="YieldStress"/> - <see cref="Stress"/>).</para>
         /// </summary>
-        public double CapacityReserve => YieldStress - Stress;
+        public double CapacityReserve => Stress > 0 ? YieldStress - Stress : YieldStress;
 
         /// <summary>
         /// Get reinforcement stiffness (ratio multiplied by steel secant module).
@@ -116,16 +149,14 @@ namespace Material.Reinforcement
         /// <summary>
         /// Calculate reinforcement ratio for distributed reinforcement.
         /// </summary>
-        /// <param name="barDiameter">The bar diameter.</param>
-        /// <param name="barSpacing">The bar spacing.</param>
-        /// <param name="width">The width of cross-section.</param>
-        public static double CalculateRatio(double barDiameter, double barSpacing, double width)
+        private double CalculateRatio()
         {
-	        if (barDiameter == 0 || barSpacing == 0 || width == 0)
-		        return 0;
+	        if (BarDiameter == 0 || BarSpacing == 0 || Width == 0)
+		        _ps = 0;
+			else
+		       _ps = 0.5 * Constants.Pi * BarDiameter * BarDiameter / (BarSpacing * Width);
 
-	        return
-		        0.5 * Constants.Pi * barDiameter * barDiameter / (barSpacing * width);
+	        return _ps.Value;
         }
 
         /// <summary>
@@ -144,29 +175,16 @@ namespace Material.Reinforcement
         /// <summary>
         /// Write string with default units (mm and MPa).
         /// </summary>
-        public override string ToString() => ToString();
-
-        /// <summary>
-        /// Write string with custom units.
-        /// </summary>
-        /// <param name="diameterUnit">The unit of bar diameter (default: mm).</param>
-        /// <param name="spacingUnit">The unit of bar spacing (default: mm).</param>
-        /// <param name="strengthUnit">The unit of steel strength (default: MPa).</param>
-        /// <returns></returns>
-        public string ToString(LengthUnit diameterUnit = LengthUnit.Millimeter, LengthUnit spacingUnit = LengthUnit.Millimeter, PressureUnit strengthUnit = PressureUnit.Megapascal)
+        public override string ToString() 
         {
-            Length
-                d = Length.FromMillimeters(BarDiameter).ToUnit(diameterUnit),
-                s = Length.FromMillimeters(BarSpacing).ToUnit(spacingUnit);
-
             char rho = (char)Characters.Rho;
             char phi = (char)Characters.Phi;
 
             return
-                phi + " = " + d + "\n" + 
-	            "s = " + s + "\n" +
-                rho + "s = " + $"{Ratio:P}" + "\n" +
-                Steel.ToString(strengthUnit);
+                $"{phi} = {_phi}\n" + 
+	            $"s = {_s}\n" +
+                $"{rho}s = {Ratio:P}\n" +
+                Steel;
         }
 
         /// <summary>

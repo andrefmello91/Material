@@ -10,27 +10,57 @@ namespace Material.Reinforcement
 	/// </summary>
 	public class UniaxialReinforcement
 	{
-		// Properties
-		public  int    NumberOfBars  { get; }
-		public  double BarDiameter   { get; }
-		public  double Area          { get; }
-		public  Steel  Steel         { get; }
-		private double ConcreteArea  { get; }
+		// Auxiliary fields
+		private Length _phi;
+		private Area _As, _Ac;
 
 		/// <summary>
-		/// Reinforcement for uniaxial calculations
+        /// Get number of reinforcing bars.
+        /// </summary>
+		public int NumberOfBars  { get; }
+
+		/// <summary>
+        /// Get bar diameter, in mm.
+        /// </summary>
+		public double BarDiameter { get; }
+
+		/// <summary>
+		/// Get reinforcement area, in mm2.
 		/// </summary>
-		/// <param name="numberOfBars">The number of bars of reinforcement.</param>
-		/// <param name="barDiameter">The bar diameter (in mm).</param>
-		/// <param name="concreteArea">The concrete area (in mm2).</param>
-		/// <param name="steel">The steel object.</param>
-		public UniaxialReinforcement(int numberOfBars, double barDiameter, double concreteArea = 0, Steel steel = null)
+		public double Area => _As.SquareMillimeters;
+
+		/// <summary>
+        /// Get <see cref="Material.Reinforcement.Steel"/> of this.
+        /// </summary>
+		public Steel Steel { get; }
+
+        /// <summary>
+        /// Reinforcement for uniaxial calculations
+        /// </summary>
+        /// <param name="numberOfBars">The number of bars of reinforcement.</param>
+        /// <param name="barDiameter">The bar diameter (in mm).</param>
+        /// <param name="steel">The steel object.</param>
+        /// <param name="concreteArea">The concrete area (in mm2).</param>
+        public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0) 
+			:this (numberOfBars, Length.FromMillimeters(barDiameter), steel, UnitsNet.Area.FromSquareMillimeters(concreteArea))
+		{
+		}
+
+        /// <summary>
+        /// Reinforcement for uniaxial calculations
+        /// </summary>
+        /// <param name="numberOfBars">The number of bars of reinforcement.</param>
+        /// <param name="barDiameter">The bar diameter.</param>
+        /// <param name="steel">The steel object.</param>
+        /// <param name="concreteArea">The concrete area.</param>
+        public UniaxialReinforcement(int numberOfBars, Length barDiameter,  Steel steel, Area concreteArea)
 		{
 			NumberOfBars = numberOfBars;
-			BarDiameter  = barDiameter;
-			ConcreteArea = concreteArea;
-			Steel        = steel;
-			Area         = ReinforcementArea();
+
+			_phi  = barDiameter;
+			_As   = CalculateArea();
+			_Ac   = concreteArea;
+			Steel = steel;
 		}
 
 		// Verify if reinforcement is set
@@ -39,17 +69,7 @@ namespace Material.Reinforcement
 		/// <summary>
 		/// Get reinforcement ratio in the cross-section.
 		/// </summary>
-		public double Ratio
-		{
-			get
-			{
-				if (Area != 0 && ConcreteArea != 0)
-					return
-						Area / ConcreteArea;
-
-				return 0;
-			}
-		}
+		public double Ratio => _Ac != UnitsNet.Area.Zero ? _As / _Ac : 0;
 
 		/// <summary>
 		/// Get normal stiffness, in N.
@@ -69,7 +89,6 @@ namespace Material.Reinforcement
 		/// <summary>
 		/// Calculated reinforcement area, in mm2.
 		/// </summary>
-		/// <returns></returns>
 		private double ReinforcementArea()
 		{
 			if (IsSet)
@@ -77,6 +96,18 @@ namespace Material.Reinforcement
 					0.25 * NumberOfBars * Constants.Pi * BarDiameter * BarDiameter;
 
 			return 0;
+		}
+
+		/// <summary>
+		/// Calculated reinforcement area, in mm2.
+		/// </summary>
+		private Area CalculateArea()
+		{
+			if (IsSet)
+				return
+					0.25 * NumberOfBars * Constants.Pi * _phi * _phi;
+
+			return UnitsNet.Area.Zero;
 		}
 
 		/// <summary>
@@ -141,35 +172,13 @@ namespace Material.Reinforcement
 			Steel.SetStrainAndStress(strain);
 		}
 
-		/// <summary>
-		/// Write string with default units (mm and MPa).
-		/// </summary>
-		public override string ToString() => ToString();
-
-		/// <summary>
-		/// Write string with custom units.
-		/// </summary>
-		/// <param name="diameterUnit">The bar diameter unit (default: mm).</param>
-		/// <param name="strengthUnit">The steel strength unit (default: MPa).</param>
-		/// <returns></returns>
-		public string ToString(LengthUnit diameterUnit = LengthUnit.Millimeter, PressureUnit strengthUnit = PressureUnit.Megapascal)
+		public override string ToString()
 		{
-			var areaUnit = AreaUnit.SquareMeter;
-
-			if (diameterUnit == LengthUnit.Millimeter)
-				areaUnit = AreaUnit.SquareMillimeter;
-
-			else if (diameterUnit == LengthUnit.Centimeter)
-				areaUnit = AreaUnit.SquareCentimeter;
-
-			var d  = Length.FromMillimeters(BarDiameter).ToUnit(diameterUnit);
-			var As = UnitsNet.Area.FromSquareMillimeters(Area).ToUnit(areaUnit);
-
 			char phi = (char) Characters.Phi;
 
 			return
-				"Reinforcement: " + NumberOfBars + " " + phi + d + " (" + As +
-				")\n\n" + Steel.ToString(strengthUnit);
+				$"Reinforcement: {NumberOfBars} {phi} {_phi} ({_As})\n\n"
+				+ Steel;
 		}
 
 		/// <summary>

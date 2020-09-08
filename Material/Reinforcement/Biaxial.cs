@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -14,6 +15,9 @@ namespace Material.Reinforcement
 	/// </summary>
 	public class BiaxialReinforcement : Relations
 	{
+		// Auxiliary fields
+		private Length _w;
+
 		// Properties
 		/// <summary>
         /// Get/set the <see cref="WebReinforcementDirection"/> on X direction.
@@ -31,9 +35,9 @@ namespace Material.Reinforcement
 		public StrainState Strains { get; set; }
 
 		/// <summary>
-        /// Get cross-section width.
-        /// </summary>
-		private double Width { get; }
+		/// Get cross-section width, in mm.
+		/// </summary>
+		private double Width => _w.Millimeters;
 
 		/// <summary>
 		/// Web reinforcement for biaxial calculations, for equal horizontal (X) and vertical (Y) directions.
@@ -43,6 +47,18 @@ namespace Material.Reinforcement
 		/// <param name="steel">The steel objects for directions X and Y.</param>
 		/// <param name="width">The width (in mm) of cross-section.</param>
 		public BiaxialReinforcement(double barDiameter, double barSpacing, Steel steel, double width)
+			: this (Length.FromMillimeters(barDiameter), Length.FromMillimeters(barSpacing), steel, Length.FromMillimeters(width))
+		{
+		}
+
+		/// <summary>
+		/// Web reinforcement for biaxial calculations, for equal horizontal (X) and vertical (Y) directions.
+		/// </summary>
+		/// <param name="barDiameter">The bar diameter for directions X and Y.</param>
+		/// <param name="barSpacing">The bar spacing for directions X and Y.</param>
+		/// <param name="steel">The steel objects for directions X and Y.</param>
+		/// <param name="width">The width of cross-section.</param>
+		public BiaxialReinforcement(Length barDiameter, Length barSpacing, Steel steel, Length width)
 		{
 			// Get new steel for calculations
 			Steel
@@ -51,7 +67,7 @@ namespace Material.Reinforcement
 
 			DirectionX = ReadReinforcementDirection(barDiameter, barSpacing, x, width);
 			DirectionY = ReadReinforcementDirection(barDiameter, barSpacing, y, width);
-			Width      = width;
+			_w = width;
 		}
 
         /// <summary>
@@ -65,24 +81,25 @@ namespace Material.Reinforcement
         /// <param name="steelY">The steel objects for vertical (Y) direction.</param>
         /// <param name="width">The width (in mm) of cross-section.</param>
         public BiaxialReinforcement(double barDiameterX, double barSpacingX, Steel steelX, double barDiameterY, double barSpacingY, Steel steelY, double width)
+			: this(Length.FromMillimeters(barDiameterX), Length.FromMillimeters(barSpacingX), steelX, Length.FromMillimeters(barDiameterY), Length.FromMillimeters(barSpacingY), steelY, Length.FromMillimeters(width))
 		{
-			DirectionX = ReadReinforcementDirection(barDiameterX, barSpacingX, steelX, width);
-			DirectionY = ReadReinforcementDirection(barDiameterY, barSpacingY, steelY, width);
-			Width      = width;
 		}
 
         /// <summary>
-        /// Reinforcement for biaxial calculations, for horizontal (X) and vertical (Y) directions.
+        /// Web reinforcement for biaxial calculations, for different horizontal (X) and vertical (Y) directions.
         /// </summary>
-        /// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
-        /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
-        /// <param name="steel">The steel objects for directions X and Y.</param>
-        /// <param name="width">The width (in mm) of cross-section.</param>
-        public BiaxialReinforcement((double X, double Y) barDiameter, (double X, double Y) barSpacing, (Steel X, Steel Y) steel, double width)
+        /// <param name="barDiameterX">The bar diameter for horizontal (X) direction.</param>
+        /// <param name="barSpacingX">The bar spacing for horizontal (X) direction.</param>
+        /// <param name="steelX">The steel objects for horizontal (X) direction.</param>
+        /// <param name="barDiameterY">The bar diameter for vertical (Y) direction.</param>
+        /// <param name="barSpacingY">The bar spacing for vertical (Y) direction.</param>
+        /// <param name="steelY">The steel objects for vertical (Y) direction.</param>
+        /// <param name="width">The width of cross-section.</param>
+        public BiaxialReinforcement(Length barDiameterX, Length barSpacingX, Steel steelX, Length barDiameterY, Length barSpacingY, Steel steelY, Length width)
 		{
-			DirectionX = ReadReinforcementDirection(barDiameter.X, barSpacing.X, steel.X, width);
-			DirectionY = ReadReinforcementDirection(barDiameter.Y, barSpacing.Y, steel.Y, width);
-			Width      = width;
+			DirectionX = ReadReinforcementDirection(barDiameterX, barSpacingX, steelX, width);
+			DirectionY = ReadReinforcementDirection(barDiameterY, barSpacingY, steelY, width);
+			_w = width;
 		}
 
 		/// <summary>
@@ -168,6 +185,23 @@ namespace Material.Reinforcement
 		}
 
 		/// <summary>
+        /// Read the <see cref="WebReinforcementDirection"/>.
+        /// <para>Returns null if <paramref name="barDiameter"/> or <paramref name="barSpacing"/> are zero, or if <paramref name="steel"/> is null.</para>
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter for directions X and Y.</param>
+        /// <param name="barSpacing">The bar spacing for directions X and Y.</param>
+        /// <param name="steel">The steel objects for directions X and Y.</param>
+        /// <param name="width">The width of cross-section.</param>
+		private WebReinforcementDirection ReadReinforcementDirection(Length barDiameter, Length barSpacing, Steel steel, Length width)
+		{
+			if (barDiameter == Length.Zero || barSpacing == Length.Zero || steel is null)
+				return null;
+
+			return
+				new WebReinforcementDirection(barDiameter, barSpacing, steel, width);
+		}
+
+		/// <summary>
 		/// Calculate angles (in radians) related to crack angle.
 		/// </summary>
 		/// <param name="theta1">Principal tensile strain angle, in radians.</param>
@@ -214,7 +248,7 @@ namespace Material.Reinforcement
 				double
 					psx   = DirectionX.Ratio,
 					phiX  = DirectionX.BarDiameter,
-					cosNx = DirectionCosines(thetaNx, true).cos;
+					cosNx = thetaNx.DirectionCosines(true).cos;
 
 				den += psx / phiX * cosNx;
 			}
@@ -224,7 +258,7 @@ namespace Material.Reinforcement
 				double
 					psy   = DirectionY.Ratio,
 					phiY  = DirectionY.BarDiameter,
-					cosNy = DirectionCosines(thetaNy, true).cos;
+					cosNy = thetaNy.DirectionCosines(true).cos;
 
 				den += psy / phiY * cosNy;
 			}
@@ -251,8 +285,8 @@ namespace Material.Reinforcement
 	            fcy = DirectionY?.CapacityReserve ?? 0;
 
 			double
-				cosNx = DirectionCosines(thetaNx, true).cos,
-				cosNy = DirectionCosines(thetaNy, true).cos;
+				cosNx = thetaNx.DirectionCosines(true).cos,
+				cosNy = thetaNy.DirectionCosines(true).cos;
 
 			// Check the maximum value of fc1 that can be transmitted across cracks
 			double
@@ -323,11 +357,16 @@ namespace Material.Reinforcement
         /// <param name="barSpacing">The bar spacing (in mm) for  X direction.</param>
         /// <param name="steel">The steel objects for X direction.</param>
         /// <param name="width">The width (in mm) of cross-section.</param>
-        public static BiaxialReinforcement HorizontalOnly(double barDiameter, double barSpacing, Steel steel, double width)
-        {
-			return
-				new BiaxialReinforcement(barDiameter, barSpacing, steel, 0, 0, null, width);
-		}
+        public static BiaxialReinforcement HorizontalOnly(double barDiameter, double barSpacing, Steel steel, double width) => new BiaxialReinforcement(barDiameter, barSpacing, steel, 0, 0, null, width);
+        
+        /// <summary>
+        /// Return a <see cref="BiaxialReinforcement"/> with <see cref="DirectionX"/> only..
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter for X direction.</param>
+        /// <param name="barSpacing">The bar spacing for X direction.</param>
+        /// <param name="steel">The steel objects for X direction.</param>
+        /// <param name="width">The width of cross-section.</param>
+        public static BiaxialReinforcement HorizontalOnly(Length barDiameter, Length barSpacing, Steel steel, Length width) => new BiaxialReinforcement(barDiameter, barSpacing, steel, Length.Zero, Length.Zero, null, width);
 
         /// <summary>
         /// Return a <see cref="BiaxialReinforcement"/> with <see cref="DirectionY"/> only..
@@ -336,32 +375,24 @@ namespace Material.Reinforcement
         /// <param name="barSpacing">The bar spacing (in mm) for  Y direction.</param>
         /// <param name="steel">The steel objects for Y direction.</param>
         /// <param name="width">The width (in mm) of cross-section.</param>
-        public static BiaxialReinforcement TransversalOnly(double barDiameter, double barSpacing, Steel steel, double width)
-        {
-			return
-				new BiaxialReinforcement(0, 0, null, barDiameter, barSpacing, steel, width);
-		}
+        public static BiaxialReinforcement TransversalOnly(double barDiameter, double barSpacing, Steel steel, double width) => new BiaxialReinforcement(0, 0, null, barDiameter, barSpacing, steel, width);
+        
+        /// <summary>
+        /// Return a <see cref="BiaxialReinforcement"/> with <see cref="DirectionY"/> only..
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter for Y direction.</param>
+        /// <param name="barSpacing">The bar spacing for  Y direction.</param>
+        /// <param name="steel">The steel objects for Y direction.</param>
+        /// <param name="width">The width of cross-section.</param>
+        public static BiaxialReinforcement TransversalOnly(Length barDiameter, Length barSpacing, Steel steel, Length width) => new BiaxialReinforcement(Length.Zero, Length.Zero, null, barDiameter, barSpacing, steel, width);
 
-		/// <summary>
-		/// Write string with default units (mm and MPa).
-		/// </summary>
-		public override string ToString() => ToString();
-
-		/// <summary>
-		/// Write string with custom units.
-		/// </summary>
-		/// <param name="diameterUnit">The unit of bar diameter (default: mm).</param>
-		/// <param name="spacingUnit">The unit of bar spacing (default: mm).</param>
-		/// <param name="strengthUnit">The unit of steel strength (default: MPa).</param>
-		/// <returns></returns>
-		public string ToString(LengthUnit diameterUnit = LengthUnit.Millimeter, LengthUnit spacingUnit = LengthUnit.Millimeter, PressureUnit strengthUnit = PressureUnit.Megapascal)
+		public override string ToString()
 		{
 			return
 				"Reinforcement (x): " + "\n" +
-				DirectionX.ToString(diameterUnit, spacingUnit, strengthUnit) + "\n\n" +
-
+				(DirectionX?.ToString() ?? "null") + "\n\n" +
 				"Reinforcement (y): " + "\n" +
-				DirectionY.ToString(diameterUnit, spacingUnit, strengthUnit);
+				(DirectionY?.ToString() ?? "null");
 		}
 
         /// <summary>

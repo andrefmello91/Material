@@ -33,36 +33,128 @@ namespace Material.Concrete
     /// </summary>
     public abstract class Parameters : IEquatable<Parameters>
 	{
-		public AggregateType Type              { get; set; }
-		public double        AggregateDiameter { get; set; }
-		public double        Strength          { get; set; }
-		public double        Poisson           { get; }
-		public double        TensileStrength   { get; set; }
-		public double        InitialModule     { get; set; }
-		public double        SecantModule      { get; set; }
-		public double        PlasticStrain     { get; set; }
-		public double        UltimateStrain    { get; set; }
+		// Auxiliary fields
+		protected Length _phiAg;
+		protected Pressure _fc, _ft, _Eci, _Ecs;
 
-		// Automatic calculated properties
-		public double         CrackStrain       => TensileStrength / InitialModule;
-		public double         TransversalModule => SecantModule / 2.4;
+		/// <summary>
+        /// Get the <see cref="PressureUnit"/> that this was constructed with.
+        /// </summary>
+		public PressureUnit Unit => _fc.Unit;
+
+        /// <summary>
+        /// Get the <see cref="LengthUnit"/> that this was constructed with.
+        /// </summary>
+        public LengthUnit AggUnit => _phiAg.Unit;
+
+		/// <summary>
+        /// Get <see cref="AggregateType"/>.
+        /// </summary>
+		public AggregateType Type { get; protected set; }
+
+		/// <summary>
+		/// Get/set maximum diameter of aggregate, in mm.
+		/// </summary>
+		public double AggregateDiameter
+        {
+			get => _phiAg.Millimeters;
+			set => _phiAg = Length.FromMillimeters(value).ToUnit(AggUnit);
+		}
+
+		/// <summary>
+		/// Get/set concrete compressive strength, in MPa (positive value).
+		/// </summary>
+		public double Strength
+		{
+			get => _fc.Megapascals;
+			set => _fc = Pressure.FromMegapascals(value).ToUnit(Unit);
+		}
+
+		/// <summary>
+        /// Get Poisson coefficient.
+        /// </summary>
+		public double Poisson { get; }
+
+		/// <summary>
+		/// Get/set concrete tensile strength, in MPa.
+		/// </summary>
+		public double TensileStrength
+		{
+			get => _ft.Megapascals;
+			protected set => _ft = Pressure.FromMegapascals(value).ToUnit(Unit);
+		}
+
+		/// <summary>
+		/// Get/set concrete initial elastic module, in MPa.
+		/// </summary>
+		public double InitialModule
+		{
+			get => _Eci.Megapascals;
+			protected set => _Eci = Pressure.FromMegapascals(value).ToUnit(Unit);
+		}
+
+        /// <summary>
+        /// Get/set concrete secant elastic module, at peak stress, in MPa.
+        /// </summary>
+        public double SecantModule
+        {
+	        get => _Ecs.Megapascals;
+	        protected set => _Ecs = Pressure.FromMegapascals(value).ToUnit(Unit);
+        }
+		
+        /// <summary>
+        /// Get concrete plastic (peak) strain (negative value).
+        /// </summary>
+        public double PlasticStrain { get; protected set; }
+
+        /// <summary>
+        /// Get concrete ultimate strain (negative value).
+        /// </summary>
+        public double UltimateStrain { get; protected set; }
+
+		/// <summary>
+        /// Get concrete cracking strain.
+        /// </summary>
+		public double CrackStrain => _ft / _Eci;
+
+		/// <summary>
+        /// Get transversal (shear) module, in MPa.
+        /// </summary>
+		public double TransversalModule => SecantModule / 2.4;
+
+		/// <summary>
+        /// Get fracture parameter.
+        /// </summary>
 		public virtual double FractureParameter => 0.075;
 
-		// Verify if concrete was set
+		/// <summary>
+        /// Returns true if strength is not zero.
+        /// </summary>
 		public bool IsSet => Strength > 0;
 
 		/// <summary>
 		/// Base object of concrete parameters.
 		/// </summary>
-		/// <param name="strength">Concrete compressive strength in MPa.</param>
-		/// <param name="aggregateDiameter">Maximum aggregate diameter in mm.</param>
+		/// <param name="strength">Concrete compressive strength, in MPa.</param>
+		/// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
 		/// <param name="aggregateType">The type of aggregate.</param>
 		public Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+			: this (Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), aggregateType)
 		{
-			Strength          = strength;
-			AggregateDiameter = aggregateDiameter;
-			Type              = aggregateType;
-			Poisson           = 0.2;
+		}
+
+		/// <summary>
+		/// Base object of concrete parameters.
+		/// </summary>
+		/// <param name="strength">Concrete compressive strength..</param>
+		/// <param name="aggregateDiameter">Maximum aggregate diameter.</param>
+		/// <param name="aggregateType">The type of aggregate.</param>
+		public Parameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+		{
+			_fc     = strength;
+			_phiAg  = aggregateDiameter;
+			Type    = aggregateType;
+			Poisson = 0.2;
 		}
 
         /// <summary>
@@ -124,37 +216,20 @@ namespace Material.Concrete
         /// </summary>
         public abstract void UpdateParameters();
 
-		/// <summary>
-		/// Write string with default units (MPa and mm).
-		/// </summary>
-		public override string ToString() => ToString();
-	        
-		/// <summary>
-		/// Write string with custom units.
-		/// </summary>
-		/// <param name="strengthUnit">The stress unit for strength (default: MPa)</param>
-		/// <param name="aggregateUnit">The aggregate dimension unit (default: mm)</param>
-		/// <returns>String with custom units</returns>
-		public string ToString(PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit aggregateUnit = LengthUnit.Millimeter)
+		public override string ToString()
 		{
-			IQuantity
-				fc    = Pressure.FromMegapascals(Strength).ToUnit(strengthUnit),
-				ft    = Pressure.FromMegapascals(TensileStrength).ToUnit(strengthUnit),
-				Ec    = Pressure.FromMegapascals(InitialModule).ToUnit(strengthUnit),
-				phiAg = Length.FromMillimeters(AggregateDiameter).ToUnit(aggregateUnit);
-
 			char
 				phi = (char)Characters.Phi,
 				eps = (char)Characters.Epsilon;
 
 			return
-				"Concrete Parameters:\n" +
-				"\nfc = " + fc +
-				"\nft = " + ft +
-				"\nEc = " + Ec +
-				"\n" + eps + "c = "   + Math.Round(1000 * PlasticStrain, 2)  + " E-03" +
-				"\n" + eps + "cu = "  + Math.Round(1000 * UltimateStrain, 2) + " E-03" +
-				"\n" + phi + ",ag = " + phiAg;
+				"Concrete Parameters:\n\n" +
+				$"fc = {_fc}\n"  +
+				$"ft = {_ft}\n"  +
+				$"Ec = {_Eci}\n" + 
+				$"{eps}c = {PlasticStrain:0.##E+00}\n"   +
+				$"{eps}cu = {UltimateStrain:0.##E+00}\n" +
+                $"{phi},ag = {_phiAg}";
 		}
 
 		/// <summary>

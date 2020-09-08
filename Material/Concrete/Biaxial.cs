@@ -130,7 +130,7 @@ namespace Material.Concrete
         /// <param name="strains">Current <see cref="StrainState"/> in concrete.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
         /// <param name="reinforcement">The <see cref="BiaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>)</param>
-        public void CalculatePrincipalStresses(StrainState strains, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+        public void CalculatePrincipalStresses(StrainState strains, BiaxialReinforcement reinforcement = null, double referenceLength = 0)
 		{
 			// Get strains
 			Strains = strains;

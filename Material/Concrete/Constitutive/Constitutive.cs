@@ -20,10 +20,20 @@ namespace Material.Concrete
     /// </summary>
     public abstract class Constitutive : IEquatable<Constitutive>
     {
-	    // Properties
-	    public Parameters     Parameters        { get; }
-	    public bool           ConsiderCrackSlip { get; set; }
-	    public bool           Cracked           { get; set; }
+		/// <summary>
+        /// Get concrete <see cref="Concrete.Parameters"/>.
+        /// </summary>
+	    public Parameters Parameters { get; }
+
+		/// <summary>
+        /// Get/set crack slip consideration.
+        /// </summary>
+	    public bool ConsiderCrackSlip { get; protected set; }
+
+		/// <summary>
+        /// Get/set concrete cracked state.
+        /// </summary>
+	    public bool Cracked { get; set; }
 
 	    // Constructor
 	    /// <summary>
@@ -149,7 +159,7 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="strain">The tensile strain to calculate stress.</param>
         /// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain"/>.</param>
-        /// <param name="theta1">The angle of maximum principal strain, in radians.</param>
+        /// <param name="theta1">The angle of <paramref name="strain"/> related to horizontal axis, in radians.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
         /// <param name="reinforcement">The <see cref="BiaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
         protected abstract double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, BiaxialReinforcement reinforcement = null);
@@ -175,7 +185,6 @@ namespace Material.Concrete
         /// Calculate compressive stress for <see cref="UniaxialConcrete"/> case.
         /// </summary>
         /// <param name="strain">Compressive strain (negative) in concrete.</param>
-        /// <returns>Compressive stress in MPa</returns>
         protected abstract double CompressiveStress(double strain);
 
 	    /// <summary>
@@ -192,11 +201,13 @@ namespace Material.Concrete
 	    }
 
         /// <summary>
-        /// Calculate concrete stress for uncracked state.
+        /// Calculate <see cref="BiaxialConcrete"/> tensile stress for uncracked state.
         /// </summary>
-        /// <param name="strain">Current tensile strain.</param>
+        /// <param name="strain">The compressive strain (negative) to calculate stress.</param>
         /// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain"/>.</param>
-        protected double UncrackedStress(double strain, double transverseStrain)
+		/// <param name="theta1">The angle of <paramref name="strain"/> related to horizontal axis, in radians.</param>
+        /// <param name="reinforcement">The <see cref="BiaxialReinforcement"/> object.</param>
+        protected double UncrackedStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, BiaxialReinforcement reinforcement = null)
 	    {
 		    if (Cracked)
 			    return 0;
@@ -212,7 +223,14 @@ namespace Material.Concrete
 		    // Verify if fc1 cracks concrete
 		    VerifyCrackedState(fc1, ec2);
 
-		    return fc1;
+		    if (reinforcement is null)
+			    return fc1;
+
+			// Check maximum stress that can be transmitted by reinforcement
+			var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
+
+		    return
+			    Math.Min(fc1, fc1s);
 	    }
 
         /// <summary>

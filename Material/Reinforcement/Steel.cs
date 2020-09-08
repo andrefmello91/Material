@@ -1,5 +1,6 @@
 ﻿using System;
-using Material.Concrete;
+using Extensions;
+using Extensions.Number;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -10,57 +11,118 @@ namespace Material.Reinforcement
     /// </summary>
 	public class Steel
 	{
-		// Steel properties
-		public double YieldStress    { get; }
-		public double ElasticModule  { get; }
+		// Auxiliary fields
+		private Pressure _fy, _Es, _Esh;
+
+		/// <summary>
+        /// Get the <see cref="PressureUnit"/> that this was constructed with.
+        /// </summary>
+		public PressureUnit Unit => _fy.Unit;
+
+		/// <summary>
+		/// Get yield stress, in MPa.
+		/// </summary>
+		public double YieldStress => _fy.Megapascals;
+
+		/// <summary>
+		/// Get elastic module, in MPa.
+		/// </summary>
+		public double ElasticModule => _Es.Megapascals;
+
+		/// <summary>
+        /// Get ultimate strain.
+        /// </summary>
 		public double UltimateStrain { get; }
-		public double YieldStrain    => YieldStress / ElasticModule;
-
-		// Hardening properties
-		private bool   ConsiderTensileHardening { get; }
-		private double HardeningModule          { get; }
-		private double HardeningStrain          { get; }
 
 		/// <summary>
-		/// Current strain.
-		/// </summary>
-		public double Strain { get; set; }
+        /// Get yield strain.
+        /// </summary>
+		public double YieldStrain => _fy / _Es;
 
 		/// <summary>
-		/// Current stress.
+        /// Get tensile hardening consideration.
+        /// </summary>
+		private bool ConsiderTensileHardening { get; }
+
+		/// <summary>
+		/// Get hardening module, in MPa.
 		/// </summary>
-		public double Stress { get; set; }
+		public double HardeningModule => _Esh.Megapascals;
+
+		/// <summary>
+        /// Get hardening strain.
+        /// </summary>
+		public double HardeningStrain { get; }
+
+		/// <summary>
+		/// Get current strain.
+		/// </summary>
+		public double Strain { get; private set; }
 
         /// <summary>
-        /// Steel object with no tensile hardening.
+        /// Get current stress, in MPa.
         /// </summary>
-        /// <param name="yieldStress">Steel yield stress in MPa</param>
-        /// <param name="elasticModule">Steel elastic module in MPa (default: 210000 MPa)</param>
-        /// <param name="ultimateStrain">Steel ultimate strain in MPa (default: 0.01)</param>
+        public double Stress { get; private set; }
+
+        /// <summary>
+        /// Steel object with no tensile hardening, with units in MPa.
+        /// </summary>
+        /// <param name="yieldStress">Steel yield stress, in MPa.</param>
+        /// <param name="elasticModule">Steel elastic module, in MPa <para>Default: 210000 MPa.</para>.</param>
+        /// <param name="ultimateStrain">Steel ultimate strain <para>Default: 0.01.</para></param>
         public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01)
+		: this (Pressure.FromMegapascals(yieldStress), Pressure.FromMegapascals(elasticModule), ultimateStrain)
 		{
-			YieldStress              = yieldStress;
-			ElasticModule            = elasticModule;
-			UltimateStrain           = ultimateStrain;
+		}
+
+        /// <summary>
+        /// Steel object with no tensile hardening, with custom <paramref name="unit"/>.
+        /// </summary>
+        /// <param name="yieldStress">Steel yield stress.</param>
+        /// <param name="elasticModule">Steel elastic module.</param>
+        /// <param name="ultimateStrain">Steel ultimate strain <para>Default: 0.01.</para></param>
+        public Steel(Pressure yieldStress, Pressure elasticModule, double ultimateStrain = 0.01)
+		{
+			_fy = yieldStress;
+			_Es = elasticModule;
+
+			UltimateStrain = ultimateStrain;
+
 			ConsiderTensileHardening = false;
 		}
 
         /// <summary>
-        /// Steel object with tensile hardening.
+        /// Steel object with tensile hardening, with units in MPa.
         /// </summary>
-        /// <param name="yieldStress">Steel yield stress in MPa</param>
-        /// <param name="elasticModule">Steel elastic module in MPa (default: 210000 MPa)</param>
-        /// <param name="ultimateStrain">Steel ultimate strain in MPa (default: 0.01)</param>
-        /// <param name="hardeningModule">Steel hardening module in MPa</param>
-        /// <param name="hardeningStrain">Steel strain at the beginning of hardening</param>
+        /// <param name="yieldStress">Steel yield stress, in MPa.</param>
+        /// <param name="elasticModule">Steel elastic module, in MPa <para>Default: 210000 MPa.</para>.</param>
+        /// <param name="ultimateStrain">Steel ultimate strain <para>Default: 0.01.</para></param>
+        /// <param name="hardeningModule">Steel hardening module in MPa.</param>
+        /// <param name="hardeningStrain">Steel strain at the beginning of hardening.</param>
         public Steel(double yieldStress, double hardeningModule, double hardeningStrain, double elasticModule = 210000, double ultimateStrain = 0.01)
+		: this (Pressure.FromMegapascals(yieldStress), Pressure.FromMegapascals(hardeningModule), hardeningStrain, Pressure.FromMegapascals(elasticModule), ultimateStrain )
 		{
-			YieldStress              = yieldStress;
-			ElasticModule            = elasticModule;
-			UltimateStrain           = ultimateStrain;
+		}
+
+        /// <summary>
+        /// Steel object with tensile hardening, with custom <paramref name="unit"/>.
+        /// </summary>
+        /// <param name="yieldStress">Steel yield stress.</param>
+        /// <param name="elasticModule">Steel elastic module.</param>
+        /// <param name="ultimateStrain">Steel ultimate strain <para>Default: 0.01.</para></param>
+        /// <param name="hardeningModule">Steel hardening module.</param>
+        /// <param name="hardeningStrain">Steel strain at the beginning of hardening.</param>
+        public Steel(Pressure yieldStress, Pressure hardeningModule, double hardeningStrain, Pressure elasticModule, double ultimateStrain = 0.01)
+		{
+			_fy  = yieldStress;
+			_Es  = elasticModule;
+			_Esh = hardeningModule;
+
+			UltimateStrain = ultimateStrain;
+
 			ConsiderTensileHardening = true;
-			HardeningModule          = hardeningModule;
-			HardeningStrain          = hardeningStrain;
+
+			HardeningStrain = hardeningStrain;
 		}
 
         /// <summary>
@@ -129,7 +191,7 @@ namespace Material.Reinforcement
 			get
 			{
 				// Verify the strain
-				if (Strain == 0)
+				if (Strain.Abs() <= 1E-6)
 					return ElasticModule;
 
 				return
@@ -155,35 +217,25 @@ namespace Material.Reinforcement
 				new Steel(steelToCopy.YieldStress, steelToCopy.HardeningModule, steelToCopy.HardeningStrain, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
         }
 
-        /// <summary>
-        /// Write string with default unit (MPa)
-        /// </summary>
-        public override string ToString() => ToString();
-
-		/// <summary>
-        /// Write string with custom unit (default: MPa)
-        /// </summary>
-        /// <param name="unit">The stress unit.</param>
-        /// <returns></returns>
-		public string ToString(PressureUnit unit = PressureUnit.Megapascal)
-		{
+        public override string ToString() 
+        {
 			char epsilon = (char) Characters.Epsilon;
 
 			string msg =
 				"Steel Parameters:\n" +
-				"fy = " + Pressure.FromMegapascals(YieldStress).ToUnit(unit)   + "\n" +
-				"Es = " + Pressure.FromMegapascals(ElasticModule).ToUnit(unit) + "\n" +
-				epsilon + "y = " + $"{YieldStrain:0.##E+00}";
+				$"fy = {_fy}\n" +
+				$"Es = {_Es}\n" +
+				$"{epsilon}y = " + $"{YieldStrain:0.##E+00}";
 
 			if (ConsiderTensileHardening)
 			{
 				msg += "\n\n" +
 				       "Hardening parameters:\n" +
-				       "Esh = "          + Pressure.FromMegapascals(HardeningModule).ToUnit(unit) + "\n" + 
-				       epsilon + "sh = " + $"{HardeningStrain:0.##E+00}" + " E-03";
+				       $"Es = {_Esh}\n" +
+				       $"{epsilon}y = " + $"{HardeningStrain:0.##E+00}";
 			}
 
-			return msg;
+            return msg;
 		}
 
 		/// <summary>

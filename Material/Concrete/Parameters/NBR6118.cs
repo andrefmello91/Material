@@ -1,4 +1,5 @@
 ﻿using System;
+using UnitsNet;
 
 namespace Material.Concrete
 {
@@ -7,16 +8,36 @@ namespace Material.Concrete
 	/// </summary>
 	public class NBR6118Parameters : Parameters
 	{
+        /// <summary>
+        /// Parameters based on NBR 6118:2014.
+        /// </summary>
 		/// <inheritdoc/>
-		/// <summary>
-		/// Parameters based on NBR 6118:2014.
-		/// </summary>
-		public NBR6118Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+        public NBR6118Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) 
+	        : this(Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), aggregateType)
 		{
-			UpdateParameters();
 		}
 
-		private double AlphaE()
+        /// <summary>
+        /// Parameters based on NBR 6118:2014.
+        /// </summary>
+        /// <inheritdoc/>
+        public NBR6118Parameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+        {
+	        UpdateParameters();
+        }
+
+        ///<inheritdoc/>
+        public sealed override void UpdateParameters()
+        {
+	        TensileStrength = fctm();
+	        PlasticStrain   = ec2();
+	        InitialModule   = Eci();
+	        SecantModule    = Ecs();
+	        UltimateStrain  = ecu();
+        }
+
+        #region NBR6118 Parameters
+        private double AlphaE()
 		{
 			switch (Type)
 			{
@@ -77,19 +98,10 @@ namespace Material.Concrete
 			return
 				-0.0026 - 0.035 * Math.Pow(0.01 * (90 - Strength), 4);
 		}
-
-		///<inheritdoc/>
-		public override void UpdateParameters()
-		{
-			TensileStrength = fctm();
-			PlasticStrain = ec2();
-			InitialModule = Eci();
-			SecantModule = Ecs();
-			UltimateStrain = ecu();
-		}
+		#endregion
 
 		/// <inheritdoc/>
-		public override bool Equals(Parameters other)
+        public override bool Equals(Parameters other)
 		{
 			if (other != null && other is NBR6118Parameters)
 				return base.Equals(other);

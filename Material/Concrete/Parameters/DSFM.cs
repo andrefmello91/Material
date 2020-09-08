@@ -1,4 +1,5 @@
 ﻿using System;
+using UnitsNet;
 
 namespace Material.Concrete
 {
@@ -7,23 +8,34 @@ namespace Material.Concrete
 	/// </summary>
 	public class DSFMParameters : Parameters
 	{
-		/// <inheritdoc/>
-		/// <summary>
-		/// Parameters based on DSFM formulation.
-		/// </summary>
-		public DSFMParameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
-		{
-			UpdateParameters();
-		}
+		// Strains
+		private const double ec  = -0.002;
+		private const double ecu = -0.0035;
 
-		private double fcr() => 0.33 * Math.Sqrt(Strength);
-		//private double fcr() => 0.65 * Math.Pow(Strength, 0.33);
-		private double ec    = -0.002;
-		private double ecu   = -0.0035;
+        /// <summary>
+        /// Parameters based on DSFM formulation.
+        /// </summary>
+        /// <inheritdoc/>
+        public DSFMParameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+	        : this(Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), aggregateType)
+        {
+        }
+
+        /// <summary>
+        /// Parameters based on DSFM formulation.
+        /// </summary>
+        /// <inheritdoc/>
+        public DSFMParameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
+        {
+	        UpdateParameters();
+        }
+
+        private double fcr() => 0.33 * Math.Sqrt(Strength);
+        //private double fcr() => 0.65 * Math.Pow(Strength, 0.33);
 		private double Ec()  => -2 * Strength / ec;
 
 		///<inheritdoc/>
-		public override void UpdateParameters()
+		public sealed override void UpdateParameters()
 		{
 			TensileStrength = fcr();
 			PlasticStrain   = ec;

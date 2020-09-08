@@ -62,7 +62,7 @@ namespace Material.Concrete
 				ec2 = transverseStrain;
 
 			// Calculate initial uncracked state
-			double fc1 = UncrackedStress(ec1, ec2);
+			double fc1 = UncrackedStress(ec1, ec2, theta1, reinforcement);
 
 			// Not cracked
 			if (!Cracked)
