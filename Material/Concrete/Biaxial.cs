@@ -16,17 +16,17 @@ namespace Material.Concrete
 		/// <summary>
         /// Get/set concrete <see cref="PrincipalStrainState"/>.
         /// </summary>
-		public PrincipalStrainState PrincipalStrains { get; set; }
+		public PrincipalStrainState PrincipalStrains { get; private  set; }
 
 		/// <summary>
         /// Get/set concrete <see cref="StressState"/>.
         /// </summary>
-		public StressState Stresses { get; set; }
+		public StressState Stresses { get; private  set; }
 
 		/// <summary>
         /// Get/set concrete <see cref="PrincipalStressState"/>.
         /// </summary>
-		public PrincipalStressState PrincipalStresses { get; set; }
+		public PrincipalStressState PrincipalStresses { get; private set; }
 
 		///<inheritdoc/>
 		/// <summary>
@@ -103,7 +103,7 @@ namespace Material.Concrete
         /// <summary>
         /// Calculate current secant module of concrete, in MPa.
         /// </summary>
-        public (double Ec1, double Ec2) SecantModule
+        private (double Ec1, double Ec2) SecantModule
 		{
 			get
 			{
@@ -129,8 +129,8 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="strains">Current <see cref="StrainState"/> in concrete.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
-        /// <param name="reinforcement">The <see cref="BiaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>)</param>
-        public void CalculatePrincipalStresses(StrainState strains, BiaxialReinforcement reinforcement = null, double referenceLength = 0)
+        /// <param name="reinforcement">The <see cref="WebReinforcement"/> (only for <see cref="DSFMConstitutive"/>)</param>
+        public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement = null, double referenceLength = 0)
 		{
 			// Get strains
 			Strains = strains;
@@ -163,26 +163,13 @@ namespace Material.Concrete
         /// Return a copy of a <see cref="BiaxialConcrete"/> object.
         /// </summary>
         /// <param name="concreteToCopy">The <see cref="BiaxialConcrete"/> object to copy.</param>
-        /// <returns></returns>
         public static BiaxialConcrete Copy(BiaxialConcrete concreteToCopy) => new BiaxialConcrete(concreteToCopy.Parameters, concreteToCopy.Constitutive);
 
         /// <inheritdoc/>
-        public override bool Equals(Concrete other)
-		{
-			if (other != null && other is BiaxialConcrete)
-				return Parameters == other.Parameters && Constitutive == other.Constitutive;
+        public override bool Equals(Concrete other) => other is BiaxialConcrete && base.Equals(other);
 
-			return false;
-		}
+        public override bool Equals(object obj) => obj is BiaxialConcrete concrete && base.Equals(concrete);
 
-		public override bool Equals(object other)
-		{
-			if (other != null && other is BiaxialConcrete concrete)
-				return Equals(concrete);
-
-			return false;
-		}
-
-		public override int GetHashCode() => Parameters.GetHashCode();
+        public override int GetHashCode() => Parameters.GetHashCode();
 	}
 }

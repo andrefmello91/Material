@@ -67,8 +67,8 @@
     <Compile Include="Concrete\Parameters\NBR6118.cs" />
     <Compile Include="Concrete\Parameters\Parameters.cs" />
     <Compile Include="Concrete\Uniaxial.cs" />
-    <Compile Include="Global.cs" />
-    <Compile Include="Reinforcement\Biaxial.cs" />
+    <Compile Include="Characters.cs" />
+    <Compile Include="Reinforcement\WebReinforcement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reinforcement\ReinforcementDirection.cs" />
     <Compile Include="Reinforcement\Steel.cs" />

@@ -54,7 +54,7 @@ namespace Material.Concrete
 		}
 
         /// <inheritdoc/>
-        protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+        protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, WebReinforcement reinforcement = null)
 		{
 			// Get strains
 			double
@@ -86,21 +86,9 @@ namespace Material.Concrete
 		/// Compare two constitutive objects.
 		/// </summary>
 		/// <param name="other">The other constitutive object.</param>
-		public override bool Equals(Constitutive other)
-		{
-			if (other is MCFTConstitutive)
-				return true;
+		public override bool Equals(Constitutive other) => other is MCFTConstitutive;
 
-			return false;
-		}
-
-		public override bool Equals(object other)
-		{
-			if (other is MCFTConstitutive)
-				return true;
-
-			return false;
-		}
+		public override bool Equals(object other) => other is MCFTConstitutive;
 
 		public override int GetHashCode() => base.GetHashCode();
 	}

@@ -7,10 +7,20 @@ namespace Material.Concrete
 	/// </summary>
 	public class UniaxialConcrete : Concrete
 	{
-		// Properties
-		public double Strain  { get; set; }
-		public double Stress  { get; set; }
-		public double Area    { get; }
+		/// <summary>
+        /// Get/set concrete strain.
+        /// </summary>
+		public double Strain { get; private set; }
+
+		/// <summary>
+        /// Get/set concrete stress.
+        /// </summary>
+		public double Stress { get; private set; }
+
+		/// <summary>
+        /// Get concrete area, in mm2.
+        /// </summary>
+		public double Area { get; }
 
 		///<inheritdoc/>
 		/// <summary>
@@ -132,9 +142,9 @@ namespace Material.Concrete
 			return false;
 		}
 
-		public override bool Equals(object other)
+		public override bool Equals(object obj)
 		{
-			if (other != null && other is UniaxialConcrete concrete)
+			if (obj != null && obj is UniaxialConcrete concrete)
 				return Equals(concrete);
 
 			return false;

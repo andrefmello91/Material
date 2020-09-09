@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using UnitsNet;
 
 namespace Material.Concrete
@@ -49,73 +50,34 @@ namespace Material.Concrete
 
 				case AggregateType.Limestone:
 					return 0.9;
-			}
 
-			// Sandstone
-			return 0.7;
+				// Sandstone
+				default:
+					return 0.7;
+			}
 		}
 
 		private double AlphaI() => Math.Min(0.8 + 0.2 * Strength / 80, 1);
 
-		private double fctm()
-		{
-			if (Strength <= 50)
-				return
-					0.3 * Math.Pow(Strength, 0.66666667);
-			//else
-			return
-				2.12 * Math.Log(1 + 0.11 * Strength);
-		}
+		private double fctm() => Strength <= 50 ? 0.3 * Strength.Pow(2 / 3) : 2.12 * Math.Log(1 + 0.11 * Strength);
 
-		private double Eci()
-		{
-			if (Strength <= 50)
-				return
-					AlphaE() * 5600 * Math.Sqrt(Strength);
-
-			return
-				21500 * AlphaE() * Math.Pow((0.1 * Strength + 1.25), 0.333333);
-		}
+		private double Eci() =>
+			Strength <= 50
+				? AlphaE() * 5600 * Math.Sqrt(Strength)
+				: 21500 * AlphaE() *(0.1 * Strength + 1.25).Pow(1 / 3);
 
 		private double Ecs() => AlphaI() * InitialModule;
 
-		private double ec2()
-		{
-			if (Strength <= 50)
-				return
-					-0.002;
+		private double ec2() => Strength <= 50 ? -0.002 : -0.002 - 0.000085 * (Strength - 50).Pow(0.53);
 
-			return
-				-0.002 - 0.000085 * Math.Pow(Strength - 50, 0.53);
-		}
+		private double ecu() => Strength <= 50 ? -0.0035 : -0.0026 - 0.035 * (0.01 * (90 - Strength)).Pow(4);
 
-		private double ecu()
-		{
-			if (Strength <= 50)
-				return
-					-0.0035;
-
-			return
-				-0.0026 - 0.035 * Math.Pow(0.01 * (90 - Strength), 4);
-		}
 		#endregion
 
 		/// <inheritdoc/>
-        public override bool Equals(Parameters other)
-		{
-			if (other != null && other is NBR6118Parameters)
-				return base.Equals(other);
+        public override bool Equals(Parameters other) => other is NBR6118Parameters && base.Equals(other);
 
-			return false;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj != null && obj is NBR6118Parameters other)
-				return base.Equals(other);
-
-			return false;
-		}
+		public override bool Equals(object obj) => obj is NBR6118Parameters other && base.Equals(other);
 
 		public override int GetHashCode() => base.GetHashCode();
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using Material.Reinforcement;
 using MathNet.Numerics;
 
@@ -98,7 +99,7 @@ namespace Material.Concrete
 		}
 
 		/// <inheritdoc/>
-        protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, BiaxialReinforcement reinforcement = null)
+        protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, WebReinforcement reinforcement = null)
 		{
 			// Get strains
 			double
@@ -129,8 +130,8 @@ namespace Material.Concrete
 		/// </summary>
 		/// <param name="strain">The tensile strain to calculate stress.</param>
 		/// <param name="theta1">The angle of maximum principal strain, in radians.</param>
-		/// <param name="reinforcement">The <see cref="BiaxialReinforcement"/>.</param>
-		private double TensionStiffening(double strain, double theta1, BiaxialReinforcement reinforcement)
+		/// <param name="reinforcement">The <see cref="WebReinforcement"/>.</param>
+		private double TensionStiffening(double strain, double theta1, WebReinforcement reinforcement)
 		{
 			// Calculate coefficient for tension stiffening effect
 			double m = reinforcement.TensionStiffeningCoefficient(theta1);
@@ -162,7 +163,7 @@ namespace Material.Concrete
 				return 1;
 
 			// Calculate Cd
-            double Cd = 0.35 * Math.Pow(r - 0.28, 0.8);
+            double Cd = 0.35 * (r - 0.28).Pow(0.8);
 
 			return
 				Math.Min(1 / (1 + Cs * Cd), 1);
@@ -187,23 +188,10 @@ namespace Material.Concrete
 		/// Compare two constitutive objects.
 		/// </summary>
 		/// <param name="other">The other constitutive object.</param>
-		public override bool Equals(Constitutive other)
-		{
-			if (other is DSFMConstitutive)
-				return true;
+		public override bool Equals(Constitutive other) => other is DSFMConstitutive;
 
-			return false;
-		}
-
-		public override bool Equals(object other)
-		{
-			if (other is DSFMConstitutive)
-				return true;
-
-			return false;
-		}
+		public override bool Equals(object other) => other is DSFMConstitutive;
 
 		public override int GetHashCode() => base.GetHashCode();
-
 	}
 }

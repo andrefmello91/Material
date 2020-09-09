@@ -1,5 +1,7 @@
 ﻿using System;
 using System.CodeDom;
+using System.Runtime.Remoting;
+using Extensions.Number;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -71,11 +73,6 @@ namespace Material.Concrete
 		}
 
 		/// <summary>
-        /// Get Poisson coefficient.
-        /// </summary>
-		public double Poisson { get; }
-
-		/// <summary>
 		/// Get/set concrete tensile strength, in MPa.
 		/// </summary>
 		public double TensileStrength
@@ -133,12 +130,17 @@ namespace Material.Concrete
 		public bool IsSet => Strength > 0;
 
 		/// <summary>
-		/// Base object of concrete parameters.
+		/// Get Poisson coefficient.
 		/// </summary>
-		/// <param name="strength">Concrete compressive strength, in MPa.</param>
-		/// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
-		/// <param name="aggregateType">The type of aggregate.</param>
-		public Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+		public const double Poisson = 0.2;
+
+        /// <summary>
+        /// Base object of concrete parameters.
+        /// </summary>
+        /// <param name="strength">Concrete compressive strength, in MPa.</param>
+        /// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
+        /// <param name="aggregateType">The type of aggregate.</param>
+        public Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
 			: this (Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), aggregateType)
 		{
 		}
@@ -154,7 +156,6 @@ namespace Material.Concrete
 			_fc     = strength;
 			_phiAg  = aggregateDiameter;
 			Type    = aggregateType;
-			Poisson = 0.2;
 		}
 
         /// <summary>
@@ -183,10 +184,10 @@ namespace Material.Concrete
 
 				case ParameterModel.DSFM:
 					return new DSFMParameters(strength, aggregateDiameter, aggregateType);
-			}
 
-			// Custom parameters
-			return new CustomParameters(strength, aggregateDiameter, tensileStrength, elasticModule, plasticStrain, ultimateStrain);
+				default:
+					return new CustomParameters(strength, aggregateDiameter, tensileStrength, elasticModule, plasticStrain, ultimateStrain);
+            }
 		}
 
 		/// <summary>
@@ -196,19 +197,23 @@ namespace Material.Concrete
         /// <returns></returns>
         public static ParameterModel ReadParameterModel(Parameters parameters)
         {
-	        if (parameters is NBR6118Parameters)
-		        return ParameterModel.NBR6118;
+	        switch (parameters)
+	        {
+		        case NBR6118Parameters _ :
+			        return ParameterModel.NBR6118;
 
-	        if (parameters is MC2010Parameters)
-		        return ParameterModel.MC2010;
+		        case MC2010Parameters _ :
+			        return ParameterModel.MC2010;
 
-	        if (parameters is MCFTParameters)
-		        return ParameterModel.MCFT;
+		        case MCFTParameters _ :
+			        return ParameterModel.MCFT;
 
-	        if (parameters is DSFMParameters)
-		        return ParameterModel.DSFM;
+		        case DSFMParameters _ :
+			        return ParameterModel.DSFM;
 
-	        return ParameterModel.Custom;
+		        default:
+			        return ParameterModel.Custom;
+	        }
         }
 
         /// <summary>
@@ -236,18 +241,20 @@ namespace Material.Concrete
 		/// Compare two parameter objects.
 		/// </summary>
 		/// <param name="other">The other parameter object.</param>
-		public virtual bool Equals(Parameters other) => other != null && Strength == other.Strength && AggregateDiameter == other.AggregateDiameter && Type == other.Type;
+		public virtual bool Equals(Parameters other) => !(other is null) && Strength == other.Strength && AggregateDiameter == other.AggregateDiameter && Type == other.Type;
 
-		public override int GetHashCode() => (int) Math.Pow(Strength, AggregateDiameter);
+		public override bool Equals(object obj) => obj is Parameters other && Equals(other);
+
+		public override int GetHashCode() => (int) Strength.Pow(AggregateDiameter);
 
 		/// <summary>
 		/// Returns true if parameters are equal.
 		/// </summary>
-		public static bool operator == (Parameters left, Parameters right) => left != null && left.Equals(right);
+		public static bool operator == (Parameters left, Parameters right) => !(left is null) && left.Equals(right);
 
 		/// <summary>
 		/// Returns true if parameters are different.
 		/// </summary>
-		public static bool operator != (Parameters left, Parameters right) => left != null && !left.Equals(right);
+		public static bool operator != (Parameters left, Parameters right) => !(left is null) && !left.Equals(right);
 	}
 }

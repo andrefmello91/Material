@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using UnitsNet;
 
 namespace Material.Concrete
@@ -30,8 +31,10 @@ namespace Material.Concrete
 	        UpdateParameters();
         }
 
-        private double fcr() => 0.33 * Math.Sqrt(Strength);
+        private double fcr() => 0.33 * Strength.Sqrt();
+
         //private double fcr() => 0.65 * Math.Pow(Strength, 0.33);
+
 		private double Ec()  => -2 * Strength / ec;
 
 		///<inheritdoc/>
@@ -44,21 +47,9 @@ namespace Material.Concrete
 		}
 
 		/// <inheritdoc/>
-		public override bool Equals(Parameters other)
-		{
-			if (other != null && other is DSFMParameters)
-				return base.Equals(other);
+		public override bool Equals(Parameters other) => other is DSFMParameters && base.Equals(other);
 
-			return false;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj != null && obj is DSFMParameters other)
-				return base.Equals(other);
-
-			return false;
-		}
+		public override bool Equals(object obj) => obj is DSFMParameters other && base.Equals(other);
 
 		public override int GetHashCode() => base.GetHashCode();
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Extensions.Number;
 using MathNet.Numerics.Interpolation;
 using UnitsNet;
 
@@ -67,25 +68,21 @@ namespace Material.Concrete
 
 				case AggregateType.Quartzite:
 					return 1;
+
+				// Limestone or sandstone
+				default:
+					return 0.9;
 			}
-
-			// Limestone or sandstone
-			return 0.9;
 		}
 
-		private double fctm()
-		{
-			if (Strength <= 50)
-				return
-					0.3 * Math.Pow(Strength, 0.66666667);
-			//else
-			return
-				2.12 * Math.Log(1 + 0.1 * Strength);
-		}
+		private double fctm() => Strength <= 50 ? 0.3 * Strength.Pow(2 / 3) : 2.12 * Math.Log(1 + 0.1 * Strength);
 
-		private double Eci() => 21500 * AlphaE() * Math.Pow(Strength / 10, 0.33333333);
-		private double ec1() => -1.6 / 1000 * Math.Pow(Strength / 10, 0.25);
+		private double Eci() => 21500 * AlphaE() * (Strength / 10).Pow(1 / 3);
+
+		private double ec1() => -1.6 / 1000 *(Strength / 10).Pow(0.25);
+
 		private double Ec1() => Strength / ec1();
+
 		private double k() => Eci() / Ec1();
 
 		private double ecu()
@@ -120,21 +117,9 @@ namespace Material.Concrete
 		#endregion
 
 		/// <inheritdoc/>
-		public override bool Equals(Parameters other)
-		{
-			if (other != null && other is MC2010Parameters)
-				return base.Equals(other);
+		public override bool Equals(Parameters other) => other is MC2010Parameters && base.Equals(other);
 
-			return false;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj != null && obj is MC2010Parameters other)
-				return base.Equals(other);
-
-			return false;
-		}
+		public override bool Equals(object obj) => obj is MC2010Parameters other && base.Equals(other);
 
 		public override int GetHashCode() => base.GetHashCode();
 	}

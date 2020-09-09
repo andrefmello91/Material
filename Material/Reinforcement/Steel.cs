@@ -9,7 +9,7 @@ namespace Material.Reinforcement
 	/// <summary>
     /// Steel class.
     /// </summary>
-	public class Steel
+	public class Steel : IEquatable<Steel>
 	{
 		// Auxiliary fields
 		private Pressure _fy, _Es, _Esh;
@@ -191,7 +191,7 @@ namespace Material.Reinforcement
 			get
 			{
 				// Verify the strain
-				if (Strain.Abs() <= 1E-6)
+				if (Strain.ApproxZero())
 					return ElasticModule;
 
 				return
@@ -204,20 +204,14 @@ namespace Material.Reinforcement
         /// </summary>
         /// <param name="steelToCopy">The steel object to copy.</param>
         /// <returns></returns>
-        public static Steel Copy(Steel steelToCopy)
-		{
-			if (steelToCopy is null)
-				return null;
+        public static Steel Copy(Steel steelToCopy) =>
+			steelToCopy is null 
+				? null : 
+				!steelToCopy.ConsiderTensileHardening
+					? new Steel(steelToCopy.YieldStress, steelToCopy.ElasticModule, steelToCopy.UltimateStrain)
+					: new Steel(steelToCopy.YieldStress, steelToCopy.HardeningModule, steelToCopy.HardeningStrain, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
 
-	        if (!steelToCopy.ConsiderTensileHardening)
-		        return
-			        new Steel(steelToCopy.YieldStress, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
-
-			return
-				new Steel(steelToCopy.YieldStress, steelToCopy.HardeningModule, steelToCopy.HardeningStrain, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
-        }
-
-        public override string ToString() 
+		public override string ToString() 
         {
 			char epsilon = (char) Characters.Epsilon;
 
@@ -256,24 +250,18 @@ namespace Material.Reinforcement
             return basic && HardeningModule == other.HardeningModule && HardeningStrain == other.HardeningStrain;
 		}
 
-		public override bool Equals(object other)
-		{
-			if (other is Steel steel)
-				return Equals(steel);
-
-			return false;
-		}
+		public override bool Equals(object other) => other is Steel steel && Equals(steel);
 
 		public override int GetHashCode() => (int) Math.Pow(ElasticModule, YieldStress);
 
 		/// <summary>
 		/// Returns true if steel parameters are equal.
 		/// </summary>
-		public static bool operator == (Steel left, Steel right) => left != null && left.Equals(right);
+		public static bool operator == (Steel left, Steel right) => !(left is null) && left.Equals(right);
 
         /// <summary>
         /// Returns true if steel parameters are different.
 		/// </summary>
-        public static bool operator != (Steel left, Steel right) => left != null && !left.Equals(right);
+        public static bool operator != (Steel left, Steel right) => !(left is null) && !left.Equals(right);
 	}
 }

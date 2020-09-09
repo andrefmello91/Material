@@ -45,25 +45,10 @@ namespace Material.Concrete
 		}
 
 		/// <inheritdoc/>
-		public override bool Equals(Parameters other)
-		{
-			if (other != null && other is CustomParameters)
-				return 
-					base.Equals(other) && TensileStrength == other.TensileStrength && InitialModule == other.InitialModule && 
-					PlasticStrain == other.PlasticStrain && UltimateStrain == other.UltimateStrain;
+		public override bool Equals(Parameters other) =>
+			 other is CustomParameters && base.Equals(other) && TensileStrength == other.TensileStrength && InitialModule == other.InitialModule && PlasticStrain == other.PlasticStrain && UltimateStrain == other.UltimateStrain;
 
-			return false;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj != null && obj is CustomParameters other)
-				return
-					base.Equals(other) && TensileStrength == other.TensileStrength && InitialModule == other.InitialModule &&
-					PlasticStrain == other.PlasticStrain && UltimateStrain == other.UltimateStrain;
-
-			return false;
-		}
+		public override bool Equals(object obj) => obj is CustomParameters other && Equals(other);
 
 		public override int GetHashCode() => base.GetHashCode();
 	}

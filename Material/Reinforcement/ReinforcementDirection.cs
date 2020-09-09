@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Extensions.Number;
 using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
@@ -12,7 +13,7 @@ namespace Material.Reinforcement
     /// <summary>
     /// Reinforcement direction class for web reinforcement.
     /// </summary>
-    public class WebReinforcementDirection
+    public class WebReinforcementDirection : IEquatable<WebReinforcementDirection>
     {
 		// Auxiliary fields
 		private Length _phi, _s, _w;
@@ -151,7 +152,7 @@ namespace Material.Reinforcement
         /// </summary>
         private double CalculateRatio()
         {
-	        if (BarDiameter == 0 || BarSpacing == 0 || Width == 0)
+	        if (BarDiameter.ApproxZero() || BarSpacing.ApproxZero() || Width.ApproxZero())
 		        _ps = 0;
 			else
 		       _ps = 0.5 * Constants.Pi * BarDiameter * BarDiameter / (BarSpacing * Width);
@@ -163,14 +164,7 @@ namespace Material.Reinforcement
         /// Return a copy of a <see cref="WebReinforcementDirection"/>.
         /// </summary>
         /// <param name="reinforcementToCopy">The <see cref="WebReinforcementDirection"/> to copy.</param>
-        public static WebReinforcementDirection Copy(WebReinforcementDirection reinforcementToCopy)
-        {
-	        if (reinforcementToCopy is null)
-		        return null;
-
-			return
-				new WebReinforcementDirection(reinforcementToCopy.BarDiameter, reinforcementToCopy.BarSpacing, reinforcementToCopy.Steel, reinforcementToCopy.Width);
-        }
+        public static WebReinforcementDirection Copy(WebReinforcementDirection reinforcementToCopy) => reinforcementToCopy is null ? null : new WebReinforcementDirection(reinforcementToCopy.BarDiameter, reinforcementToCopy.BarSpacing, reinforcementToCopy.Steel, reinforcementToCopy.Width);
 
         /// <summary>
         /// Write string with default units (mm and MPa).
@@ -192,32 +186,20 @@ namespace Material.Reinforcement
         /// <para>Returns true if parameters are equal.</para>
         /// </summary>
         /// <param name="other">The other reinforcement object.</param>
-        public virtual bool Equals(WebReinforcementDirection other)
-        {
-	        if (other != null)
-		        return BarDiameter == other.BarDiameter && other.BarSpacing == BarSpacing && other.Steel == Steel;
+        public virtual bool Equals(WebReinforcementDirection other) => !(other is null) && (BarDiameter == other.BarDiameter && BarSpacing == other.BarSpacing && Steel == other.Steel);
 
-            return false;
-        }
+        public override bool Equals(object other) => other is WebReinforcementDirection reinforcement && Equals(reinforcement);
 
-        public override bool Equals(object other)
-        {
-            if (other is WebReinforcementDirection reinforcement)
-                return Equals(reinforcement);
-
-            return false;
-        }
-
-        public override int GetHashCode() => (int)Math.Pow(BarDiameter, BarSpacing);
+        public override int GetHashCode() => (int)BarDiameter.Pow(BarSpacing);
 
         /// <summary>
         /// Returns true if steel parameters are equal.
         /// </summary>
-        public static bool operator == (WebReinforcementDirection left, WebReinforcementDirection right) => left != null && left.Equals(right);
+        public static bool operator == (WebReinforcementDirection left, WebReinforcementDirection right) => !(left is null) && left.Equals(right);
 
         /// <summary>
         /// Returns true if steel parameters are different.
         /// </summary>
-        public static bool operator != (WebReinforcementDirection left, WebReinforcementDirection right) => left != null && !left.Equals(right);
+        public static bool operator != (WebReinforcementDirection left, WebReinforcementDirection right) => !(left is null) && !left.Equals(right);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Extensions.Number;
 using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
@@ -8,7 +9,7 @@ namespace Material.Reinforcement
 	/// <summary>
 	/// Uniaxial reinforcement class.
 	/// </summary>
-	public class UniaxialReinforcement
+	public class UniaxialReinforcement : IEquatable<UniaxialReinforcement>
 	{
 		// Auxiliary fields
 		private Length _phi;
@@ -30,7 +31,7 @@ namespace Material.Reinforcement
 		public double Area => _As.SquareMillimeters;
 
 		/// <summary>
-        /// Get <see cref="Material.Reinforcement.Steel"/> of this.
+        /// Get <see cref="Reinforcement.Steel"/> of this.
         /// </summary>
 		public Steel Steel { get; }
 
@@ -186,32 +187,20 @@ namespace Material.Reinforcement
 		/// <para>Returns true if parameters are equal.</para>
 		/// </summary>
 		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool Equals(UniaxialReinforcement other)
-		{
-			if (other != null)
-				return Area == other.Area && Steel == other.Steel;
+		public virtual bool Equals(UniaxialReinforcement other) => !(other is null) && (Area == other.Area && Steel == other.Steel);
 
-			return false;
-		}
+		public override bool Equals(object other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
 
-		public override bool Equals(object other)
-		{
-			if (other is UniaxialReinforcement reinforcement)
-				return Equals(reinforcement);
-
-			return false;
-		}
-
-		public override int GetHashCode() => (int)Math.Pow(BarDiameter, NumberOfBars);
+		public override int GetHashCode() => (int)BarDiameter.Pow(NumberOfBars);
 
 		/// <summary>
 		/// Returns true if steel parameters are equal.
 		/// </summary>
-		public static bool operator == (UniaxialReinforcement left, UniaxialReinforcement right) => left != null && left.Equals(right);
+		public static bool operator == (UniaxialReinforcement left, UniaxialReinforcement right) => !(left is null) && left.Equals(right);
 
 		/// <summary>
 		/// Returns true if steel parameters are different.
 		/// </summary>
-		public static bool operator != (UniaxialReinforcement left, UniaxialReinforcement right) => left != null && !left.Equals(right);
+		public static bool operator != (UniaxialReinforcement left, UniaxialReinforcement right) => !(left is null) && !left.Equals(right);
 	}
 }
