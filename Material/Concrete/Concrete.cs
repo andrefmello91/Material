@@ -67,7 +67,7 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="parameters">Concrete parameters object.</param>
         /// <param name="constitutiveModel">The base model of concrete behavior.</param>
-        public Concrete(Parameters parameters, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT)
+        public Concrete(in Parameters parameters, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT)
 			: this(parameters, Constitutive.ReadConstitutive(constitutiveModel, parameters))
 		{
 		}
@@ -77,7 +77,7 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.Parameters"/>).</param>
         /// <param name="constitutive">Concrete constitutive object (<see cref="Material.Concrete.Constitutive"/>).</param>
-        public Concrete(Parameters parameters, Constitutive constitutive)
+        public Concrete(in Parameters parameters, in Constitutive constitutive)
 		{           
 			// Initiate parameters
 			Parameters   = parameters;
@@ -94,6 +94,11 @@ namespace Material.Concrete
 		public double ecr => Parameters.CrackStrain;
 		public double nu  => Parameters.Poisson;
 
+		/// <summary>
+		/// Return a copy of this <see cref="Concrete"/> object.
+		/// </summary>
+		public Concrete Copy() => new Concrete(Parameters, Constitutive);
+
         /// <summary>
         /// Read concrete.
         /// </summary>
@@ -109,12 +114,6 @@ namespace Material.Concrete
 
 			return new BiaxialConcrete(parameters, constitutive);
 		}
-
-        /// <summary>
-        /// Return a copy of a <see cref="Concrete"/> object.
-        /// </summary>
-        /// <param name="concreteToCopy">The <see cref="Concrete"/> object to copy.</param>
-        public static Concrete Copy(Concrete concreteToCopy) => new Concrete(concreteToCopy.Parameters, concreteToCopy.Constitutive);
 
         public override string ToString() => Parameters.ToString();
 

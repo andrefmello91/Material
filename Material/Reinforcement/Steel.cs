@@ -65,6 +65,11 @@ namespace Material.Reinforcement
         public double Stress { get; private set; }
 
         /// <summary>
+        /// Get current steel secant module, in MPa.
+        /// </summary>
+        public double SecantModule => Strain.ApproxZero() ? ElasticModule : Math.Min(Stress / Strain, ElasticModule);
+
+        /// <summary>
         /// Steel object with no tensile hardening, with units in MPa.
         /// </summary>
         /// <param name="yieldStress">Steel yield stress, in MPa.</param>
@@ -183,33 +188,12 @@ namespace Material.Reinforcement
             return 0;
 		}
 
-        /// <summary>
-        /// Get current steel secant module, in MPa.
-        /// </summary>
-        public double SecantModule
-		{
-			get
-			{
-				// Verify the strain
-				if (Strain.ApproxZero())
-					return ElasticModule;
-
-				return
-					Math.Min(Stress / Strain, ElasticModule);
-			}
-		}
-
 		/// <summary>
-        /// Return a new steel object with the same parameters.
+        /// Return a copy of this <see cref="Steel"/> object.
         /// </summary>
-        /// <param name="steelToCopy">The steel object to copy.</param>
-        /// <returns></returns>
-        public static Steel Copy(Steel steelToCopy) =>
-			steelToCopy is null 
-				? null : 
-				!steelToCopy.ConsiderTensileHardening
-					? new Steel(steelToCopy.YieldStress, steelToCopy.ElasticModule, steelToCopy.UltimateStrain)
-					: new Steel(steelToCopy.YieldStress, steelToCopy.HardeningModule, steelToCopy.HardeningStrain, steelToCopy.ElasticModule, steelToCopy.UltimateStrain);
+        public Steel Copy() => !ConsiderTensileHardening
+			? new Steel(YieldStress, ElasticModule, UltimateStrain)
+			: new Steel(YieldStress, HardeningModule, HardeningStrain, ElasticModule, UltimateStrain);
 
 		public override string ToString() 
         {

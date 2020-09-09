@@ -54,7 +54,7 @@ namespace Material.Reinforcement
         /// <param name="barDiameter">The bar diameter.</param>
         /// <param name="steel">The steel object.</param>
         /// <param name="concreteArea">The concrete area.</param>
-        public UniaxialReinforcement(int numberOfBars, Length barDiameter,  Steel steel, Area concreteArea)
+        public UniaxialReinforcement(int numberOfBars, Length barDiameter, Steel steel, Area concreteArea)
 		{
 			NumberOfBars = numberOfBars;
 

@@ -52,9 +52,9 @@ namespace Material.Reinforcement
 		}
 
         /// <summary>
-        /// Get/set the steel object.
+        /// Get the steel object.
         /// </summary>
-        public Steel Steel { get; set; }
+        public Steel Steel { get; }
 
         /// <summary>
         /// Reinforcement direction object for web reinforcement.
@@ -147,6 +147,11 @@ namespace Material.Reinforcement
 		/// <param name="strain">The strain for calculating stress.</param>
 		public double CalculateStress(double strain) => Ratio * Steel.CalculateStress(strain);
 
+		/// <summary>
+		/// Return a copy of this <see cref="WebReinforcementDirection"/>.
+		/// </summary>
+		public WebReinforcementDirection Copy() => new WebReinforcementDirection(BarDiameter, BarSpacing, Steel, Width);
+
         /// <summary>
         /// Calculate reinforcement ratio for distributed reinforcement.
         /// </summary>
@@ -159,12 +164,6 @@ namespace Material.Reinforcement
 
 	        return _ps.Value;
         }
-
-        /// <summary>
-        /// Return a copy of a <see cref="WebReinforcementDirection"/>.
-        /// </summary>
-        /// <param name="reinforcementToCopy">The <see cref="WebReinforcementDirection"/> to copy.</param>
-        public static WebReinforcementDirection Copy(WebReinforcementDirection reinforcementToCopy) => reinforcementToCopy is null ? null : new WebReinforcementDirection(reinforcementToCopy.BarDiameter, reinforcementToCopy.BarSpacing, reinforcementToCopy.Steel, reinforcementToCopy.Width);
 
         /// <summary>
         /// Write string with default units (mm and MPa).

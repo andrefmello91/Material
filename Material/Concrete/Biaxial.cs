@@ -11,7 +11,7 @@ namespace Material.Concrete
 		/// <summary>
         /// Get/set concrete <see cref="StrainState"/>.
         /// </summary>
-		public StrainState Strains { get; set; }
+		public StrainState Strains { get; private set; }
 
 		/// <summary>
         /// Get/set concrete <see cref="PrincipalStrainState"/>.
@@ -133,7 +133,7 @@ namespace Material.Concrete
         public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement = null, double referenceLength = 0)
 		{
 			// Get strains
-			Strains = strains;
+			Strains = strains.Copy();
 
 			// Calculate principal strains
 			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
@@ -160,10 +160,9 @@ namespace Material.Concrete
 		}
 
         /// <summary>
-        /// Return a copy of a <see cref="BiaxialConcrete"/> object.
+        /// Return a copy of this <see cref="BiaxialConcrete"/> object.
         /// </summary>
-        /// <param name="concreteToCopy">The <see cref="BiaxialConcrete"/> object to copy.</param>
-        public static BiaxialConcrete Copy(BiaxialConcrete concreteToCopy) => new BiaxialConcrete(concreteToCopy.Parameters, concreteToCopy.Constitutive);
+        public BiaxialConcrete Copy() => new BiaxialConcrete(Parameters, Constitutive);
 
         /// <inheritdoc/>
         public override bool Equals(Concrete other) => other is BiaxialConcrete && base.Equals(other);

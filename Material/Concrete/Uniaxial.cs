@@ -37,7 +37,7 @@ namespace Material.Concrete
 		/// Concrete for uniaxial calculations.
 		/// </summary>
 		///<param name="concreteArea">The concrete area, in mm2.</param>
-		public UniaxialConcrete(Parameters parameters, double concreteArea, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT) : base(parameters, constitutiveModel)
+		public UniaxialConcrete(in Parameters parameters, double concreteArea, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT) : base(parameters, constitutiveModel)
 		{
 			Area = concreteArea;
 		}
@@ -47,7 +47,7 @@ namespace Material.Concrete
 		/// Concrete for uniaxial calculations.
 		/// </summary>
 		///<param name="concreteArea">The concrete area, in mm2.</param>
-		public UniaxialConcrete(Parameters parameters, double concreteArea, Constitutive constitutive) : base(parameters, constitutive)
+		public UniaxialConcrete(in Parameters parameters, double concreteArea, in Constitutive constitutive) : base(parameters, constitutive)
 		{
 			Area = concreteArea;
 		}
@@ -126,12 +126,11 @@ namespace Material.Concrete
 			SetStress(strain, referenceLength, reinforcement);
 		}
 
-		/// <summary>
-		/// Return a copy of a <see cref="UniaxialConcrete"/> object.
-		/// </summary>
-		/// <param name="concreteToCopy">The <see cref="UniaxialConcrete"/> object to copy.</param>
-		/// <returns></returns>
-		public static UniaxialConcrete Copy(UniaxialConcrete concreteToCopy) => new UniaxialConcrete(concreteToCopy.Parameters, concreteToCopy.Area, concreteToCopy.Constitutive);
+
+        /// <summary>
+        /// Return a copy of this <see cref="UniaxialConcrete"/> object.
+        /// </summary>
+        public UniaxialConcrete Copy() => new UniaxialConcrete(Parameters, Area, Constitutive);
 
         /// <inheritdoc/>
         public override bool Equals(Concrete other)

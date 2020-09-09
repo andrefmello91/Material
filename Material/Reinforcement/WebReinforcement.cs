@@ -124,7 +124,7 @@ namespace Material.Reinforcement
         /// <param name="steel">The steel objects for directions X and Y.</param>
         /// <param name="width">The width of cross-section.</param>
         public WebReinforcement(Length barDiameter, Length barSpacing, Steel steel, Length width)
-            : this(barDiameter, barSpacing, steel, barDiameter, barSpacing, Steel.Copy(steel), width)
+            : this(barDiameter, barSpacing, steel, barDiameter, barSpacing, steel.Copy(), width)
         {
         }
 
@@ -321,26 +321,21 @@ namespace Material.Reinforcement
 		}
 
         /// <summary>
-        /// Return a copy of a <see cref="WebReinforcement"/>.
+        /// Return a copy of this <see cref="WebReinforcement"/>.
         /// </summary>
-        /// <param name="reinforcementToCopy">The <see cref="WebReinforcement"/> to copy.</param>
-        /// <returns></returns>
-        public static WebReinforcement Copy(WebReinforcement reinforcementToCopy)
+        public WebReinforcement Copy()
         {
-	        var x = reinforcementToCopy?.DirectionX;
-	        var y = reinforcementToCopy?.DirectionY;
-
-            if (reinforcementToCopy is null || (x is null && y is null))
+	        if (DirectionX is null && DirectionY is null)
 		        return null;
 
-            if (x is null)
-	            return TransversalOnly(y.BarDiameter, y.BarSpacing, y.Steel, y.Width);
+            if (DirectionX is null)
+	            return TransversalOnly(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionX.Width);
 
-            if (y is null)
-	            return HorizontalOnly(x.BarDiameter, x.BarSpacing, x.Steel, x.Width);
+            if (DirectionY is null)
+	            return HorizontalOnly(DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), DirectionY.Width);
 			
 			return
-				new WebReinforcement(x.BarDiameter, x.BarSpacing, Steel.Copy(x.Steel), y.BarDiameter, y.BarSpacing, Steel.Copy(y.Steel), reinforcementToCopy.Width);
+				new WebReinforcement(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), Width);
 		}
 
         /// <summary>

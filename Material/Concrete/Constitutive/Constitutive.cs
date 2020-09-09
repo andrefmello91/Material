@@ -42,7 +42,7 @@ namespace Material.Concrete
 	    /// </summary>
 	    /// <param name="parameters">Concrete parameters object.</param>
 	    /// <param name="considerCrackSlip">Consider crack slip (only for DSFM) (default: false)</param>
-	    public Constitutive(Parameters parameters, bool considerCrackSlip = false)
+	    protected Constitutive(in Parameters parameters, bool considerCrackSlip = false)
 	    {
 		    Parameters        = parameters;
 		    ConsiderCrackSlip = considerCrackSlip;
