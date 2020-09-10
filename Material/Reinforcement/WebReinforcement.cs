@@ -170,7 +170,7 @@ namespace Material.Reinforcement
         /// <param name="width">The width (in mm) of cross-section.</param>
         private WebReinforcementDirection ReadReinforcementDirection(double barDiameter, double barSpacing, Steel steel, double width)
 		{
-			if (barDiameter == 0 || barSpacing == 0 || steel is null)
+			if (steel is null || barDiameter.ApproxZero() || barSpacing.ApproxZero())
 				return null;
 
 			return
@@ -187,7 +187,7 @@ namespace Material.Reinforcement
         /// <param name="width">The width of cross-section.</param>
 		private WebReinforcementDirection ReadReinforcementDirection(Length barDiameter, Length barSpacing, Steel steel, Length width)
 		{
-			if (barDiameter == Length.Zero || barSpacing == Length.Zero || steel is null)
+			if (steel is null || barDiameter == Length.Zero || barSpacing == Length.Zero)
 				return null;
 
 			return
@@ -271,7 +271,7 @@ namespace Material.Reinforcement
 				double
 					psx   = DirectionX.Ratio,
 					phiX  = DirectionX.BarDiameter,
-					cosNx = thetaNx.DirectionCosines(true).cos;
+					cosNx = thetaNx.Cos(true);
 
 				den += psx / phiX * cosNx;
 			}
@@ -281,7 +281,7 @@ namespace Material.Reinforcement
 				double
 					psy   = DirectionY.Ratio,
 					phiY  = DirectionY.BarDiameter,
-					cosNy = thetaNy.DirectionCosines(true).cos;
+					cosNy = thetaNy.Cos(true);
 
 				den += psy / phiY * cosNy;
 			}
@@ -308,8 +308,8 @@ namespace Material.Reinforcement
 				fcy = DirectionY?.CapacityReserve ?? 0;
 
 			double
-				cosNx = thetaNx.DirectionCosines(true).cos,
-				cosNy = thetaNy.DirectionCosines(true).cos;
+				cosNx = thetaNx.Cos(true),
+				cosNy = thetaNy.Cos(true);
 
 			// Check the maximum value of fc1 that can be transmitted across cracks
 			double
@@ -329,12 +329,12 @@ namespace Material.Reinforcement
 		        return null;
 
             if (DirectionX is null)
-	            return TransversalOnly(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionX.Width);
+	            return TransversalOnly(DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), DirectionY.Width);
 
             if (DirectionY is null)
-	            return HorizontalOnly(DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), DirectionY.Width);
-			
-			return
+	            return HorizontalOnly(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionX.Width);
+
+            return
 				new WebReinforcement(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), Width);
 		}
 
@@ -377,10 +377,10 @@ namespace Material.Reinforcement
 		public override string ToString()
 		{
 			return
-				"Reinforcement (x): " + "\n" +
-				(DirectionX?.ToString() ?? "null") + "\n\n" +
-				"Reinforcement (y): " + "\n" +
-				(DirectionY?.ToString() ?? "null");
+				"Reinforcement (x):\n" +
+				$"{(DirectionX?.ToString() ?? "null")}\n\n" +
+				"Reinforcement (y):\n" +
+				$"{(DirectionY?.ToString() ?? "null")}";
 		}
 
         /// <summary>

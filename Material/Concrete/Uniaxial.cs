@@ -37,7 +37,7 @@ namespace Material.Concrete
 		/// Concrete for uniaxial calculations.
 		/// </summary>
 		///<param name="concreteArea">The concrete area, in mm2.</param>
-		public UniaxialConcrete(in Parameters parameters, double concreteArea, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT) : base(parameters, constitutiveModel)
+		public UniaxialConcrete(Parameters parameters, double concreteArea, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT) : base(parameters, constitutiveModel)
 		{
 			Area = concreteArea;
 		}
@@ -47,7 +47,7 @@ namespace Material.Concrete
 		/// Concrete for uniaxial calculations.
 		/// </summary>
 		///<param name="concreteArea">The concrete area, in mm2.</param>
-		public UniaxialConcrete(in Parameters parameters, double concreteArea, in Constitutive constitutive) : base(parameters, constitutive)
+		public UniaxialConcrete(Parameters parameters, double concreteArea, in Constitutive constitutive) : base(parameters, constitutive)
 		{
 			Area = concreteArea;
 		}

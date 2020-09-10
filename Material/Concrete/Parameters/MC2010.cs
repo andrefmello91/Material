@@ -45,7 +45,6 @@ namespace Material.Concrete
         /// <inheritdoc/>
         public MC2010Parameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
         {
-	        UpdateParameters();
         }
 
         ///<inheritdoc/>

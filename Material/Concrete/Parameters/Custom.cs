@@ -32,11 +32,7 @@ namespace Material.Concrete
         /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
         public CustomParameters(Pressure strength, Length aggregateDiameter, Pressure tensileStrength, Pressure elasticModule, double plasticStrain, double ultimateStrain) : base(strength, aggregateDiameter)
 		{
-			_ft  = tensileStrength;
-			_Eci = elasticModule;
-
-			PlasticStrain  = plasticStrain;
-			UltimateStrain = ultimateStrain;
+			UpdateParameters(tensileStrength, elasticModule, plasticStrain, ultimateStrain);
 		}
 
         ///<inheritdoc/>
@@ -44,8 +40,33 @@ namespace Material.Concrete
 		{
 		}
 
-		/// <inheritdoc/>
-		public override bool Equals(Parameters other) =>
+        /// <summary>
+        /// Update concrete custom parameters.
+        /// </summary>
+        /// <param name="tensileStrength">Concrete tensile strength, in MPa.</param>
+        /// <param name="elasticModule">Concrete initial elastic module, in MPa.</param>
+        /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
+        /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
+        public void UpdateParameters(double tensileStrength, double elasticModule, double plasticStrain, double ultimateStrain) => UpdateParameters(Pressure.FromMegapascals(tensileStrength), Pressure.FromMegapascals(elasticModule), plasticStrain, ultimateStrain);
+
+        /// <summary>
+        /// Update concrete custom parameters.
+        /// </summary>
+        /// <param name="tensileStrength">Concrete tensile strength.</param>
+        /// <param name="elasticModule">Concrete initial elastic module.</param>
+        /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
+        /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
+        public void UpdateParameters(Pressure tensileStrength, Pressure elasticModule, double plasticStrain, double ultimateStrain)
+        {
+	        _ft  = tensileStrength;
+	        _Eci = elasticModule;
+
+	        PlasticStrain  = plasticStrain;
+	        UltimateStrain = ultimateStrain;
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(Parameters other) =>
 			 other is CustomParameters && base.Equals(other) && TensileStrength == other.TensileStrength && InitialModule == other.InitialModule && PlasticStrain == other.PlasticStrain && UltimateStrain == other.UltimateStrain;
 
 		public override bool Equals(object obj) => obj is CustomParameters other && Equals(other);

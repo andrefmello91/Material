@@ -137,7 +137,7 @@ namespace Material.Concrete
 			double m = reinforcement.TensionStiffeningCoefficient(theta1);
 
 			// Calculate concrete postcracking stress associated with tension stiffening
-			double fc1b = ft / (1 + Math.Sqrt(2.2 * m * strain));
+			double fc1b = ft / (1 + (2.2 * m * strain).Sqrt());
 
 			// Check the maximum value of fc1 that can be transmitted across cracks
 			double fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);

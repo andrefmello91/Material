@@ -28,7 +28,6 @@ namespace Material.Concrete
         /// <inheritdoc/>
         public MCFTParameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
         {
-	        UpdateParameters();
         }
 
         private double fcr() => 0.33 * Strength.Sqrt();

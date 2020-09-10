@@ -1,6 +1,4 @@
 ﻿using System;
-using System.CodeDom;
-using UnitsNet.Units;
 
 namespace Material.Concrete
 {
@@ -16,7 +14,7 @@ namespace Material.Concrete
 	/// <summary>
     /// Base class for concrete object.
     /// </summary>
-	public class Concrete : IEquatable<Concrete>
+	public abstract class Concrete : IEquatable<Concrete>
 	{
 		/// <summary>
         /// Get concrete <see cref="Material.Concrete.Parameters"/>.
@@ -55,7 +53,7 @@ namespace Material.Concrete
         /// <param name="elasticModule">Concrete initial elastic module, in MPa.</param>
         /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
         /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
-        public Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+        protected Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
         {
 			// Initiate parameters
 			Parameters   = Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain);
@@ -67,7 +65,7 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="parameters">Concrete parameters object.</param>
         /// <param name="constitutiveModel">The base model of concrete behavior.</param>
-        public Concrete(in Parameters parameters, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT)
+        protected Concrete(Parameters parameters, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT)
 			: this(parameters, Constitutive.ReadConstitutive(constitutiveModel, parameters))
 		{
 		}
@@ -77,7 +75,7 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.Parameters"/>).</param>
         /// <param name="constitutive">Concrete constitutive object (<see cref="Material.Concrete.Constitutive"/>).</param>
-        public Concrete(in Parameters parameters, in Constitutive constitutive)
+        protected Concrete(Parameters parameters, Constitutive constitutive)
 		{           
 			// Initiate parameters
 			Parameters   = parameters;
@@ -93,11 +91,6 @@ namespace Material.Concrete
 		public double Ecs => Parameters.SecantModule;
 		public double ecr => Parameters.CrackStrain;
 		public double nu  => Parameters.Poisson;
-
-		/// <summary>
-		/// Return a copy of this <see cref="Concrete"/> object.
-		/// </summary>
-		public Concrete Copy() => new Concrete(Parameters, Constitutive);
 
         /// <summary>
         /// Read concrete.

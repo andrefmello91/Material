@@ -24,7 +24,6 @@ namespace Material.Concrete
         /// <inheritdoc/>
         public NBR6118Parameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite) : base(strength, aggregateDiameter, aggregateType)
         {
-	        UpdateParameters();
         }
 
         ///<inheritdoc/>

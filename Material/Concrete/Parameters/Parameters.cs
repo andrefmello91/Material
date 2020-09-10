@@ -38,6 +38,7 @@ namespace Material.Concrete
 		// Auxiliary fields
 		protected Length _phiAg;
 		protected Pressure _fc, _ft, _Eci, _Ecs;
+		private AggregateType _type;
 
 		/// <summary>
         /// Get the <see cref="PressureUnit"/> that this was constructed with.
@@ -49,18 +50,30 @@ namespace Material.Concrete
         /// </summary>
         public LengthUnit AggUnit => _phiAg.Unit;
 
-		/// <summary>
+        /// <summary>
         /// Get <see cref="AggregateType"/>.
         /// </summary>
-		public AggregateType Type { get; protected set; }
+        public AggregateType Type
+        {
+	        get => _type;
+	        protected set
+	        {
+		        _type = value;
+		        UpdateParameters();
+	        }
+        }
 
 		/// <summary>
 		/// Get/set maximum diameter of aggregate, in mm.
 		/// </summary>
 		public double AggregateDiameter
-        {
+		{
 			get => _phiAg.Millimeters;
-			set => _phiAg = Length.FromMillimeters(value).ToUnit(AggUnit);
+			set
+			{
+				_phiAg = Length.FromMillimeters(value).ToUnit(AggUnit);
+				UpdateParameters();
+			}
 		}
 
 		/// <summary>
@@ -69,8 +82,12 @@ namespace Material.Concrete
 		public double Strength
 		{
 			get => _fc.Megapascals;
-			set => _fc = Pressure.FromMegapascals(value).ToUnit(Unit);
-		}
+			set
+			{
+				_fc = Pressure.FromMegapascals(value).ToUnit(Unit);
+				UpdateParameters();
+			}
+        }
 
 		/// <summary>
 		/// Get/set concrete tensile strength, in MPa.
@@ -115,7 +132,7 @@ namespace Material.Concrete
 		public double CrackStrain => _ft / _Eci;
 
 		/// <summary>
-        /// Get transversal (shear) module, in MPa.
+        /// Get transverse (shear) module, in MPa.
         /// </summary>
 		public double TransversalModule => SecantModule / 2.4;
 
@@ -140,7 +157,7 @@ namespace Material.Concrete
         /// <param name="strength">Concrete compressive strength, in MPa.</param>
         /// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
         /// <param name="aggregateType">The type of aggregate.</param>
-        public Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+        protected Parameters(double strength, double aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
 			: this (Pressure.FromMegapascals(strength), Length.FromMillimeters(aggregateDiameter), aggregateType)
 		{
 		}
@@ -151,11 +168,12 @@ namespace Material.Concrete
 		/// <param name="strength">Concrete compressive strength..</param>
 		/// <param name="aggregateDiameter">Maximum aggregate diameter.</param>
 		/// <param name="aggregateType">The type of aggregate.</param>
-		public Parameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
+		protected Parameters(Pressure strength, Length aggregateDiameter, AggregateType aggregateType = AggregateType.Quartzite)
 		{
 			_fc     = strength;
 			_phiAg  = aggregateDiameter;
 			Type    = aggregateType;
+			UpdateParameters();
 		}
 
         /// <summary>
