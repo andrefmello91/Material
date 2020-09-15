@@ -58,7 +58,7 @@ namespace Material.Concrete
 	    protected double ecr => Parameters.CrackStrain;
 	    protected double nu  => Parameters.Poisson;
 	    protected double Gf  => Parameters.FractureParameter;
-	    protected double Cs  => ConsiderCrackSlip ? 0.55 : 1;
+	    protected double Cs  => ConsiderCrackSlip && Cracked ? 0.55 : 0;
 
 	    /// <summary>
         /// Get concrete <see cref="Constitutive"/> object based on the <see cref="ConstitutiveModel"/>.
@@ -102,10 +102,10 @@ namespace Material.Concrete
         /// Calculate concrete <see cref="PrincipalStressState"/> related to <see cref="PrincipalStrainState"/>.
         /// <para>For <seealso cref="BiaxialConcrete"/>.</para>
         /// </summary>
-        /// <param name="principalStrains">The <see cref="PrincipalStrainState"/> in concrete.</param>
+        /// <param name="principalStrains">The <see cref="PrincipalStrainState"/> in concrete.</param
+        /// <param name="reinforcement">The <see cref="WebReinforcement"/>.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
-        /// <param name="reinforcement">The <see cref="WebReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
-        public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, double referenceLength = 0, WebReinforcement reinforcement = null)
+        public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement reinforcement, double referenceLength = 0)
         {
 			if (principalStrains.IsZero)
 				return PrincipalStressState.Zero;
@@ -144,7 +144,7 @@ namespace Material.Concrete
         /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> reinforcement (only for <see cref="DSFMConstitutive"/>).</param>
         public double CalculateStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
 		{
-			if (strain == 0)
+			if (strain.ApproxZero(1E-18))
 				return 0;
 
 			if (strain > 0)

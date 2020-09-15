@@ -128,9 +128,9 @@ namespace Material.Concrete
         /// Set concrete <see cref="StressState"/> given <see cref="StrainState"/>
         /// </summary>
         /// <param name="strains">Current <see cref="StrainState"/> in concrete.</param>
+        /// <param name="reinforcement">The <see cref="WebReinforcement"/>.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
-        /// <param name="reinforcement">The <see cref="WebReinforcement"/> (only for <see cref="DSFMConstitutive"/>)</param>
-        public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement = null, double referenceLength = 0)
+        public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement, double referenceLength = 0)
 		{
 			// Get strains
 			Strains = strains.Copy();
@@ -139,7 +139,7 @@ namespace Material.Concrete
 			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
 
 			// Get stresses from constitutive model
-			PrincipalStresses = Constitutive.CalculateStresses(PrincipalStrains, referenceLength, reinforcement);
+			PrincipalStresses = Constitutive.CalculateStresses(PrincipalStrains, reinforcement, referenceLength);
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 

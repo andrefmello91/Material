@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Xml;
 using Extensions.Number;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -7,6 +8,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
 using OnPlaneComponents;
+using static OnPlaneComponents.StrainRelations;
 
 namespace Material.Reinforcement
 {
@@ -30,7 +32,7 @@ namespace Material.Reinforcement
         public WebReinforcementDirection DirectionY { get; }
 
 		/// <summary>
-        /// Get/set reinforcement <see cref="StrainState"/>.
+        /// Get/set reinforcement <see cref="StrainState"/>, at horizontal plane.
         /// </summary>
 		public StrainState Strains { get; private set; }
 
@@ -55,7 +57,7 @@ namespace Material.Reinforcement
 		public bool XYReinforced => XReinforced && YReinforced;
 
 		/// <summary>
-		/// Get reinforcement <see cref="StressState"/>, in MPa.
+		/// Get reinforcement <see cref="StressState"/>, transformed to horizontal plane, in MPa.
 		/// </summary>
 		public StressState Stresses
 		{
@@ -65,8 +67,13 @@ namespace Material.Reinforcement
 					fsx = DirectionX?.Stress ?? 0,
 					fsy = DirectionY?.Stress ?? 0;
 
-				return
-					new StressState(fsx, fsy, 0);
+				var stresses = new StressState(fsx, fsy, 0);
+
+				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
+					return stresses;
+
+                return
+					StressState.Transform(stresses, -DirectionX?.Angle ?? 0);
 			}
 		}
 
@@ -83,7 +90,14 @@ namespace Material.Reinforcement
 				Ds[0, 0] = DirectionX?.Stiffness ?? 0;
 				Ds[1, 1] = DirectionY?.Stiffness ?? 0;
 
-				return Ds;
+				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
+					return Ds;
+
+				// Transform
+				var t = TransformationMatrix(DirectionX.Angle);
+
+				return
+					t.Transpose() * Ds * t;
 			}
 		}
 
@@ -100,99 +114,103 @@ namespace Material.Reinforcement
 				Ds[0, 0] = DirectionX?.InitialStiffness ?? 0;
 				Ds[1, 1] = DirectionY?.InitialStiffness ?? 0;
 
-				return Ds;
+				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
+					return Ds;
+
+				// Transform
+				var t = TransformationMatrix(DirectionX.Angle);
+
+				return
+					t.Transpose() * Ds * t;
 			}
-		}
+        }
 
         /// <summary>
-        /// Web reinforcement for biaxial calculations, for equal horizontal (X) and vertical (Y) directions.
+        /// Web reinforcement for biaxial calculations, for equal X and Y directions.
         /// </summary>
         /// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
         /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
         /// <param name="steel">The steel objects for directions X and Y.</param>
         /// <param name="width">The width (in mm) of cross-section.</param>
-        public WebReinforcement(double barDiameter, double barSpacing, Steel steel, double width)
-            : this(Length.FromMillimeters(barDiameter), Length.FromMillimeters(barSpacing), steel, Length.FromMillimeters(width))
+        /// <param name="angleX">The angle (in radians) of <see cref="DirectionX"/>, related to horizontal axis.
+        /// <para><paramref name="angleX"/> is positive if counterclockwise.</para></param>
+        public WebReinforcement(double barDiameter, double barSpacing, Steel steel, double width, double angleX = 0)
+            : this(WebReinforcementDirection.Read(barDiameter, barSpacing, steel, width, angleX), WebReinforcementDirection.Read(barDiameter, barSpacing, steel.Copy(), width, angleX + Constants.PiOver2), width)
         {
         }
 
         /// <summary>
-        /// Web reinforcement for biaxial calculations, for equal horizontal (X) and vertical (Y) directions.
+        /// Web reinforcement for biaxial calculations, for equal X and Y directions.
         /// </summary>
         /// <param name="barDiameter">The bar diameter for directions X and Y.</param>
         /// <param name="barSpacing">The bar spacing for directions X and Y.</param>
         /// <param name="steel">The steel objects for directions X and Y.</param>
         /// <param name="width">The width of cross-section.</param>
-        public WebReinforcement(Length barDiameter, Length barSpacing, Steel steel, Length width)
-            : this(barDiameter, barSpacing, steel, barDiameter, barSpacing, steel.Copy(), width)
+        /// <param name="angleX">The angle (in radians) of <see cref="DirectionX"/>, related to horizontal axis.
+        /// <para><paramref name="angleX"/> is positive if counterclockwise.</para></param>
+        public WebReinforcement(Length barDiameter, Length barSpacing, Steel steel, Length width, double angleX = 0)
+            : this(WebReinforcementDirection.Read(barDiameter, barSpacing, steel, width, angleX), WebReinforcementDirection.Read(barDiameter, barSpacing, steel.Copy(), width, angleX + Constants.PiOver2), width)
         {
         }
 
         /// <summary>
-        /// Web reinforcement for biaxial calculations, for different horizontal (X) and vertical (Y) directions.
+        /// Web reinforcement for biaxial calculations, for different X and Y directions.
         /// </summary>
-        /// <param name="barDiameterX">The bar diameter (in mm) for horizontal (X) direction.</param>
-        /// <param name="barSpacingX">The bar spacing (in mm) for horizontal (X) direction.</param>
-        /// <param name="steelX">The steel objects for horizontal (X) direction.</param>
-        /// <param name="barDiameterY">The bar diameter (in mm) for vertical (Y) direction.</param>
-        /// <param name="barSpacingY">The bar spacing (in mm) for vertical (Y) direction.</param>
-        /// <param name="steelY">The steel objects for vertical (Y) direction.</param>
+        /// <param name="barDiameterX">The bar diameter (in mm) for X direction.</param>
+        /// <param name="barSpacingX">The bar spacing (in mm) for X direction.</param>
+        /// <param name="steelX">The steel objects for X direction.</param>
+        /// <param name="barDiameterY">The bar diameter (in mm) for Y direction.</param>
+        /// <param name="barSpacingY">The bar spacing (in mm) for Y direction.</param>
+        /// <param name="steelY">The steel objects for Y direction.</param>
         /// <param name="width">The width (in mm) of cross-section.</param>
-        public WebReinforcement(double barDiameterX, double barSpacingX, Steel steelX, double barDiameterY, double barSpacingY, Steel steelY, double width)
-            : this(Length.FromMillimeters(barDiameterX), Length.FromMillimeters(barSpacingX), steelX, Length.FromMillimeters(barDiameterY), Length.FromMillimeters(barSpacingY), steelY, Length.FromMillimeters(width))
+        /// <param name="angleX">The angle (in radians) of <see cref="DirectionX"/>, related to horizontal axis.
+        /// <para><paramref name="angleX"/> is positive if counterclockwise.</para></param>
+        public WebReinforcement(double barDiameterX, double barSpacingX, Steel steelX, double barDiameterY, double barSpacingY, Steel steelY, double width, double angleX = 0)
+            : this(WebReinforcementDirection.Read(barDiameterX, barSpacingX, steelX, width, angleX), WebReinforcementDirection.Read(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2), Length.FromMillimeters(width))
         {
         }
 
         /// <summary>
-        /// Web reinforcement for biaxial calculations, for different horizontal (X) and vertical (Y) directions.
+        /// Web reinforcement for biaxial calculations, for different X and Y directions.
         /// </summary>
-        /// <param name="barDiameterX">The bar diameter for horizontal (X) direction.</param>
-        /// <param name="barSpacingX">The bar spacing for horizontal (X) direction.</param>
-        /// <param name="steelX">The steel objects for horizontal (X) direction.</param>
-        /// <param name="barDiameterY">The bar diameter for vertical (Y) direction.</param>
-        /// <param name="barSpacingY">The bar spacing for vertical (Y) direction.</param>
-        /// <param name="steelY">The steel objects for vertical (Y) direction.</param>
+        /// <param name="barDiameterX">The bar diameter for X direction.</param>
+        /// <param name="barSpacingX">The bar spacing for X direction.</param>
+        /// <param name="steelX">The steel objects for X direction.</param>
+        /// <param name="barDiameterY">The bar diameter for Y direction.</param>
+        /// <param name="barSpacingY">The bar spacing for Y direction.</param>
+        /// <param name="steelY">The steel objects for Y direction.</param>
         /// <param name="width">The width of cross-section.</param>
-        public WebReinforcement(Length barDiameterX, Length barSpacingX, Steel steelX, Length barDiameterY, Length barSpacingY, Steel steelY, Length width)
+        /// <param name="angleX">The angle (in radians) of <see cref="DirectionX"/>, related to horizontal axis.
+        /// <para><paramref name="angleX"/> is positive if counterclockwise.</para></param>
+        public WebReinforcement(Length barDiameterX, Length barSpacingX, Steel steelX, Length barDiameterY, Length barSpacingY, Steel steelY, Length width, double angleX = 0)
+			: this (WebReinforcementDirection.Read(barDiameterX, barSpacingX, steelX,  width, angleX), WebReinforcementDirection.Read(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2), width)
         {
-            DirectionX = ReadReinforcementDirection(barDiameterX, barSpacingX, steelX, width);
-            DirectionY = ReadReinforcementDirection(barDiameterY, barSpacingY, steelY, width);
+        }
+
+        /// <summary>
+        /// Web reinforcement for biaxial calculations, for different X and Y directions.
+        /// </summary>
+        /// <param name="directionX">The <see cref="WebReinforcementDirection"/> of X direction</param>
+        /// <param name="directionY"></param>
+        /// <param name="width">The width of cross-section, in mm.</param>
+        public WebReinforcement(WebReinforcementDirection directionX, WebReinforcementDirection directionY, double width)
+			: this (directionX, directionY, Length.FromMillimeters(width))
+        {
+        }
+
+        /// <summary>
+        /// Web reinforcement for biaxial calculations, for different X and Y directions.
+        /// </summary>
+        /// <param name="directionX">The <see cref="WebReinforcementDirection"/> of X direction</param>
+        /// <param name="directionY"></param>
+        /// <param name="width">The width of cross-section.</param>
+        public WebReinforcement(WebReinforcementDirection directionX, WebReinforcementDirection directionY, Length width)
+        {
+            DirectionX = directionX;
+            DirectionY = directionY;
             _w = width;
         }
 
-        /// <summary>
-        /// Read the <see cref="WebReinforcementDirection"/>.
-        /// <para>Returns null if <paramref name="barDiameter"/> or <paramref name="barSpacing"/> are zero, or if <paramref name="steel"/> is null.</para>
-        /// </summary>
-        /// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
-        /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
-        /// <param name="steel">The steel objects for directions X and Y.</param>
-        /// <param name="width">The width (in mm) of cross-section.</param>
-        private WebReinforcementDirection ReadReinforcementDirection(double barDiameter, double barSpacing, Steel steel, double width)
-		{
-			if (steel is null || barDiameter.ApproxZero() || barSpacing.ApproxZero())
-				return null;
-
-			return
-				new WebReinforcementDirection(barDiameter, barSpacing, steel, width);
-		}
-
-		/// <summary>
-        /// Read the <see cref="WebReinforcementDirection"/>.
-        /// <para>Returns null if <paramref name="barDiameter"/> or <paramref name="barSpacing"/> are zero, or if <paramref name="steel"/> is null.</para>
-        /// </summary>
-        /// <param name="barDiameter">The bar diameter for directions X and Y.</param>
-        /// <param name="barSpacing">The bar spacing for directions X and Y.</param>
-        /// <param name="steel">The steel objects for directions X and Y.</param>
-        /// <param name="width">The width of cross-section.</param>
-		private WebReinforcementDirection ReadReinforcementDirection(Length barDiameter, Length barSpacing, Steel steel, Length width)
-		{
-			if (steel is null || barDiameter == Length.Zero || barSpacing == Length.Zero)
-				return null;
-
-			return
-				new WebReinforcementDirection(barDiameter, barSpacing, steel, width);
-		}
 
 		/// <summary>
 		/// Calculate angles (in radians) related to crack angle.
@@ -202,8 +220,8 @@ namespace Material.Reinforcement
 		{
 			// Calculate angles
 			double
-				thetaNx = theta1,
-				thetaNy = theta1 - Constants.PiOver2;
+				thetaNx = theta1 - (DirectionX?.Angle ?? 0),
+				thetaNy = theta1 - (DirectionY?.Angle ?? Constants.PiOver2);
 
 			return
 				(thetaNx, thetaNy);
@@ -215,10 +233,11 @@ namespace Material.Reinforcement
 		/// <param name="strainsState">Current <see cref="StrainState"/>.</param>
 		public void CalculateStresses(StrainState strainsState)
 		{
-			Strains = strainsState;
+			// Set strains
+			Strains = strainsState.Copy();
 				
-			// Calculate stresses in steel
-			SetStrainsAndStresses(Strains);
+			// Transform directions and calculate stresses in steel
+			SetStrainsAndStresses(StrainState.Transform(Strains, DirectionX?.Angle ?? 0));
 		}
 
 		/// <summary>
@@ -312,12 +331,8 @@ namespace Material.Reinforcement
 				cosNy = thetaNy.Cos(true);
 
 			// Check the maximum value of fc1 that can be transmitted across cracks
-			double
-				cos2x = cosNx * cosNx,
-				cos2y = cosNy * cosNy;
-
 			return
-				fcx * cos2x + fcy * cos2y;
+				fcx * cosNx * cosNx + fcy * cosNy * cosNy;
 		}
 
         /// <summary>
@@ -329,24 +344,26 @@ namespace Material.Reinforcement
 		        return null;
 
             if (DirectionX is null)
-	            return TransversalOnly(DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), DirectionY.Width);
+	            return DirectionYOnly(DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), DirectionY.Width, DirectionY.Angle);
 
             if (DirectionY is null)
-	            return HorizontalOnly(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionX.Width);
+	            return DirectionXOnly(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionX.Width, DirectionX.Angle);
 
             return
-				new WebReinforcement(DirectionX.BarDiameter, DirectionX.BarSpacing, DirectionX.Steel.Copy(), DirectionY.BarDiameter, DirectionY.BarSpacing, DirectionY.Steel.Copy(), Width);
+				new WebReinforcement(DirectionX.Copy(), DirectionY.Copy(), Width);
 		}
 
         /// <summary>
-        /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionX"/> only..
+        /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionX"/> only.
         /// </summary>
         /// <param name="barDiameter">The bar diameter (in mm) for X direction.</param>
         /// <param name="barSpacing">The bar spacing (in mm) for  X direction.</param>
         /// <param name="steel">The steel objects for X direction.</param>
         /// <param name="width">The width (in mm) of cross-section.</param>
-        public static WebReinforcement HorizontalOnly(double barDiameter, double barSpacing, Steel steel, double width) => new WebReinforcement(barDiameter, barSpacing, steel, 0, 0, null, width);
-        
+        /// <param name="angle">The angle (in radians) of <see cref="DirectionX"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public static WebReinforcement DirectionXOnly(double barDiameter, double barSpacing, Steel steel, double width, double angle = 0) => new WebReinforcement(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), null, width);
+
         /// <summary>
         /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionX"/> only..
         /// </summary>
@@ -354,7 +371,9 @@ namespace Material.Reinforcement
         /// <param name="barSpacing">The bar spacing for X direction.</param>
         /// <param name="steel">The steel objects for X direction.</param>
         /// <param name="width">The width of cross-section.</param>
-        public static WebReinforcement HorizontalOnly(Length barDiameter, Length barSpacing, Steel steel, Length width) => new WebReinforcement(barDiameter, barSpacing, steel, Length.Zero, Length.Zero, null, width);
+        /// <param name="angle">The angle (in radians) of <see cref="DirectionX"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public static WebReinforcement DirectionXOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle = 0) => new WebReinforcement(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), null, width);
 
         /// <summary>
         /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionY"/> only..
@@ -363,8 +382,10 @@ namespace Material.Reinforcement
         /// <param name="barSpacing">The bar spacing (in mm) for  Y direction.</param>
         /// <param name="steel">The steel objects for Y direction.</param>
         /// <param name="width">The width (in mm) of cross-section.</param>
-        public static WebReinforcement TransversalOnly(double barDiameter, double barSpacing, Steel steel, double width) => new WebReinforcement(0, 0, null, barDiameter, barSpacing, steel, width);
-        
+        /// <param name="angle">The angle (in radians) of <see cref="DirectionY"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public static WebReinforcement DirectionYOnly(double barDiameter, double barSpacing, Steel steel, double width, double angle = Constants.PiOver2) => new WebReinforcement(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), width);
+
         /// <summary>
         /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionY"/> only..
         /// </summary>
@@ -372,7 +393,9 @@ namespace Material.Reinforcement
         /// <param name="barSpacing">The bar spacing for  Y direction.</param>
         /// <param name="steel">The steel objects for Y direction.</param>
         /// <param name="width">The width of cross-section.</param>
-        public static WebReinforcement TransversalOnly(Length barDiameter, Length barSpacing, Steel steel, Length width) => new WebReinforcement(Length.Zero, Length.Zero, null, barDiameter, barSpacing, steel, width);
+        /// <param name="angle">The angle (in radians) of <see cref="DirectionY"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public static WebReinforcement DirectionYOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle = Constants.PiOver2) => new WebReinforcement(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), width);
 
 		public override string ToString()
 		{

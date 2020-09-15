@@ -57,14 +57,32 @@ namespace Material.Reinforcement
         public Steel Steel { get; }
 
         /// <summary>
+        /// Get the angle (in radians) of this <see cref="WebReinforcementDirection"/>, related to horizontal axis.
+        /// <para><see cref="Angle"/> is positive if counterclockwise.</para>
+        /// </summary>
+        public double Angle { get; }
+
+		/// <summary>
+        /// Returns true if <see cref="Angle"/> is approximately zero.
+        /// </summary>
+        public bool IsHorizontal => Angle.ApproxZero();
+
+		/// <summary>
+        /// Returns true if <see cref="Angle"/> is approximately 90 deg.
+        /// </summary>
+        public bool IsVertical => Angle.Approx(Constants.PiOver2);
+
+        /// <summary>
         /// Reinforcement direction object for web reinforcement.
         /// </summary>
         /// <param name="barDiameter">The bar diameter (in mm).</param>
         /// <param name="barSpacing">The bar spacing (in mm).</param>
         /// <param name="steel">The steel object.</param>
         /// <param name="width">The width of cross-section (in mm).</param>
-        public WebReinforcementDirection(double barDiameter, double barSpacing, Steel steel, double width)
-			: this (Length.FromMillimeters(barDiameter), Length.FromMillimeters(barSpacing), steel, Length.FromMillimeters(width))
+        /// <param name="angle">The angle (in radians) of this <see cref="WebReinforcementDirection"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public WebReinforcementDirection(double barDiameter, double barSpacing, Steel steel, double width, double angle)
+			: this (Length.FromMillimeters(barDiameter), Length.FromMillimeters(barSpacing), steel, Length.FromMillimeters(width), angle)
         {
         }
 
@@ -75,12 +93,15 @@ namespace Material.Reinforcement
         /// <param name="barSpacing">The bar spacing.</param>
         /// <param name="steel">The steel object.</param>
         /// <param name="width">The width of cross-section.</param>
-        public WebReinforcementDirection(Length barDiameter, Length barSpacing, Steel steel, Length width)
+        /// <param name="angle">The angle (in radians) of this <see cref="WebReinforcementDirection"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public WebReinforcementDirection(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle)
         {
 	        _phi  = barDiameter;
 	        _s    = barSpacing;
 	        Steel = steel;
 	        _w    = width;
+	        Angle = angle;
         }
 
 		/// <summary>
@@ -150,7 +171,38 @@ namespace Material.Reinforcement
 		/// <summary>
 		/// Return a copy of this <see cref="WebReinforcementDirection"/>.
 		/// </summary>
-		public WebReinforcementDirection Copy() => new WebReinforcementDirection(BarDiameter, BarSpacing, Steel, Width);
+		public WebReinforcementDirection Copy() => new WebReinforcementDirection(BarDiameter, BarSpacing, Steel.Copy(), Width, Angle);
+
+        /// <summary>
+        /// Read the <see cref="WebReinforcementDirection"/>.
+        /// <para>Returns null if <paramref name="barDiameter"/> or <paramref name="barSpacing"/> are zero, or if <paramref name="steel"/> is null.</para>
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter (in mm)</param>
+        /// <param name="barSpacing">The bar spacing (in mm).</param>
+        /// <param name="steel">The steel object.</param>
+        /// <param name="width">The width (in mm) of cross-section.</param>
+        /// <param name="angle">The angle (in radians) of this <see cref="WebReinforcementDirection"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public static WebReinforcementDirection Read(double barDiameter, double barSpacing, Steel steel, double width, double angle)
+        {
+            if (steel is null || barDiameter.ApproxZero() || barSpacing.ApproxZero())
+                return null;
+
+            return
+                new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle);
+        }
+
+        /// <summary>
+        /// Read the <see cref="WebReinforcementDirection"/>.
+        /// <para>Returns null if <paramref name="barDiameter"/> or <paramref name="barSpacing"/> are zero, or if <paramref name="steel"/> is null.</para>
+        /// </summary>
+        /// <param name="barDiameter">The bar diameter.</param>
+        /// <param name="barSpacing">The bar spacing .</param>
+        /// <param name="steel">The steel object.</param>
+        /// <param name="width">The width of cross-section.</param>
+        /// <param name="angle">The angle (in radians) of this <see cref="WebReinforcementDirection"/>, related to horizontal axis.
+        /// <para><paramref name="angle"/> is positive if counterclockwise.</para></param>
+        public static WebReinforcementDirection Read(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle) => Read(barDiameter.Millimeters, barSpacing.Millimeters, steel, width.Millimeters, angle);
 
         /// <summary>
         /// Calculate reinforcement ratio for distributed reinforcement.
@@ -177,6 +229,7 @@ namespace Material.Reinforcement
                 $"{phi} = {_phi}\n" + 
 	            $"s = {_s}\n" +
                 $"{rho}s = {Ratio:P}\n" +
+				$"Angle = {Angle.ToDegree():0.00} deg" +
                 Steel;
         }
 
