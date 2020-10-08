@@ -58,7 +58,7 @@ namespace Material.Concrete
 	    protected double ecr => Parameters.CrackStrain;
 	    protected double nu  => Parameters.Poisson;
 	    protected double Gf  => Parameters.FractureParameter;
-	    protected double Cs  => ConsiderCrackSlip && Cracked ? 0.55 : 0;
+	    protected double Cs  => ConsiderCrackSlip ? 0.55 : 1;
 
 	    /// <summary>
         /// Get concrete <see cref="Constitutive"/> object based on the <see cref="ConstitutiveModel"/>.
@@ -147,12 +147,7 @@ namespace Material.Concrete
 			if (strain.ApproxZero(1E-18))
 				return 0;
 
-			if (strain > 0)
-				return
-					TensileStress(strain, referenceLength, reinforcement);
-
-			return
-				CompressiveStress(strain);
+			return strain > 0 ? TensileStress(strain, referenceLength, reinforcement) : CompressiveStress(strain);
 		}
 
         /// <summary>

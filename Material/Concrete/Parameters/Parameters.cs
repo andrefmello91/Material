@@ -51,12 +51,12 @@ namespace Material.Concrete
         public LengthUnit AggUnit => _phiAg.Unit;
 
         /// <summary>
-        /// Get <see cref="AggregateType"/>.
+        /// Get/set <see cref="AggregateType"/>.
         /// </summary>
         public AggregateType Type
         {
 	        get => _type;
-	        protected set
+	        set
 	        {
 		        _type = value;
 		        UpdateParameters();

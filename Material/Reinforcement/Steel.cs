@@ -200,17 +200,17 @@ namespace Material.Reinforcement
 			char epsilon = (char) Characters.Epsilon;
 
 			string msg =
-				"Steel Parameters:\n" +
+				$"Steel Parameters:\n" +
 				$"fy = {_fy}\n" +
 				$"Es = {_Es}\n" +
-				$"{epsilon}y = " + $"{YieldStrain:0.##E+00}";
+				$"{epsilon}y = {YieldStrain:0.##E+00}";
 
 			if (ConsiderTensileHardening)
 			{
 				msg += "\n\n" +
 				       "Hardening parameters:\n" +
 				       $"Es = {_Esh}\n" +
-				       $"{epsilon}y = " + $"{HardeningStrain:0.##E+00}";
+				       $"{epsilon}y = {HardeningStrain:0.##E+00}";
 			}
 
             return msg;

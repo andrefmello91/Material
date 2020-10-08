@@ -95,7 +95,7 @@ namespace Material.Concrete
 
 			// Calculate the principal compressive stress in concrete
 			return
-				fp * n * ec2_ep / (n - 1 + Math.Pow(ec2_ep, n * k));
+				fp * n * ec2_ep / (n - 1 + ec2_ep.Pow(n * k));
 		}
 
 		/// <inheritdoc/>

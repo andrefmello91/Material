@@ -127,6 +127,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Web reinforcement for biaxial calculations, for equal X and Y directions.
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameter">The bar diameter (in mm) for directions X and Y.</param>
         /// <param name="barSpacing">The bar spacing (in mm) for directions X and Y.</param>
@@ -141,6 +142,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Web reinforcement for biaxial calculations, for equal X and Y directions.
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameter">The bar diameter for directions X and Y.</param>
         /// <param name="barSpacing">The bar spacing for directions X and Y.</param>
@@ -155,6 +157,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Web reinforcement for biaxial calculations, for different X and Y directions.
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameterX">The bar diameter (in mm) for X direction.</param>
         /// <param name="barSpacingX">The bar spacing (in mm) for X direction.</param>
@@ -172,6 +175,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Web reinforcement for biaxial calculations, for different X and Y directions.
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameterX">The bar diameter for X direction.</param>
         /// <param name="barSpacingX">The bar spacing for X direction.</param>
@@ -189,6 +193,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Web reinforcement for biaxial calculations, for different X and Y directions.
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="directionX">The <see cref="WebReinforcementDirection"/> of X direction</param>
         /// <param name="directionY"></param>
@@ -200,6 +205,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Web reinforcement for biaxial calculations, for different X and Y directions.
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="directionX">The <see cref="WebReinforcementDirection"/> of X direction</param>
         /// <param name="directionY"></param>
@@ -355,6 +361,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionX"/> only.
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameter">The bar diameter (in mm) for X direction.</param>
         /// <param name="barSpacing">The bar spacing (in mm) for  X direction.</param>
@@ -366,6 +373,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionX"/> only..
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameter">The bar diameter for X direction.</param>
         /// <param name="barSpacing">The bar spacing for X direction.</param>
@@ -377,6 +385,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionY"/> only..
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameter">The bar diameter (in mm) for Y direction.</param>
         /// <param name="barSpacing">The bar spacing (in mm) for  Y direction.</param>
@@ -388,6 +397,7 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Return a <see cref="WebReinforcement"/> with <see cref="DirectionY"/> only..
+        /// <para>Two reinforcing bars are considered at cross-section, one in each lateral face of structural element.</para>
         /// </summary>
         /// <param name="barDiameter">The bar diameter for Y direction.</param>
         /// <param name="barSpacing">The bar spacing for  Y direction.</param>
