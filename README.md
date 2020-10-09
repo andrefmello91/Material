@@ -1,7 +1,5 @@
 # Material
-**Concrete and steel implementation for nonlinear analysis.**
-
-Models for uniaxial and biaxial state of stresses.
+This library implements models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.
 
 Code parameters implemented for concrete: [*fib* Model Code 2010](https://www.fib-international.org/publications/fib-bulletins/model-code-2010-final-draft,-volume-1-detail.html) and [ABNT NBR 6118:2014](https://www.abntcatalogo.com.br/norma.aspx?ID=317027).
 
