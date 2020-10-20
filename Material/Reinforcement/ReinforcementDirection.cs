@@ -235,10 +235,17 @@ namespace Material.Reinforcement
 
         /// <summary>
         /// Compare two reinforcement objects.
+        /// <para>Returns true if <see cref="BarDiameter"/> and <see cref="BarSpacing"/> are equal.</para>
+        /// </summary>
+        /// <param name="other">The other reinforcement object.</param>
+        public virtual bool EqualsDiameterAndSpacing(WebReinforcementDirection other) => !(other is null) && BarDiameter.Approx(other.BarDiameter) && BarSpacing.Approx(other.BarSpacing);
+
+        /// <summary>
+        /// Compare two reinforcement objects.
         /// <para>Returns true if parameters are equal.</para>
         /// </summary>
         /// <param name="other">The other reinforcement object.</param>
-        public virtual bool Equals(WebReinforcementDirection other) => !(other is null) && (BarDiameter == other.BarDiameter && BarSpacing == other.BarSpacing && Steel == other.Steel);
+        public virtual bool Equals(WebReinforcementDirection other) => !(other is null) && EqualsDiameterAndSpacing(other) && Steel == other.Steel;
 
         public override bool Equals(object other) => other is WebReinforcementDirection reinforcement && Equals(reinforcement);
 

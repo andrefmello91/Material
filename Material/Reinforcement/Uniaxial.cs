@@ -13,7 +13,8 @@ namespace Material.Reinforcement
 	{
 		// Auxiliary fields
 		private Length _phi;
-		private Area _As, _Ac;
+		private Area _As;
+		private readonly Area _Ac;
 
 		/// <summary>
         /// Get number of reinforcing bars.
@@ -21,9 +22,9 @@ namespace Material.Reinforcement
 		public int NumberOfBars  { get; }
 
 		/// <summary>
-        /// Get bar diameter, in mm.
-        /// </summary>
-		public double BarDiameter { get; }
+		/// Get bar diameter, in mm.
+		/// </summary>
+		public double BarDiameter => _phi.Millimeters;
 
 		/// <summary>
 		/// Get reinforcement area, in mm2.
@@ -184,10 +185,17 @@ namespace Material.Reinforcement
 
 		/// <summary>
 		/// Compare two reinforcement objects.
+		/// <para>Returns true if <see cref="NumberOfBars"/> and <see cref="BarDiameter"/> are equal.</para>
+		/// </summary>
+		/// <param name="other">The other reinforcement object.</param>
+		public virtual bool EqualsNumberAndDiameter(UniaxialReinforcement other) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter);
+
+		/// <summary>
+		/// Compare two reinforcement objects.
 		/// <para>Returns true if parameters are equal.</para>
 		/// </summary>
 		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool Equals(UniaxialReinforcement other) => !(other is null) && (Area == other.Area && Steel == other.Steel);
+		public virtual bool Equals(UniaxialReinforcement other) => !(other is null) && EqualsNumberAndDiameter(other) && Steel == other.Steel;
 
 		public override bool Equals(object other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
 
