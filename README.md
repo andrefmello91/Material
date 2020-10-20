@@ -1,7 +1,5 @@
 # Material
-**Concrete and steel implementation for nonlinear analysis.**
-
-Models for uniaxial and biaxial state of stresses.
+This library implements models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.
 
 Code parameters implemented for concrete: [*fib* Model Code 2010](https://www.fib-international.org/publications/fib-bulletins/model-code-2010-final-draft,-volume-1-detail.html) and [ABNT NBR 6118:2014](https://www.abntcatalogo.com.br/norma.aspx?ID=317027).
 
@@ -9,4 +7,12 @@ Concrete behavior implemented: [MCFT by Vecchio and Collins (1986)](https://www.
 
 Steel behavior: Bilinear.
 
-Using library [MathNet.Numerics](https://github.com/mathnet/mathnet-numerics).
+This library uses:
+
+- [MathNet.Numerics](https://github.com/mathnet/mathnet-numerics) for Linear Algebra operations;
+
+- [Units.NET](https://github.com/angularsen/UnitsNet) for simple unit conversions;
+
+- [OnPlaneComponents](https://github.com/andrefmello91/On-Plane-Components) for stress and strain transformations;
+
+- [Extensions](https://github.com/andrefmello91/Extensions) for some numeric extensions.
