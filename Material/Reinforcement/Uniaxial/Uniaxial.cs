@@ -4,7 +4,7 @@ using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Material.Reinforcement
+namespace Material.Reinforcement.Uniaxial
 {
 	/// <summary>
 	/// Uniaxial reinforcement class.
@@ -36,37 +36,10 @@ namespace Material.Reinforcement
         /// </summary>
 		public Steel Steel { get; }
 
-        /// <summary>
-        /// Reinforcement for uniaxial calculations
-        /// </summary>
-        /// <param name="numberOfBars">The number of bars of reinforcement.</param>
-        /// <param name="barDiameter">The bar diameter (in mm).</param>
-        /// <param name="steel">The steel object.</param>
-        /// <param name="concreteArea">The concrete area (in mm2).</param>
-        public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0) 
-			:this (numberOfBars, Length.FromMillimeters(barDiameter), steel, UnitsNet.Area.FromSquareMillimeters(concreteArea))
-		{
-		}
-
-        /// <summary>
-        /// Reinforcement for uniaxial calculations
-        /// </summary>
-        /// <param name="numberOfBars">The number of bars of reinforcement.</param>
-        /// <param name="barDiameter">The bar diameter.</param>
-        /// <param name="steel">The steel object.</param>
-        /// <param name="concreteArea">The concrete area.</param>
-        public UniaxialReinforcement(int numberOfBars, Length barDiameter, Steel steel, Area concreteArea)
-		{
-			NumberOfBars = numberOfBars;
-
-			_phi  = barDiameter;
-			_As   = CalculateArea();
-			_Ac   = concreteArea;
-			Steel = steel;
-		}
-
-		// Verify if reinforcement is set
-		public bool IsSet => NumberOfBars > 0 && BarDiameter > 0;
+		/// <summary>
+		/// Verify if <see cref="NumberOfBars"/> and <see cref="BarDiameter"/> are not zero.
+		/// </summary>
+		public bool IsSet => NumberOfBars > 0 && !BarDiameter.ApproxZero(1E-6);
 
 		/// <summary>
 		/// Get reinforcement ratio in the cross-section.
@@ -87,6 +60,35 @@ namespace Material.Reinforcement
 		/// Get current force, in N.
 		/// </summary>
 		public double Force => Area * Steel.Stress;
+
+		/// <summary>
+		/// Reinforcement for uniaxial calculations
+		/// </summary>
+		/// <param name="numberOfBars">The number of bars of reinforcement.</param>
+		/// <param name="barDiameter">The bar diameter (in mm).</param>
+		/// <param name="steel">The steel object.</param>
+		/// <param name="concreteArea">The concrete area (in mm2).</param>
+		public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0) 
+			:this (numberOfBars, Length.FromMillimeters(barDiameter), steel, UnitsNet.Area.FromSquareMillimeters(concreteArea))
+		{
+		}
+
+        /// <summary>
+        /// Reinforcement for uniaxial calculations
+        /// </summary>
+        /// <param name="numberOfBars">The number of bars of reinforcement.</param>
+        /// <param name="barDiameter">The bar diameter.</param>
+        /// <param name="steel">The steel object.</param>
+        /// <param name="concreteArea">The concrete area.</param>
+        public UniaxialReinforcement(int numberOfBars, Length barDiameter, Steel steel, Area concreteArea)
+		{
+			NumberOfBars = numberOfBars;
+
+			_phi  = barDiameter;
+			_As   = CalculateArea();
+			_Ac   = concreteArea;
+			Steel = steel;
+		}
 
 		/// <summary>
 		/// Calculated reinforcement area, in mm2.
@@ -173,6 +175,11 @@ namespace Material.Reinforcement
 		{
 			Steel.SetStrainAndStress(strain);
 		}
+
+		/// <summary>
+		/// Create a copy of this <see cref="UniaxialReinforcement"/> object.
+		/// </summary>
+		public UniaxialReinforcement Copy() => new UniaxialReinforcement(NumberOfBars, _phi, Steel.Copy(), _Ac);
 
 		public override string ToString()
 		{

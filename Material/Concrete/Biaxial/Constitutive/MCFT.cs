@@ -1,9 +1,8 @@
 ﻿using System;
-using Material.Reinforcement;
+using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
-using OnPlaneComponents;
 
-namespace Material.Concrete
+namespace Material.Concrete.Biaxial
 {
 	/// <summary>
 	/// MCFT constitutive class.
@@ -16,23 +15,6 @@ namespace Material.Concrete
 		{
 		}
 
-        #region Uniaxial
-        /// <inheritdoc/>
-        protected override double CompressiveStress(double strain)
-		{
-			double n = strain / ec;
-
-			return
-				-fc * (2 * n - n * n);
-		}
-
-        // Calculate tensile stress in concrete
-        /// <inheritdoc/>
-        protected override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null) => strain <= ecr ? strain * Ec : CrackedStress(strain);
-
-        #endregion
-
-        #region Biaxial
         /// <inheritdoc/>
         protected override double CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 		{
@@ -72,7 +54,6 @@ namespace Material.Concrete
 			return
 				CrackedStress(ec1);
 		}
-		#endregion
 
 		/// <summary>
         /// Calculate tensile stress for cracked concrete.
@@ -86,7 +67,7 @@ namespace Material.Concrete
 		/// Compare two constitutive objects.
 		/// </summary>
 		/// <param name="other">The other constitutive object.</param>
-		public override bool Equals(Constitutive other) => other is MCFTConstitutive;
+		public override bool Equals(Material.Concrete.Constitutive other) => other is MCFTConstitutive;
 
 		public override bool Equals(object other) => other is MCFTConstitutive;
 

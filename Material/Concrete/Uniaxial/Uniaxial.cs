@@ -1,6 +1,6 @@
-﻿using Material.Reinforcement;
+﻿using Material.Reinforcement.Uniaxial;
 
-namespace Material.Concrete
+namespace Material.Concrete.Uniaxial
 {
 	/// <summary>
 	/// Concrete uniaxial class.
@@ -8,8 +8,18 @@ namespace Material.Concrete
 	public class UniaxialConcrete : Concrete
 	{
 		/// <summary>
-        /// Get/set concrete strain.
-        /// </summary>
+		/// Get concrete <see cref="Uniaxial.Constitutive"/>.
+		/// </summary>
+		public Constitutive Constitutive { get; }
+
+		/// <summary>
+		/// Returns true if concrete is cracked.
+		/// </summary>
+		public bool Cracked => Constitutive.Cracked;
+
+		/// <summary>
+		/// Get/set concrete strain.
+		/// </summary>
 		public double Strain { get; private set; }
 
 		/// <summary>
@@ -22,36 +32,6 @@ namespace Material.Concrete
         /// </summary>
 		public double Area { get; }
 
-		///<inheritdoc/>
-		/// <summary>
-		/// Concrete for uniaxial calculations.
-		/// </summary>
-		/// <param name="concreteArea">The concrete area, in mm2.</param>
-		public UniaxialConcrete(double strength, double aggregateDiameter, double concreteArea, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, parameterModel, constitutiveModel, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
-		{
-			Area = concreteArea;
-		}
-
-		///<inheritdoc/>
-		/// <summary>
-		/// Concrete for uniaxial calculations.
-		/// </summary>
-		///<param name="concreteArea">The concrete area, in mm2.</param>
-		public UniaxialConcrete(Parameters parameters, double concreteArea, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT) : base(parameters, constitutiveModel)
-		{
-			Area = concreteArea;
-		}
-
-		///<inheritdoc/>
-		/// <summary>
-		/// Concrete for uniaxial calculations.
-		/// </summary>
-		///<param name="concreteArea">The concrete area, in mm2.</param>
-		public UniaxialConcrete(Parameters parameters, double concreteArea, in Constitutive constitutive) : base(parameters, constitutive)
-		{
-			Area = concreteArea;
-		}
-
 		/// <summary>
 		/// Calculate current secant module of concrete, in MPa.
 		/// </summary>
@@ -63,7 +43,7 @@ namespace Material.Concrete
 		public double Stiffness => Ec * Area;
 
 		/// <summary>
-		/// Calculate maximum force resisted by concrete, in N.
+		/// Calculate maximum force resisted by concrete, in N (negative value).
 		/// </summary>
 		public double MaxForce => -fc * Area;
 
@@ -72,21 +52,37 @@ namespace Material.Concrete
 		/// </summary>
 		public double Force => Stress * Area;
 
+		///<inheritdoc/>
+		/// <summary>
+		/// Concrete for uniaxial calculations.
+		/// </summary>
+		/// <param name="concreteArea">The concrete area, in mm2.</param>
+		public UniaxialConcrete(double strength, double aggregateDiameter, double concreteArea, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel model = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+			: this(Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain), concreteArea, model)
+		{
+		}
+
+		///<inheritdoc/>
+		/// <summary>
+		/// Concrete for uniaxial calculations.
+		/// </summary>
+		///<param name="concreteArea">The concrete area, in mm2.</param>
+		public UniaxialConcrete(Parameters parameters, double concreteArea, ConstitutiveModel model = ConstitutiveModel.MCFT) 
+			: base(parameters, model)
+		{
+			Area         = concreteArea;
+			Constitutive = Constitutive.Read(Model, Parameters);
+		}
+
 		/// <summary>
 		/// Calculate force (in N) given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="referenceLength">The reference length (only for DSFM).</param>
 		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
-		public double CalculateForce(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
-		{
-			double stress = CalculateStress(strain, referenceLength, reinforcement);
+		public double CalculateForce(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null) => Area * CalculateStress(strain, referenceLength, reinforcement);
 
-			return
-				stress * Area;
-		}
-
-        /// <summary>
+		/// <summary>
         /// Calculate stress (in MPa) given strain.
         /// </summary>
         /// <param name="strain">Current strain.</param>
@@ -98,23 +94,17 @@ namespace Material.Concrete
 		/// Set concrete strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public void SetStrain(double strain)
-		{
-			Strain = strain;
-		}
+		public void SetStrain(double strain) => Strain = strain;
 
-        /// <summary>
+		/// <summary>
         /// Set concrete stress (in MPa) given strain.
         /// </summary>
         /// <param name="strain">Current strain.</param>
         /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
         /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
-		public void SetStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
-		{
-			Stress = CalculateStress(strain, referenceLength, reinforcement);
-		}
+		public void SetStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null) => Stress = CalculateStress(strain, referenceLength, reinforcement);
 
-        /// <summary>
+		/// <summary>
         /// Set concrete strain and calculate stress, in MPa.
         /// </summary>
         /// <param name="strain">Current strain.</param>
@@ -125,30 +115,17 @@ namespace Material.Concrete
 			SetStrain(strain);
 			SetStress(strain, referenceLength, reinforcement);
 		}
-
-
+		
         /// <summary>
         /// Return a copy of this <see cref="UniaxialConcrete"/> object.
         /// </summary>
-        public UniaxialConcrete Copy() => new UniaxialConcrete(Parameters, Area, Constitutive);
+        public UniaxialConcrete Copy() => new UniaxialConcrete(Parameters, Area, Model);
 
         /// <inheritdoc/>
-        public override bool Equals(Concrete other)
-		{
-			if (other != null && other is UniaxialConcrete)
-				return Parameters == other.Parameters && Constitutive == other.Constitutive;
+        public override bool Equals(Concrete other) => other is UniaxialConcrete && (Parameters == other.Parameters && Model == other.Model);
 
-			return false;
-		}
+        public override bool Equals(object obj) => obj is UniaxialConcrete concrete && Equals(concrete);
 
-		public override bool Equals(object obj)
-		{
-			if (obj != null && obj is UniaxialConcrete concrete)
-				return Equals(concrete);
-
-			return false;
-		}
-
-		public override int GetHashCode() => Parameters.GetHashCode();
+        public override int GetHashCode() => Parameters.GetHashCode();
 	}
 }

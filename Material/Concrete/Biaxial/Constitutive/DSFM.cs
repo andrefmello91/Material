@@ -1,9 +1,9 @@
 ﻿using System;
 using Extensions.Number;
-using Material.Reinforcement;
+using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
 
-namespace Material.Concrete
+namespace Material.Concrete.Biaxial
 {
 	/// <summary>
 	/// DSFM constitutive class.
@@ -18,59 +18,6 @@ namespace Material.Concrete
 		{
 		}
 
-		#region Uniaxial
-		/// <inheritdoc/>
-		protected override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
-		{
-			// Check if concrete is cracked
-			if (strain <= ecr) // Not cracked
-				return
-					Ec * strain;
-
-			// Cracked
-			// Calculate concrete post-cracking stress associated with tension softening
-			double fc1a = TensionSoftening(strain, referenceLength);
-
-			// Calculate concrete postcracking stress associated with tension stiffening
-			double fc1b = TensionStiffening(strain, reinforcement);
-
-			// Return maximum
-			return
-				Math.Max(fc1a, fc1b);
-		}
-
-        /// <inheritdoc/>
-        protected override double CompressiveStress(double strain)
-		{
-			// Calculate the principal compressive stress in concrete
-			return
-				CompressiveStress(strain, 0);
-		}
-
-        /// <summary>
-        /// Calculate concrete post-cracking stress associated with tension stiffening (for <see cref="UniaxialConcrete"/>).
-        /// </summary>
-        /// <param name="strain">The tensile strain to calculate stress.</param>
-        /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/>.</param>
-        private double TensionStiffening(double strain, UniaxialReinforcement reinforcement)
-        {
-	        // Calculate coefficient for tension stiffening effect
-	        double m = reinforcement.TensionStiffeningCoefficient();
-
-	        // Calculate concrete postcracking stress associated with tension stiffening
-	        double fc1b = ft / (1 + Math.Sqrt(2.2 * m * strain));
-
-	        // Check the maximum value of fc1 that can be transmitted across cracks
-	        double fc1s = reinforcement.MaximumPrincipalTensileStress();
-
-	        // Return minimum
-	        return
-		        Math.Min(fc1b, fc1s);
-        }
-
-        #endregion
-
-        #region Biaxial
         /// <inheritdoc/>
         protected override double CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 		{
@@ -147,8 +94,6 @@ namespace Material.Concrete
 				Math.Min(fc1b, fc1s);
 		}
 
-        #endregion
-
         /// <summary>
         /// Calculate compression softening factor (beta D).
         /// </summary>
@@ -188,7 +133,7 @@ namespace Material.Concrete
 		/// Compare two constitutive objects.
 		/// </summary>
 		/// <param name="other">The other constitutive object.</param>
-		public override bool Equals(Constitutive other) => other is DSFMConstitutive;
+		public override bool Equals(Material.Concrete.Constitutive other) => other is DSFMConstitutive;
 
 		public override bool Equals(object other) => other is DSFMConstitutive;
 

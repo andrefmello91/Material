@@ -1,4 +1,6 @@
 ﻿using System;
+using Material.Concrete.Biaxial;
+using Material.Concrete.Uniaxial;
 
 namespace Material.Concrete
 {
@@ -14,7 +16,7 @@ namespace Material.Concrete
 	/// <summary>
     /// Base class for concrete object.
     /// </summary>
-	public class Concrete : IEquatable<Concrete>
+	public abstract class Concrete : IEquatable<Concrete>
 	{
 		/// <summary>
         /// Get concrete <see cref="Material.Concrete.Parameters"/>.
@@ -22,14 +24,9 @@ namespace Material.Concrete
 		public Parameters Parameters { get; }
 
 		/// <summary>
-		/// Get concrete <see cref="Material.Concrete.Constitutive"/>.
-		/// </summary>
-		public Constitutive Constitutive { get; }
-
-		/// <summary>
-        /// Returns true if concrete is cracked.
+        /// Get concrete <see cref="ConstitutiveModel"/>.
         /// </summary>
-		public bool Cracked => Constitutive.Cracked;
+		public ConstitutiveModel Model { get; }
 
         /// <summary>
         /// Get <see cref="AggregateType"/>.
@@ -47,40 +44,27 @@ namespace Material.Concrete
         /// <param name="strength">Concrete compressive strength, in MPa.</param>
         /// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
         /// <param name="parameterModel">The model for calculating concrete parameters.</param>
-        /// <param name="constitutiveModel">The concrete constitutive model.</param>
+        /// <param name="model">The concrete constitutive model.</param>
         /// <param name="aggregateType">The type of aggregate.</param>
         /// <param name="tensileStrength">Concrete tensile strength, in MPa.</param>
         /// <param name="elasticModule">Concrete initial elastic module, in MPa.</param>
         /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
         /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
-        public Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+        protected Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel model = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+			: this (Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain), model)
         {
-			// Initiate parameters
-			Parameters   = Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain);
-			Constitutive = Constitutive.ReadConstitutive(constitutiveModel, Parameters);
 		}
 
         /// <summary>
         /// Base concrete object.
         /// </summary>
         /// <param name="parameters">Concrete parameters object.</param>
-        /// <param name="constitutiveModel">The base model of concrete behavior.</param>
-        public Concrete(Parameters parameters, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT)
-			: this(parameters, Constitutive.ReadConstitutive(constitutiveModel, parameters))
-		{
-		}
-
-        /// <summary>
-        /// Base concrete object.
-        /// </summary>
-        /// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.Parameters"/>).</param>
-        /// <param name="constitutive">Concrete constitutive object (<see cref="Material.Concrete.Constitutive"/>).</param>
-        public Concrete(Parameters parameters, Constitutive constitutive)
-		{           
-			// Initiate parameters
-			Parameters   = parameters;
-			Constitutive = constitutive;
-		}
+        /// <param name="model">The base model of concrete behavior.</param>
+        protected Concrete(Parameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+        {
+	        Parameters = parameters;
+	        Model      = model;
+        }
 
         // Get parameters
         public double fc  => Parameters.Strength;
@@ -97,16 +81,20 @@ namespace Material.Concrete
         /// </summary>
         /// <param name="direction">Uniaxial or biaxial?</param>
         /// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.Parameters"/>).</param>
-        /// <param name="constitutive">Concrete constitutive object (<see cref="Material.Concrete.Constitutive"/>).</param>
+        /// <param name="model">Concrete constitutive object (<see cref="ConstitutiveModel"/>).</param>
         ///<param name="concreteArea">The concrete area, in mm2 (only for uniaxial case).</param>
         /// <returns></returns>
-        public static Concrete ReadConcrete(Direction direction, Parameters parameters, Constitutive constitutive, double concreteArea = 0)
-		{
-			if (direction == Direction.Uniaxial)
-				return new UniaxialConcrete(parameters, concreteArea, constitutive);
+        public static Concrete ReadConcrete(Direction direction, Parameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT, double concreteArea = 0)
+        {
+	        switch (direction)
+	        {
+		        case Direction.Uniaxial:
+			        return new UniaxialConcrete(parameters, concreteArea, model);
 
-			return new BiaxialConcrete(parameters, constitutive);
-		}
+		        default:
+			        return new BiaxialConcrete(parameters, model);
+	        }
+        }
 
         public override string ToString() => Parameters.ToString();
 
@@ -115,7 +103,7 @@ namespace Material.Concrete
 		/// <para>Returns true if parameters and constitutive model are equal.</para>
 		/// </summary>
 		/// <param name="other">The other concrete object.</param>
-		public virtual bool Equals(Concrete other) => !(other is null) && (Parameters == other.Parameters && Constitutive == other.Constitutive);
+		public virtual bool Equals(Concrete other) => !(other is null) && Parameters == other.Parameters && Model == other.Model;
 
 		public override bool Equals(object obj) => obj is Concrete concrete && Equals(concrete);
 

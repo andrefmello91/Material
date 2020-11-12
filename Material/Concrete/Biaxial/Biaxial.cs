@@ -1,22 +1,32 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
-using Material.Reinforcement;
+using Material.Reinforcement.Biaxial;
 using OnPlaneComponents;
 
-namespace Material.Concrete
+namespace Material.Concrete.Biaxial
 {
 	public class BiaxialConcrete : Concrete
 	{
 		/// <summary>
-        /// Get/set concrete <see cref="StrainState"/>.
-        /// </summary>
+		/// Get concrete <see cref="Biaxial.Constitutive"/>.
+		/// </summary>
+		public Constitutive Constitutive { get; }
+
+		/// <summary>
+		/// Returns true if concrete is cracked.
+		/// </summary>
+		public bool Cracked => Constitutive.Cracked;
+
+		/// <summary>
+		/// Get/set concrete <see cref="StrainState"/>.
+		/// </summary>
 		public StrainState Strains { get; private set; }
 
 		/// <summary>
         /// Get/set concrete <see cref="PrincipalStrainState"/>.
         /// </summary>
-		public PrincipalStrainState PrincipalStrains { get; private  set; }
+		public PrincipalStrainState PrincipalStrains { get; private set; }
 
 		/// <summary>
         /// Get/set concrete <see cref="StressState"/>.
@@ -32,7 +42,8 @@ namespace Material.Concrete
 		/// <summary>
 		/// Concrete for membrane calculations.
 		/// </summary>
-		public BiaxialConcrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0) : base(strength, aggregateDiameter, parameterModel, constitutiveModel, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain)
+		public BiaxialConcrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel model = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+			: this(Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain), model)
 		{
 		}
 
@@ -40,16 +51,10 @@ namespace Material.Concrete
 		/// <summary>
 		/// Concrete for membrane calculations.
 		/// </summary>
-		public BiaxialConcrete(Parameters parameters, ConstitutiveModel constitutiveModel = ConstitutiveModel.MCFT) : base(parameters, constitutiveModel)
+		public BiaxialConcrete(Parameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+			: base(parameters, model)
 		{
-		}
-
-		///<inheritdoc/>
-		/// <summary>
-		/// Concrete for membrane calculations.
-		/// </summary>
-		public BiaxialConcrete(Parameters parameters, Constitutive constitutive) : base(parameters, constitutive)
-		{
+			Constitutive = Constitutive.Read(Model, Parameters);
 		}
 
         /// <summary>
@@ -162,7 +167,7 @@ namespace Material.Concrete
         /// <summary>
         /// Return a copy of this <see cref="BiaxialConcrete"/> object.
         /// </summary>
-        public BiaxialConcrete Copy() => new BiaxialConcrete(Parameters, Constitutive);
+        public BiaxialConcrete Copy() => new BiaxialConcrete(Parameters, Model);
 
         /// <inheritdoc/>
         public override bool Equals(Concrete other) => other is BiaxialConcrete && base.Equals(other);

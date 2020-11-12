@@ -31,8 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MathNet.Numerics, Version=4.11.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MathNet.Numerics.4.11.0\lib\net461\MathNet.Numerics.dll</HintPath>
+    <Reference Include="MathNet.Numerics, Version=4.12.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\SPMTool\packages\MathNet.Numerics.4.12.0\lib\net461\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics.Data.Text, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.Data.Text.4.0.0\lib\net40\MathNet.Numerics.Data.Text.dll</HintPath>
@@ -51,28 +51,32 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnitsNet, Version=4.0.0.0, Culture=neutral, PublicKeyToken=f8601875a1f041da, processorArchitecture=MSIL">
-      <HintPath>..\..\SPMTool\packages\UnitsNet.4.67.0\lib\net40\UnitsNet.dll</HintPath>
+      <HintPath>..\..\SPMTool\packages\UnitsNet.4.73.0\lib\net40\UnitsNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Concrete\Biaxial\Constitutive\Constitutive.cs" />
     <Compile Include="Concrete\Concrete.cs" />
-    <Compile Include="Concrete\Constitutive\Constitutive.cs" />
-    <Compile Include="Concrete\Biaxial.cs" />
-    <Compile Include="Concrete\Constitutive\DSFM.cs" />
-    <Compile Include="Concrete\Constitutive\MCFT.cs" />
+    <Compile Include="Concrete\Constitutive.cs" />
+    <Compile Include="Concrete\Biaxial\Biaxial.cs" />
+    <Compile Include="Concrete\Biaxial\Constitutive\DSFM.cs" />
+    <Compile Include="Concrete\Biaxial\Constitutive\MCFT.cs" />
     <Compile Include="Concrete\Parameters\Custom.cs" />
     <Compile Include="Concrete\Parameters\DSFM.cs" />
     <Compile Include="Concrete\Parameters\MC2010.cs" />
     <Compile Include="Concrete\Parameters\MCFT.cs" />
     <Compile Include="Concrete\Parameters\NBR6118.cs" />
     <Compile Include="Concrete\Parameters\Parameters.cs" />
-    <Compile Include="Concrete\Uniaxial.cs" />
+    <Compile Include="Concrete\Uniaxial\Constitutive\Constitutive.cs" />
+    <Compile Include="Concrete\Uniaxial\Constitutive\DSFM.cs" />
+    <Compile Include="Concrete\Uniaxial\Constitutive\MCFT.cs" />
+    <Compile Include="Concrete\Uniaxial\Uniaxial.cs" />
     <Compile Include="Characters.cs" />
-    <Compile Include="Reinforcement\WebReinforcement.cs" />
+    <Compile Include="Reinforcement\Biaxial\WebReinforcement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reinforcement\ReinforcementDirection.cs" />
+    <Compile Include="Reinforcement\Biaxial\ReinforcementDirection.cs" />
     <Compile Include="Reinforcement\Steel.cs" />
-    <Compile Include="Reinforcement\Uniaxial.cs" />
+    <Compile Include="Reinforcement\Uniaxial\Uniaxial.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

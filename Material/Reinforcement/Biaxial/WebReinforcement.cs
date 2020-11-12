@@ -10,7 +10,7 @@ using UnitsNet.Units;
 using OnPlaneComponents;
 using static OnPlaneComponents.StrainRelations;
 
-namespace Material.Reinforcement
+namespace Material.Reinforcement.Biaxial
 {
 	/// <summary>
 	/// Web reinforcement class.

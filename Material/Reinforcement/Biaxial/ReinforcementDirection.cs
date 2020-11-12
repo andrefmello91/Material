@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Extensions.Number;
 using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Material.Reinforcement
+namespace Material.Reinforcement.Biaxial
 {
     /// <summary>
     /// Reinforcement direction class for web reinforcement.
@@ -229,7 +225,7 @@ namespace Material.Reinforcement
                 $"{phi} = {_phi}\n" + 
 	            $"s = {_s}\n" +
                 $"{rho}s = {Ratio:P}\n" +
-				$"Angle = {Angle.ToDegree():0.00} deg" +
+				$"Angle = {Angle.ToDegree():0.00} deg\n" +
                 Steel;
         }
 
