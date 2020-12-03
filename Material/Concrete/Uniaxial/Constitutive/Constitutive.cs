@@ -46,23 +46,21 @@ namespace Material.Concrete.Uniaxial
         /// <para>For <seealso cref="UniaxialConcrete"/>.</para>
         /// </summary>
         /// <param name="strain">Current strain.</param>
-        /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
         /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> reinforcement (only for <see cref="DSFMConstitutive"/>).</param>
-        public double CalculateStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
+        public double CalculateStress(double strain, UniaxialReinforcement reinforcement = null)
 		{
-			if (strain.ApproxZero(1E-18))
+			if (strain.ApproxZero())
 				return 0;
 
-			return strain > 0 ? TensileStress(strain, referenceLength, reinforcement) : CompressiveStress(strain);
+			return strain > 0 ? TensileStress(strain, reinforcement) : CompressiveStress(strain);
 		}
 
         /// <summary>
         /// Calculate tensile stress for <see cref="UniaxialConcrete"/> case.
         /// </summary>
         /// <param name="strain">Tensile strain in concrete.</param>
-        /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
         /// <param name="reinforcement">The <see cref="UniaxialReinforcement"/> (only for <see cref="DSFMConstitutive"/>).</param>
-        protected abstract double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null);
+        protected abstract double TensileStress(double strain, UniaxialReinforcement reinforcement = null);
 
         /// <summary>
         /// Calculate compressive stress for <see cref="UniaxialConcrete"/> case.

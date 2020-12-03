@@ -9,6 +9,8 @@ namespace Material.Concrete.Uniaxial
 	/// </summary>
 	public class DSFMConstitutive : Constitutive
 	{
+		private double? _refLength;
+
 		// Constructor
 		/// <inheritdoc/>
 		/// <param name="parameters">Concrete parameters object.</param>
@@ -18,7 +20,7 @@ namespace Material.Concrete.Uniaxial
 		}
 
 		/// <inheritdoc/>
-		protected override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null)
+		protected override double TensileStress(double strain, UniaxialReinforcement reinforcement = null)
 		{
 			// Check if concrete is cracked
 			if (strain <= ecr) // Not cracked
@@ -27,7 +29,7 @@ namespace Material.Concrete.Uniaxial
 
 			// Cracked
 			// Calculate concrete post-cracking stress associated with tension softening
-			double fc1a = TensionSoftening(strain, referenceLength);
+			double fc1a = TensionSoftening(strain, reinforcement);
 
 			// Calculate concrete postcracking stress associated with tension stiffening
 			double fc1b = TensionStiffening(strain, reinforcement);
@@ -48,7 +50,7 @@ namespace Material.Concrete.Uniaxial
 			// Calculate fp and ep
 			double
 				fp = -fc,
-				ep = ec;
+				ep =  ec;
 
 			// Calculate parameters of concrete
 			double
@@ -67,7 +69,10 @@ namespace Material.Concrete.Uniaxial
 		/// <param name="strain">The tensile strain to calculate stress.</param>
 		/// <param name="reinforcement">The <see cref="UniaxialReinforcement"/>.</param>
 		private double TensionStiffening(double strain, UniaxialReinforcement reinforcement)
-        {
+		{
+			if (reinforcement is null)
+				return 0;
+
 	        // Calculate coefficient for tension stiffening effect
 	        double m = reinforcement.TensionStiffeningCoefficient();
 
@@ -82,17 +87,29 @@ namespace Material.Concrete.Uniaxial
 		        Math.Min(fc1b, fc1s);
         }
 
-        /// <summary>
-        /// Calculate concrete post-cracking stress associated with tension softening.
-        /// </summary>
-        /// <param name="strain">The tensile strain to calculate stress.</param>
-        /// <param name="referenceLength">The reference length.</param>
-        private double TensionSoftening(double strain, double referenceLength)
+		/// <summary>
+		/// Calculate concrete post-cracking stress associated with tension softening.
+		/// </summary>
+		/// <param name="strain">The tensile strain to calculate stress.</param>
+		/// <param name="reinforcement">The <see cref="UniaxialReinforcement"/>.</param>
+        private double TensionSoftening(double strain, UniaxialReinforcement reinforcement)
         {
-	        double ets = 2 * Gf / (ft * referenceLength);
+	        var ets = 2 * Gf / (ft * ReferenceLength(reinforcement));
 
 	        return
 		        ft * (1 - (strain - ecr) / (ets - ecr));
+        }
+
+		/// <summary>
+		/// Calculate reference length.
+		/// </summary>
+		/// <param name="reinforcement">The <see cref="UniaxialReinforcement"/>.</param>
+        private double ReferenceLength(UniaxialReinforcement reinforcement)
+        {
+			if (!_refLength.HasValue)
+				_refLength = reinforcement is null ? 21 : 21 + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio;
+
+	        return _refLength.Value;
         }
 
         public override string ToString() => "DSFM";

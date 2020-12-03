@@ -23,9 +23,8 @@ namespace Material.Concrete.Uniaxial
 				-fc * (2 * n - n * n);
 		}
 
-        // Calculate tensile stress in concrete
         /// <inheritdoc/>
-        protected override double TensileStress(double strain, double referenceLength = 0, UniaxialReinforcement reinforcement = null) => strain <= ecr ? strain * Ec : CrackedStress(strain);
+        protected override double TensileStress(double strain, UniaxialReinforcement reinforcement = null) => strain <= ecr ? strain * Ec : CrackedStress(strain);
 
 		/// <summary>
         /// Calculate tensile stress for cracked concrete.
