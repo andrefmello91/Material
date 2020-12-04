@@ -29,7 +29,7 @@ namespace Material.Concrete.Biaxial
 				f2max  = Math.Max(f2maxA, -fc) * confinementFactor;
 
 			// Calculate the principal compressive stress in concrete
-			double n = ec2 / ec;
+			var n = ec2 / ec;
 
 			return
 				f2max * (2 * n - n * n);

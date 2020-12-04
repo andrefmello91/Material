@@ -226,12 +226,12 @@ namespace Material.Reinforcement
 			if (other is null)
 				return false;
 
-			bool basic = YieldStress == other.YieldStress && ElasticModule == other.ElasticModule && UltimateStrain == other.UltimateStrain;
+			bool basic = YieldStress.Approx(other.YieldStress) && ElasticModule.Approx(other.ElasticModule) && UltimateStrain.Approx(other.UltimateStrain);
 
             if (!other.ConsiderTensileHardening)
 				return basic;
 
-            return basic && HardeningModule == other.HardeningModule && HardeningStrain == other.HardeningStrain;
+            return basic && HardeningModule.Approx(other.HardeningModule) && HardeningStrain.Approx(other.HardeningStrain);
 		}
 
 		public override bool Equals(object other) => other is Steel steel && Equals(steel);

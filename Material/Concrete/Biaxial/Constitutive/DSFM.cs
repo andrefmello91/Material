@@ -111,7 +111,7 @@ namespace Material.Concrete.Biaxial
             double Cd = 0.35 * (r - 0.28).Pow(0.8);
 
 			return
-				Math.Min(1 / (1 + Cs * Cd), 1);
+				Math.Min(1.0 / (1 + Cs * Cd), 1);
 		}
 
         /// <summary>
@@ -121,10 +121,10 @@ namespace Material.Concrete.Biaxial
         /// <param name="referenceLength">The reference length.</param>
         private double TensionSoftening(double strain, double referenceLength)
         {
-	        double ets = 2 * Gf / (ft * referenceLength);
+	        double ets = 2.0 * Gf / (ft * referenceLength);
 
 	        return
-		        ft * (1 - (strain - ecr) / (ets - ecr));
+		        ft * (1.0 - (strain - ecr) / (ets - ecr));
         }
 
         public override string ToString() => "DSFM";

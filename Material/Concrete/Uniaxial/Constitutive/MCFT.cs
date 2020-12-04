@@ -17,7 +17,7 @@ namespace Material.Concrete.Uniaxial
         /// <inheritdoc/>
         protected override double CompressiveStress(double strain)
 		{
-			double n = strain / ec;
+			var n = strain / ec;
 
 			return
 				-fc * (2 * n - n * n);

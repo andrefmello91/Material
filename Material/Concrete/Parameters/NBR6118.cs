@@ -58,12 +58,12 @@ namespace Material.Concrete
 
 		private double AlphaI() => Math.Min(0.8 + 0.2 * Strength / 80, 1);
 
-		private double fctm() => Strength <= 50 ? 0.3 * Strength.Pow(2 / 3) : 2.12 * Math.Log(1 + 0.11 * Strength);
+		private double fctm() => Strength <= 50 ? 0.3 * Strength.Pow(2.0 / 3) : 2.12 * Math.Log(1 + 0.11 * Strength);
 
 		private double Eci() =>
 			Strength <= 50
 				? AlphaE() * 5600 * Math.Sqrt(Strength)
-				: 21500 * AlphaE() *(0.1 * Strength + 1.25).Pow(1 / 3);
+				: 21500 * AlphaE() *(0.1 * Strength + 1.25).Pow(1.0 / 3);
 
 		private double Ecs() => AlphaI() * InitialModule;
 

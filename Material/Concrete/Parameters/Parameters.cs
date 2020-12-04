@@ -217,7 +217,7 @@ namespace Material.Concrete
         {
 	        switch (parameters)
 	        {
-		        case NBR6118Parameters _ :
+		        case NBR6118Parameters _:
 			        return ParameterModel.NBR6118;
 
 		        case MC2010Parameters _ :

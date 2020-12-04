@@ -28,7 +28,7 @@ namespace Material.Concrete
 		};
 
         ///<inheritdoc/>
-        public override double FractureParameter => 0.073 * Math.Pow(Strength, 0.18);
+        public override double FractureParameter => 0.073 * Strength.Pow(0.18);
 
         /// <summary>
         /// Parameters based on fib Model Code 2010.
@@ -74,11 +74,11 @@ namespace Material.Concrete
 			}
 		}
 
-		private double fctm() => Strength <= 50 ? 0.3 * Strength.Pow(2 / 3) : 2.12 * Math.Log(1 + 0.1 * Strength);
+		private double fctm() => Strength <= 50 ? 0.3 * Strength.Pow(2.0 / 3) : 2.12 * Math.Log(1 + 0.1 * Strength);
 
-		private double Eci() => 21500 * AlphaE() * (Strength / 10).Pow(1 / 3);
+		private double Eci() => 21500 * AlphaE() * (0.1 * Strength).Pow(1.0 / 3);
 
-		private double ec1() => -1.6 / 1000 *(Strength / 10).Pow(0.25);
+		private double ec1() => -1.6 / 1000 *(0.1 * Strength).Pow(0.25);
 
 		private double Ec1() => Strength / ec1();
 

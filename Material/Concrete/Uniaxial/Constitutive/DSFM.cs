@@ -94,10 +94,10 @@ namespace Material.Concrete.Uniaxial
 		/// <param name="reinforcement">The <see cref="UniaxialReinforcement"/>.</param>
         private double TensionSoftening(double strain, UniaxialReinforcement reinforcement)
         {
-	        var ets = 2 * Gf / (ft * ReferenceLength(reinforcement));
+	        var ets = 2.0 * Gf / (ft * ReferenceLength(reinforcement));
 
 	        return
-		        ft * (1 - (strain - ecr) / (ets - ecr));
+		        ft * (1.0 - (strain - ecr) / (ets - ecr));
         }
 
 		/// <summary>
