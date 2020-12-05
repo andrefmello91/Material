@@ -137,7 +137,7 @@ namespace Material.Concrete
 		public double TransversalModule => SecantModule / 2.4;
 
 		/// <summary>
-        /// Get fracture parameter.
+        /// Get fracture parameter, in N/mm.
         /// </summary>
 		public virtual double FractureParameter => 0.075;
 

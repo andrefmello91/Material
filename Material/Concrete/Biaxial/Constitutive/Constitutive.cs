@@ -143,10 +143,10 @@ namespace Material.Concrete.Biaxial
 		    if (!Cracked)
 		    {
 			    // Calculate current cracking stress
-			    double fcr1 = ft * (1 - ec2 / ec);
+			    var fcr1 = ft * (1 - ec2 / ec);
 
 			    // Verify limits
-			    double fcr = Math.Max(fcr1, 0.25 * ft);
+			    var fcr = Math.Max(fcr1, 0.25 * ft);
 			    fcr = Math.Min(fcr, ft);
 
 			    // Verify is concrete is cracked
@@ -207,7 +207,7 @@ namespace Material.Concrete.Biaxial
         private double ConfinementFactor(double transverseStress)
 	    {
 			// Get absolute value
-		    double fcn_fc = (transverseStress / fc).Abs();
+		    var fcn_fc = (transverseStress / fc).Abs();
 
 		    return
 			    1 + 0.92 * fcn_fc - 0.76 * fcn_fc * fcn_fc;

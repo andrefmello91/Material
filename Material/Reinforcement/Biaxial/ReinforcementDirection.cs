@@ -119,7 +119,7 @@ namespace Material.Reinforcement.Biaxial
         /// Get reinforcement capacity reserve for tension.
         /// <para>(<see cref="YieldStress"/> - <see cref="Stress"/>).</para>
         /// </summary>
-        public double CapacityReserve => Stress > 0 ? YieldStress - Stress : YieldStress;
+        public double CapacityReserve => YieldStress - Stress.Abs();
 
         /// <summary>
         /// Get reinforcement stiffness (ratio multiplied by steel secant module).

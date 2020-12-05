@@ -66,7 +66,7 @@ namespace Material.Concrete.Biaxial
 			{
 				var (Ec1, Ec2) = SecantModule;
 
-				double Gc = Ec1 * Ec2 / (Ec1 + Ec2);
+				var Gc = Ec1 * Ec2 / (Ec1 + Ec2);
 
 				// Concrete matrix
 				var Dc1 = Matrix<double>.Build.Dense(3, 3);

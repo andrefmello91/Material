@@ -54,7 +54,7 @@ namespace Material.Concrete.Biaxial
 				ec2 = transverseStrain;
 
 			// Calculate initial uncracked state
-			double fc1 = UncrackedStress(ec1, ec2, theta1, reinforcement);
+			var fc1 = UncrackedStress(ec1, ec2, theta1, reinforcement);
 
 			// Not cracked
 			if (!Cracked)
@@ -62,10 +62,10 @@ namespace Material.Concrete.Biaxial
 
             // Cracked
             // Calculate concrete post-cracking stress associated with tension softening
-            double fc1a = TensionSoftening(ec1, referenceLength);
+            var fc1a = TensionSoftening(ec1, referenceLength);
 
             // Calculate concrete post-cracking stress associated with tension stiffening.
-            double fc1b = TensionStiffening(ec1, theta1, reinforcement);
+            var fc1b = TensionStiffening(ec1, theta1, reinforcement);
 
             // Return maximum
             return
@@ -81,7 +81,7 @@ namespace Material.Concrete.Biaxial
 		private double TensionStiffening(double strain, double theta1, WebReinforcement reinforcement)
 		{
 			// Calculate coefficient for tension stiffening effect
-			double m = reinforcement.TensionStiffeningCoefficient(theta1);
+			var m = reinforcement.TensionStiffeningCoefficient(theta1);
 
 			// Calculate concrete postcracking stress associated with tension stiffening
 			double fc1b = ft / (1 + (2.2 * m * strain).Sqrt());
