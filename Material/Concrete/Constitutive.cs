@@ -1,12 +1,5 @@
 ﻿using System;
 using Extensions.Number;
-using Material.Concrete.Biaxial;
-using Material.Concrete.Uniaxial;
-using MathNet.Numerics;
-using Material.Reinforcement;
-using Material.Reinforcement.Biaxial;
-using Material.Reinforcement.Uniaxial;
-using OnPlaneComponents;
 
 namespace Material.Concrete
 {
