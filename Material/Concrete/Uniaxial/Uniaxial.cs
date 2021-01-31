@@ -1,4 +1,6 @@
 ﻿using Material.Reinforcement.Uniaxial;
+using static Material.Concrete.Constitutive;
+using static Material.Concrete.Uniaxial.Constitutive;
 
 namespace Material.Concrete.Uniaxial
 {
@@ -7,10 +9,33 @@ namespace Material.Concrete.Uniaxial
 	/// </summary>
 	public class UniaxialConcrete : Concrete
 	{
+		// Auxiliary fields
+		private Parameters _parameters;
+
+		/// <summary>
+		/// Get concrete <see cref="Material.Concrete.Parameters"/>.
+		/// </summary>
+		public override Parameters Parameters
+		{
+			get => _parameters;
+			set
+			{
+				_parameters = value;
+				Constitutive.Parameters = value;
+			}
+		}
+
+		/// <inheritdoc/>
+		public sealed override ConstitutiveModel Model
+		{
+			get => ReadModel(Constitutive);
+			set => Constitutive = Read(value, Parameters);
+		}
+
 		/// <summary>
 		/// Get concrete <see cref="Uniaxial.Constitutive"/>.
 		/// </summary>
-		public Constitutive Constitutive { get; }
+		public Constitutive Constitutive { get; private set; }
 
 		/// <summary>
 		/// Returns true if concrete is cracked.
@@ -68,10 +93,11 @@ namespace Material.Concrete.Uniaxial
 		/// </summary>
 		///<param name="concreteArea">The concrete area, in mm2.</param>
 		public UniaxialConcrete(Parameters parameters, double concreteArea, ConstitutiveModel model = ConstitutiveModel.MCFT) 
-			: base(parameters, model)
+			: base(parameters)
 		{
-			Area         = concreteArea;
-			Constitutive = Constitutive.Read(Model, Parameters);
+			Area        = concreteArea;
+			_parameters = parameters;
+			Model       = model;
 		}
 
 		/// <summary>
@@ -116,6 +142,7 @@ namespace Material.Concrete.Uniaxial
         /// Return a copy of this <see cref="UniaxialConcrete"/> object.
         /// </summary>
         public UniaxialConcrete Copy() => new UniaxialConcrete(Parameters, Area, Model);
+
 
         /// <inheritdoc/>
         public override bool Equals(Concrete other) => other is UniaxialConcrete && (Parameters == other.Parameters && Model == other.Model);

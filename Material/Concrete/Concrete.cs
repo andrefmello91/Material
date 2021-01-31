@@ -21,12 +21,12 @@ namespace Material.Concrete
 		/// <summary>
         /// Get concrete <see cref="Material.Concrete.Parameters"/>.
         /// </summary>
-		public Parameters Parameters { get; }
+		public abstract Parameters Parameters { get; set; }
 
 		/// <summary>
         /// Get concrete <see cref="ConstitutiveModel"/>.
         /// </summary>
-		public ConstitutiveModel Model { get; }
+		public abstract ConstitutiveModel Model { get; set; }
 
         /// <summary>
         /// Get <see cref="AggregateType"/>.
@@ -44,14 +44,13 @@ namespace Material.Concrete
         /// <param name="strength">Concrete compressive strength, in MPa.</param>
         /// <param name="aggregateDiameter">Maximum aggregate diameter, in mm.</param>
         /// <param name="parameterModel">The model for calculating concrete parameters.</param>
-        /// <param name="model">The concrete constitutive model.</param>
         /// <param name="aggregateType">The type of aggregate.</param>
         /// <param name="tensileStrength">Concrete tensile strength, in MPa.</param>
         /// <param name="elasticModule">Concrete initial elastic module, in MPa.</param>
         /// <param name="plasticStrain">Concrete peak strain (negative value).</param>
         /// <param name="ultimateStrain">Concrete ultimate strain (negative value).</param>
-        protected Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel model = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
-			: this (Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain), model)
+        protected Concrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
+			: this (Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain))
         {
 		}
 
@@ -59,11 +58,8 @@ namespace Material.Concrete
         /// Base concrete object.
         /// </summary>
         /// <param name="parameters">Concrete parameters object.</param>
-        /// <param name="model">The base model of concrete behavior.</param>
-        protected Concrete(Parameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+        protected Concrete(Parameters parameters)
         {
-	        Parameters = parameters;
-	        Model      = model;
         }
 
         // Get parameters

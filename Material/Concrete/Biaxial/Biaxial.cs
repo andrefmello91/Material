@@ -1,17 +1,43 @@
 ﻿using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+
 using Material.Reinforcement.Biaxial;
+using MathNet.Numerics.LinearAlgebra;
 using OnPlaneComponents;
+using static Material.Concrete.Biaxial.Constitutive;
+using static Material.Concrete.Constitutive;
 
 namespace Material.Concrete.Biaxial
 {
 	public class BiaxialConcrete : Concrete
 	{
+		// Auxiliary fields
+		private Parameters _parameters;
+
+		/// <summary>
+		/// Get concrete <see cref="Material.Concrete.Parameters"/>.
+		/// </summary>
+		public override Parameters Parameters
+		{
+			get => _parameters;
+			set
+			{
+				_parameters = value;
+				Constitutive.Parameters = value;
+			}
+		}
+
+		/// <inheritdoc/>
+		public sealed override ConstitutiveModel Model
+		{
+			get => ReadModel(Constitutive);
+			set => Constitutive = Read(value, Parameters);
+		}
+
 		/// <summary>
 		/// Get concrete <see cref="Biaxial.Constitutive"/>.
 		/// </summary>
-		public Constitutive Constitutive { get; }
+		public Constitutive Constitutive { get; private set; }
 
 		/// <summary>
 		/// Returns true if concrete is cracked.
@@ -52,15 +78,16 @@ namespace Material.Concrete.Biaxial
 		/// Concrete for membrane calculations.
 		/// </summary>
 		public BiaxialConcrete(Parameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
-			: base(parameters, model)
+			: base(parameters)
 		{
-			Constitutive = Constitutive.Read(Model, Parameters);
+			_parameters = parameters;
+			Model       = model;
 		}
 
-        /// <summary>
-        /// Get concrete stiffness <see cref="Matrix"/>.
-        /// </summary>
-        public Matrix<double> Stiffness
+		/// <summary>
+		/// Get concrete stiffness <see cref="Matrix"/>.
+		/// </summary>
+		public Matrix<double> Stiffness
 		{
 			get
 			{

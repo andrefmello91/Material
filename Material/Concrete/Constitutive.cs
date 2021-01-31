@@ -21,7 +21,7 @@ namespace Material.Concrete
 		/// <summary>
         /// Get concrete <see cref="Concrete.Parameters"/>.
         /// </summary>
-	    public Parameters Parameters { get; }
+	    public Parameters Parameters { get; set; }
 
 		/// <summary>
         /// Get/set crack slip consideration.
