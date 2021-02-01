@@ -1,83 +1,105 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OnPlaneComponents;
 using UnitsNet;
 using UnitsNet.Units;
 
 namespace Material.Concrete
 {
-    /// <summary>
-    /// Interface for concrete parameters.
-    /// </summary>
-    public interface IParameter : IUnitConvertible<IParameter, PressureUnit>, IUnitConvertible<IParameter, LengthUnit>
-    {
-        /// <summary>
-        ///     Get/set the unit of concrete strength parameters.
-        /// </summary>
-        PressureUnit StressUnit { get; set; }
+	/// <summary>
+	///     Model for calculating concrete parameters.
+	/// </summary>
+	public enum ParameterModel
+	{
+		NBR6118,
+		MC2010,
+		MCFT,
+		DSFM,
+		Custom
+	}
 
-        /// <summary>
-        ///     Get/set the unit of concrete aggregate diameter.
-        /// </summary>
-        LengthUnit DiameterUnit { get; set; }
+	/// <summary>
+	///     Types of concrete aggregate.
+	/// </summary>
+	public enum AggregateType
+	{
+		Basalt,
+		Quartzite,
+		Limestone,
+		Sandstone
+	}
 
-        /// <summary>
-        ///     Get the compressive strength of concrete (positive value).
-        /// </summary>
-        Pressure Strength { get; }
+	/// <summary>
+	///     Interface for concrete parameters.
+	/// </summary>
+	public interface IParameter : IUnitConvertible<IParameter, PressureUnit>, IUnitConvertible<IParameter, LengthUnit>, IApproachable<IParameter, Pressure>, IEquatable<IParameter>, IComparable<IParameter>
+	{
+		#region Properties
 
-        /// <summary>
-        ///     Get the type of concrete aggregate.
-        /// </summary>
-        AggregateType Type { get; }
+		/// <summary>
+		///     Get/set maximum diameter of concrete aggregate.
+		/// </summary>
+		Length AggregateDiameter { get; }
 
-        /// <summary>
-        ///     Get/set maximum diameter of concrete aggregate.
-        /// </summary>
-        Length AggregateDiameter { get; }
+		/// <summary>
+		///     Get concrete cracking strain.
+		/// </summary>
+		double CrackingStrain { get; }
 
-        /// <summary>
-        ///     Get tensile strength.
-        /// </summary>
-        Pressure TensileStrength { get; }
+		/// <summary>
+		///     Get/set the unit of concrete aggregate diameter.
+		/// </summary>
+		LengthUnit DiameterUnit { get; set; }
 
-        /// <summary>
-        ///     Get initial elastic module.
-        /// </summary>
-        Pressure ElasticModule { get; }
+		/// <summary>
+		///     Get initial elastic module.
+		/// </summary>
+		Pressure ElasticModule { get; }
 
-        /// <summary>
-        ///     Get secant module.
-        /// </summary>
-        Pressure SecantModule { get; }
+		/// <summary>
+		///     Get fracture parameter.
+		/// </summary>
+		ForcePerLength FractureParameter { get; }
 
-        /// <summary>
-        ///     Get concrete plastic (peak) strain (negative value).
-        /// </summary>
-        double PlasticStrain { get; }
+		/// <summary>
+		///     Get the <see cref="ParameterModel" />.
+		/// </summary>
+		ParameterModel Model { get; }
 
-        /// <summary>
-        ///     Get concrete ultimate strain (negative value).
-        /// </summary>
-        double UltimateStrain { get; }
+		/// <summary>
+		///     Get concrete plastic (peak) strain (negative value).
+		/// </summary>
+		double PlasticStrain { get; }
 
-        /// <summary>
-        ///     Get concrete cracking strain.
-        /// </summary>
-        double CrackingStrain { get; }
+		/// <summary>
+		///     Get secant module.
+		/// </summary>
+		Pressure SecantModule { get; }
 
-        /// <summary>
-        ///     Get transverse (shear) module.
-        /// </summary>
-        Pressure TransverseModule { get; }
+		/// <summary>
+		///     Get the compressive strength of concrete (positive value).
+		/// </summary>
+		Pressure Strength { get; }
 
-        /// <summary>
-        ///     Get fracture parameter, in N/mm.
-        /// </summary>
-        ForcePerLength FractureParameter { get; }
-    }
+		/// <summary>
+		///     Get/set the unit of concrete strength parameters.
+		/// </summary>
+		PressureUnit StressUnit { get; set; }
+
+		/// <summary>
+		///     Get tensile strength.
+		/// </summary>
+		Pressure TensileStrength { get; }
+
+		/// <summary>
+		///     Get transverse (shear) module.
+		/// </summary>
+		Pressure TransverseModule { get; }
+
+		/// <summary>
+		///     Get concrete ultimate strain (negative value).
+		/// </summary>
+		double UltimateStrain { get; }
+
+		#endregion
+	}
 }
