@@ -8,17 +8,17 @@ namespace Material.Concrete
 	/// <summary>
 	///     Concrete parameters struct.
 	/// </summary>
-	public struct CustomParameters : IParameter, ICloneable<CustomParameters>
+	public struct CustomParameters : IParameters, ICloneable<CustomParameters>
 	{
 		#region Properties
 
-		PressureUnit IUnitConvertible<IParameter, PressureUnit>.Unit
+		PressureUnit IUnitConvertible<IParameters, PressureUnit>.Unit
 		{
 			get => StressUnit;
 			set => StressUnit = value;
 		}
 
-		LengthUnit IUnitConvertible<IParameter, LengthUnit>.Unit
+		LengthUnit IUnitConvertible<IParameters, LengthUnit>.Unit
 		{
 			get => DiameterUnit;
 			set => DiameterUnit = value;
@@ -102,7 +102,7 @@ namespace Material.Concrete
 			AggregateDiameter = AggregateDiameter.ToUnit(unit);
 		}
 
-		public IParameter Convert(LengthUnit unit) => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter.ToUnit(unit), PlasticStrain, UltimateStrain);
+		public IParameters Convert(LengthUnit unit) => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter.ToUnit(unit), PlasticStrain, UltimateStrain);
 
 		/// <summary>
 		///     Change <see cref="Strength" /> unit.
@@ -118,7 +118,7 @@ namespace Material.Concrete
 			ElasticModule   = ElasticModule.ToUnit(unit);
 		}
 
-		public IParameter Convert(PressureUnit unit) => new CustomParameters(Strength.ToUnit(unit), TensileStrength.ToUnit(unit), ElasticModule.ToUnit(unit), AggregateDiameter, PlasticStrain, UltimateStrain);
+		public IParameters Convert(PressureUnit unit) => new CustomParameters(Strength.ToUnit(unit), TensileStrength.ToUnit(unit), ElasticModule.ToUnit(unit), AggregateDiameter, PlasticStrain, UltimateStrain);
 
 		/// <summary>
 		///     Create a clone of this object with converted units.
@@ -127,7 +127,7 @@ namespace Material.Concrete
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
 		public CustomParameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new CustomParameters(Strength.ToUnit(stressUnit), TensileStrength.ToUnit(stressUnit), ElasticModule.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), PlasticStrain, UltimateStrain);
 
-		public bool Approaches(IParameter other, Pressure tolerance) => Model == other.Model && Strength.Approx(other.Strength, tolerance);
+		public bool Approaches(IParameters other, Pressure tolerance) => Model == other.Model && Strength.Approx(other.Strength, tolerance);
 
 		public CustomParameters Clone() => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
 
@@ -135,14 +135,14 @@ namespace Material.Concrete
 		///     <see cref="Strength" /> is compared.
 		/// </remarks>
 		/// <inheritdoc />
-		public int CompareTo(IParameter other) =>
+		public int CompareTo(IParameters other) =>
 			Strength == other.Strength
 				? 0
 				: Strength > other.Strength
 					?  1
 					: -1;
 
-		public bool Equals(IParameter other) => Approaches(other, Parameters.Tolerance);
+		public bool Equals(IParameters other) => Approaches(other, Parameters.Tolerance);
 
 		public override string ToString()
 		{
@@ -161,9 +161,17 @@ namespace Material.Concrete
 		}
 
 
-		public override bool Equals(object obj) => obj is Parameters other && Equals(other);
+		public override bool Equals(object obj) => obj is CustomParameters other && Equals(other);
 
 		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
+
+		#endregion
+
+		#region Operators
+
+		public static bool operator ==(CustomParameters left, IParameters right) => !(right is null) && left.Equals(right);
+
+		public static bool operator !=(CustomParameters left, IParameters right) => !(right is null) && !left.Equals(right);
 
 		#endregion
 	}

@@ -31,7 +31,7 @@ namespace Material.Concrete
 	/// <summary>
 	///     Interface for concrete parameters.
 	/// </summary>
-	public interface IParameter : IUnitConvertible<IParameter, PressureUnit>, IUnitConvertible<IParameter, LengthUnit>, IApproachable<IParameter, Pressure>, IEquatable<IParameter>, IComparable<IParameter>
+	public interface IParameters : IUnitConvertible<IParameters, PressureUnit>, IUnitConvertible<IParameters, LengthUnit>, IApproachable<IParameters, Pressure>, IEquatable<IParameters>, IComparable<IParameters>
 	{
 		#region Properties
 

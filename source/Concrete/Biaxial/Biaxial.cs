@@ -1,91 +1,92 @@
-﻿using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra.Double;
-
-using Material.Reinforcement.Biaxial;
+﻿using Material.Reinforcement.Biaxial;
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using OnPlaneComponents;
-using static Material.Concrete.Biaxial.Constitutive;
-using static Material.Concrete.Constitutive;
 
 namespace Material.Concrete.Biaxial
 {
-	public class BiaxialConcrete : Concrete
+	/// <summary>
+	///		Biaxial concrete for membrane calculations.
+	/// </summary>
+	public partial class BiaxialConcrete : Concrete, ICloneable<BiaxialConcrete>
 	{
-		// Auxiliary fields
-		private Parameters _parameters;
+		#region Fields
 
 		/// <summary>
-		/// Get concrete <see cref="Material.Concrete.Parameters"/>.
+		///     Get concrete <see cref="Constitutive" />.
 		/// </summary>
-		public override Parameters Parameters
+		private Constitutive _constitutive;
+
+		#endregion
+
+		#region Properties
+
+		/// <summary>
+		///     Returns true if concrete is cracked.
+		/// </summary>
+		public bool Cracked => _constitutive.Cracked;
+
+		/// <summary>
+		///     Get concrete initial stiffness <see cref="Matrix" />.
+		/// </summary>
+		public Matrix<double> InitialStiffness
 		{
-			get => _parameters;
-			set
+			get
 			{
-				_parameters = value;
-				Constitutive.Parameters = value;
+				var Ec = Parameters.ElasticModule.Megapascals;
+
+				// Concrete matrix
+				var Dc1 = Matrix<double>.Build.Dense(3, 3);
+				Dc1[0, 0] = Ec;
+				Dc1[1, 1] = Ec;
+				Dc1[2, 2] = 0.5 * Ec;
+
+				// Get transformation matrix
+				var T = StrainRelations.TransformationMatrix(Constants.PiOver4);
+
+				// Calculate Dc
+				return
+					T.Transpose() * Dc1 * T;
 			}
 		}
 
-		/// <inheritdoc/>
-		public sealed override ConstitutiveModel Model
-		{
-			get => ReadModel(Constitutive);
-			set => Constitutive = Read(value, Parameters);
-		}
-
 		/// <summary>
-		/// Get concrete <see cref="Biaxial.Constitutive"/>.
+		///     Get/set concrete <see cref="PrincipalStrainState" />.
 		/// </summary>
-		public Constitutive Constitutive { get; private set; }
-
-		/// <summary>
-		/// Returns true if concrete is cracked.
-		/// </summary>
-		public bool Cracked => Constitutive.Cracked;
-
-		/// <summary>
-		/// Get/set concrete <see cref="StrainState"/>.
-		/// </summary>
-		public StrainState Strains { get; private set; }
-
-		/// <summary>
-        /// Get/set concrete <see cref="PrincipalStrainState"/>.
-        /// </summary>
 		public PrincipalStrainState PrincipalStrains { get; private set; }
 
 		/// <summary>
-        /// Get/set concrete <see cref="StressState"/>.
-        /// </summary>
-		public StressState Stresses { get; private  set; }
-
-		/// <summary>
-        /// Get/set concrete <see cref="PrincipalStressState"/>.
-        /// </summary>
+		///     Get/set concrete <see cref="PrincipalStressState" />.
+		/// </summary>
 		public PrincipalStressState PrincipalStresses { get; private set; }
 
-		///<inheritdoc/>
 		/// <summary>
-		/// Concrete for membrane calculations.
+		///     Calculate current secant module of concrete, in MPa.
 		/// </summary>
-		public BiaxialConcrete(double strength, double aggregateDiameter, ParameterModel parameterModel = ParameterModel.MCFT, ConstitutiveModel model = ConstitutiveModel.MCFT, AggregateType aggregateType = AggregateType.Quartzite, double tensileStrength = 0, double elasticModule = 0, double plasticStrain = 0, double ultimateStrain = 0)
-			: this(Parameters.ReadParameters(parameterModel, strength, aggregateDiameter, aggregateType, tensileStrength, elasticModule, plasticStrain, ultimateStrain), model)
+		private (double Ec1, double Ec2) SecantModule
 		{
+			get
+			{
+				// Get values
+				double
+					ec1 = PrincipalStrains.Epsilon1,
+					ec2 = PrincipalStrains.Epsilon2,
+					fc1 = PrincipalStresses.Sigma1.Megapascals,
+					fc2 = PrincipalStresses.Sigma2.Megapascals;
+
+				// Calculate modules
+				double
+					Ec1 = _constitutive.SecantModule(fc1, ec1),
+					Ec2 = _constitutive.SecantModule(fc2, ec2);
+
+				return
+					(Ec1, Ec2);
+			}
 		}
 
-		///<inheritdoc/>
 		/// <summary>
-		/// Concrete for membrane calculations.
-		/// </summary>
-		public BiaxialConcrete(Parameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
-			: base(parameters)
-		{
-			_parameters = parameters;
-			Model       = model;
-		}
-
-		/// <summary>
-		/// Get concrete stiffness <see cref="Matrix"/>.
+		///     Get concrete stiffness <see cref="Matrix" />.
 		/// </summary>
 		public Matrix<double> Stiffness
 		{
@@ -108,82 +109,64 @@ namespace Material.Concrete.Biaxial
 				return
 					T.Transpose() * Dc1 * T;
 			}
-        }
-
-        /// <summary>
-        /// Get concrete initial stiffness <see cref="Matrix"/>.
-        /// </summary>
-        public Matrix<double> InitialStiffness
-        {
-	        get
-	        {
-		        // Concrete matrix
-		        var Dc1 = Matrix<double>.Build.Dense(3, 3);
-		        Dc1[0, 0] = Ec;
-		        Dc1[1, 1] = Ec;
-		        Dc1[2, 2] = 0.5 * Ec;
-
-		        // Get transformation matrix
-		        var T = StrainRelations.TransformationMatrix(Constants.PiOver4);
-
-		        // Calculate Dc
-		        return
-			        T.Transpose() * Dc1 * T;
-	        }
-        }
-
-        /// <summary>
-        /// Calculate current secant module of concrete, in MPa.
-        /// </summary>
-        private (double Ec1, double Ec2) SecantModule
-		{
-			get
-			{
-				// Get values
-				double
-					ec1 = PrincipalStrains.Epsilon1,
-					ec2 = PrincipalStrains.Epsilon2,
-					fc1 = PrincipalStresses.Sigma1,
-					fc2 = PrincipalStresses.Sigma2;
-
-				// Calculate modules
-				double
-					Ec1 = Constitutive.SecantModule(fc1, ec1),
-					Ec2 = Constitutive.SecantModule(fc2, ec2);
-
-				return
-					(Ec1, Ec2);
-			}
 		}
 
-        /// <summary>
-        /// Set concrete <see cref="StressState"/> given <see cref="StrainState"/>
-        /// </summary>
-        /// <param name="strains">Current <see cref="StrainState"/> in concrete.</param>
-        /// <param name="reinforcement">The <see cref="WebReinforcement"/>.</param>
-        /// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive"/>).</param>
-        public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement, double referenceLength = 0)
+		/// <summary>
+		///     Get/set concrete <see cref="StrainState" />.
+		/// </summary>
+		public StrainState Strains { get; private set; }
+
+		/// <summary>
+		///     Get/set concrete <see cref="StressState" />.
+		/// </summary>
+		public StressState Stresses { get; private  set; }
+
+		#endregion
+
+		#region Constructors
+
+		/// <summary>
+		///     Concrete for membrane calculations.
+		/// </summary>
+		/// <inheritdoc />
+		public BiaxialConcrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+			: base(parameters, model)
+		{
+			_constitutive = Constitutive.Read(model, parameters);
+		}
+
+		#endregion
+
+		#region
+
+		/// <summary>
+		///     Set concrete <see cref="StressState" /> given <see cref="StrainState" />
+		/// </summary>
+		/// <param name="strains">Current <see cref="StrainState" /> in concrete.</param>
+		/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
+		/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
+		public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement, double referenceLength = 0)
 		{
 			// Get strains
-			Strains = strains.Copy();
+			Strains = strains.Clone();
 
 			// Calculate principal strains
 			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
 
 			// Get stresses from constitutive model
-			PrincipalStresses = Constitutive.CalculateStresses(PrincipalStrains, reinforcement, referenceLength);
+			PrincipalStresses = _constitutive.CalculateStresses(PrincipalStrains, reinforcement, referenceLength);
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
 		/// <summary>
-		/// Set tensile stress.
+		///     Set tensile stress.
 		/// </summary>
 		/// <param name="fc1">Concrete tensile stress, in MPa.</param>
 		public void SetTensileStress(double fc1)
 		{
 			// Get compressive stress and theta1
 			double
-				fc2    = PrincipalStresses.Sigma2,
+				fc2    = PrincipalStresses.Sigma2.Megapascals,
 				theta1 = PrincipalStresses.Theta1;
 
 			// Set new state
@@ -191,16 +174,15 @@ namespace Material.Concrete.Biaxial
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
-        /// <summary>
-        /// Return a copy of this <see cref="BiaxialConcrete"/> object.
-        /// </summary>
-        public BiaxialConcrete Copy() => new BiaxialConcrete(Parameters, Model);
+		public BiaxialConcrete Clone() => new BiaxialConcrete(Parameters, Model);
 
-        /// <inheritdoc/>
-        public override bool Equals(Concrete other) => other is BiaxialConcrete && base.Equals(other);
+		/// <inheritdoc />
+		public override bool Equals(IConcrete other) => other is BiaxialConcrete && base.Equals(other);
 
-        public override bool Equals(object obj) => obj is BiaxialConcrete concrete && base.Equals(concrete);
+		public override bool Equals(object obj) => obj is BiaxialConcrete concrete && Equals(concrete);
 
-        public override int GetHashCode() => Parameters.GetHashCode();
+		public override int GetHashCode() => Parameters.GetHashCode();
+
+		#endregion
 	}
 }

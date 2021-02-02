@@ -8,7 +8,7 @@ namespace Material.Concrete
 	/// <summary>
 	///     Concrete parameters struct.
 	/// </summary>
-	public partial struct Parameters : IParameter, ICloneable<Parameters>
+	public partial struct Parameters : IParameters, ICloneable<Parameters>
 	{
 		#region Fields
 
@@ -26,13 +26,13 @@ namespace Material.Concrete
 
 		#region Properties
 
-		PressureUnit IUnitConvertible<IParameter, PressureUnit>.Unit
+		PressureUnit IUnitConvertible<IParameters, PressureUnit>.Unit
 		{
 			get => StressUnit;
 			set => StressUnit = value;
 		}
 
-		LengthUnit IUnitConvertible<IParameter, LengthUnit>.Unit
+		LengthUnit IUnitConvertible<IParameters, LengthUnit>.Unit
 		{
 			get => DiameterUnit;
 			set => DiameterUnit = value;
@@ -141,7 +141,7 @@ namespace Material.Concrete
 			AggregateDiameter = AggregateDiameter.ToUnit(unit);
 		}
 
-		public IParameter Convert(LengthUnit unit) => new Parameters(Strength, AggregateDiameter.ToUnit(unit), Model, Type);
+		public IParameters Convert(LengthUnit unit) => new Parameters(Strength, AggregateDiameter.ToUnit(unit), Model, Type);
 
 		/// <summary>
 		///     Change <see cref="Strength" /> unit.
@@ -155,7 +155,7 @@ namespace Material.Concrete
 			Strength = Strength.ToUnit(unit);
 		}
 
-		public IParameter Convert(PressureUnit unit) => new Parameters(Strength.ToUnit(unit), AggregateDiameter, Model, Type);
+		public IParameters Convert(PressureUnit unit) => new Parameters(Strength.ToUnit(unit), AggregateDiameter, Model, Type);
 
 		/// <summary>
 		///     Create a clone of this object with converted units.
@@ -164,7 +164,7 @@ namespace Material.Concrete
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
 		public Parameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new Parameters(Strength.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), Model, Type);
 
-		public bool Approaches(IParameter other, Pressure tolerance) => Model == other.Model && Strength.Approx(other.Strength, tolerance);
+		public bool Approaches(IParameters other, Pressure tolerance) => Model == other.Model && Strength.Approx(other.Strength, tolerance);
 
 		public Parameters Clone() => new Parameters(Strength, AggregateDiameter, Model, Type);
 
@@ -172,14 +172,14 @@ namespace Material.Concrete
 		///     <see cref="Strength" /> is compared.
 		/// </remarks>
 		/// <inheritdoc />
-		public int CompareTo(IParameter other) =>
+		public int CompareTo(IParameters other) =>
 			Strength == other.Strength
 				? 0
 				: Strength > other.Strength
 					? 1
 					: -1;
 
-		public bool Equals(IParameter other) => Approaches(other, Tolerance);
+		public bool Equals(IParameters other) => Approaches(other, Tolerance);
 
 		public override string ToString()
 		{
@@ -201,6 +201,14 @@ namespace Material.Concrete
 		public override bool Equals(object obj) => obj is Parameters other && Equals(other);
 
 		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
+
+		#endregion
+
+		#region Operators
+
+		public static bool operator == (Parameters left, IParameters right) => !(right is null) && left.Equals(right);
+
+		public static bool operator != (Parameters left, IParameters right) => !(right is null) && !left.Equals(right);
 
 		#endregion
 	}

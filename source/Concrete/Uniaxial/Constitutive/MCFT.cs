@@ -3,45 +3,55 @@ using Material.Reinforcement.Uniaxial;
 
 namespace Material.Concrete.Uniaxial
 {
-	/// <summary>
-	/// MCFT constitutive class.
-	/// </summary>
-	public class MCFTConstitutive : Constitutive
+	public partial class UniaxialConcrete
 	{
-		// Constructor
-		/// <inheritdoc/>
-		public MCFTConstitutive(Parameters parameters, bool considerCrackSlip = false) : base(parameters, considerCrackSlip)
-		{
-		}
-
-        /// <inheritdoc/>
-        protected override double CompressiveStress(double strain)
-		{
-			var n = strain / ec;
-
-			return
-				-fc * (2 * n - n * n);
-		}
-
-        /// <inheritdoc/>
-        protected override double TensileStress(double strain, UniaxialReinforcement reinforcement = null) => strain <= ecr ? strain * Ec : CrackedStress(strain);
-
 		/// <summary>
-        /// Calculate tensile stress for cracked concrete.
-        /// </summary>
-        /// <param name="strain">Current tensile strain.</param>
-		private double CrackedStress(double strain) => ft / (1 + Math.Sqrt(500 * strain));
-
-        public override string ToString() => "MCFT";
-
-		/// <summary>
-		/// Compare two constitutive objects.
+		///     MCFT constitutive class.
 		/// </summary>
-		/// <param name="other">The other constitutive object.</param>
-		public override bool Equals(Material.Concrete.Constitutive other) => other is MCFTConstitutive;
+		private class MCFTConstitutive : Constitutive
+		{
+			#region Constructors
 
-		public override bool Equals(object other) => other is MCFTConstitutive;
+			/// <summary>
+			///		MCFT constitutive object.
+			/// </summary>
+			/// <inheritdoc cref="Constitutive(IParameters)"/>
+			public MCFTConstitutive(IParameters parameters) : base(parameters)
+			{
+			}
 
-		public override int GetHashCode() => base.GetHashCode();
+			#endregion
+
+			#region
+
+			/// <inheritdoc />
+			protected override double CompressiveStress(double strain)
+			{
+				double
+					ec = Parameters.PlasticStrain,
+					fc = Parameters.Strength.Megapascals,
+					n  = strain / ec;
+
+				return
+					-fc * (2 * n - n * n);
+			}
+
+			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
+
+			/// <inheritdoc />
+			protected override double TensileStress(double strain, UniaxialReinforcement reinforcement = null) =>
+				strain <= Parameters.CrackingStrain
+					? strain * Parameters.ElasticModule.Megapascals
+					: CrackedStress(strain);
+
+			/// <summary>
+			///     Calculate tensile stress, in MPa, for cracked concrete.
+			/// </summary>
+			/// <param name="strain">Current tensile strain.</param>
+			private double CrackedStress(double strain) => Parameters.TensileStrength.Megapascals / (1 + Math.Sqrt(500 * strain));
+
+
+			#endregion
+		}
 	}
 }
