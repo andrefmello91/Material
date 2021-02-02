@@ -1,221 +1,210 @@
 ﻿using System;
 using Extensions;
 using MathNet.Numerics;
+using OnPlaneComponents;
 using UnitsNet;
 using UnitsNet.Units;
+using Force = UnitsNet.Force;
 
 namespace Material.Reinforcement.Uniaxial
 {
 	/// <summary>
-	/// Uniaxial reinforcement class.
+	///     Uniaxial reinforcement class.
 	/// </summary>
-	public class UniaxialReinforcement : IEquatable<UniaxialReinforcement>
+	public class UniaxialReinforcement : IUnitConvertible<UniaxialReinforcement, LengthUnit>, IApproachable<UniaxialReinforcement, Length>, IEquatable<UniaxialReinforcement>, IComparable<UniaxialReinforcement>, ICloneable<UniaxialReinforcement>
 	{
-		// Auxiliary fields
-		private Length _phi;
-		private Area _As;
-		private readonly Area _Ac;
+		#region Fields
 
 		/// <summary>
-        /// Get number of reinforcing bars.
-        /// </summary>
+		///     Concrete area.
+		/// </summary>
+		private readonly Area _concreteArea;
+
+		#endregion
+
+		#region Properties
+
+		public LengthUnit Unit
+		{
+			get => BarDiameter.Unit;
+			set => ChangeUnit(value);
+		}
+
+		/// <summary>
+		///     Get reinforcement area.
+		/// </summary>
+		public Area Area { get; private set; }
+
+		/// <summary>
+		///     Get bar diameter.
+		/// </summary>
+		public Length BarDiameter { get; private set; }
+
+		/// <summary>
+		///     Get current force.
+		/// </summary>
+		public Force Force => Area * Steel.Stress;
+
+		/// <summary>
+		///     Get number of reinforcing bars.
+		/// </summary>
 		public int NumberOfBars  { get; }
 
 		/// <summary>
-		/// Get bar diameter, in mm.
+		///     Get reinforcement ratio in the cross-section.
 		/// </summary>
-		public double BarDiameter => _phi.Millimeters;
+		public double Ratio => _concreteArea == Area.Zero ? 0 : Area / _concreteArea;
 
 		/// <summary>
-		/// Get reinforcement area, in mm2.
+		///     Get <see cref="Reinforcement.Steel" /> of this.
 		/// </summary>
-		public double Area => _As.SquareMillimeters;
-
-		/// <summary>
-        /// Get <see cref="Reinforcement.Steel"/> of this.
-        /// </summary>
 		public Steel Steel { get; }
 
 		/// <summary>
-		/// Verify if <see cref="NumberOfBars"/> and <see cref="BarDiameter"/> are not zero.
+		///     Get normal stiffness.
 		/// </summary>
-		public bool IsSet => NumberOfBars > 0 && !BarDiameter.ApproxZero(1E-6);
+		public Force Stiffness => Steel.ElasticModule * Area;
 
 		/// <summary>
-		/// Get reinforcement ratio in the cross-section.
+		///     Get the yield force.
 		/// </summary>
-		public double Ratio => _Ac != UnitsNet.Area.Zero ? _As / _Ac : 0;
+		public Force YieldForce => Area * Steel.YieldStress;
+
+		#endregion
+
+		#region Constructors
+
+		/// <param name="concreteArea">The concrete area, in <see cref="AreaUnit" /> compatible to <paramref name="unit" />.</param>
+		/// <param name="unit">The <see cref="LengthUnit" /> of <paramref name="barDiameter" />.</param>
+		/// <inheritdoc cref="UniaxialReinforcement(int, Length, Steel, Area)" />
+		public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0, LengthUnit unit = LengthUnit.Millimeter)
+			: this (numberOfBars, Length.From(barDiameter, unit), steel, Area.From(concreteArea, unit.GetAreaUnit()))
+		{
+		}
 
 		/// <summary>
-		/// Get normal stiffness, in N.
-		/// </summary>
-		public double Stiffness => Steel.ElasticModule * Area;
-
-		/// <summary>
-		/// Get the yield force, in N.
-		/// </summary>
-		public double YieldForce => Area * Steel.YieldStress;
-
-		/// <summary>
-		/// Get current force, in N.
-		/// </summary>
-		public double Force => Area * Steel.Stress;
-
-		/// <summary>
-		/// Reinforcement for uniaxial calculations
+		///     Reinforcement for uniaxial calculations
 		/// </summary>
 		/// <param name="numberOfBars">The number of bars of reinforcement.</param>
-		/// <param name="barDiameter">The bar diameter (in mm).</param>
+		/// <param name="barDiameter">The bar diameter.</param>
 		/// <param name="steel">The steel object.</param>
-		/// <param name="concreteArea">The concrete area (in mm2).</param>
-		public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0) 
-			:this (numberOfBars, Length.FromMillimeters(barDiameter), steel, UnitsNet.Area.FromSquareMillimeters(concreteArea))
+		/// <param name="concreteArea">The concrete area.</param>
+		public UniaxialReinforcement(int numberOfBars, Length barDiameter, Steel steel, Area concreteArea)
 		{
+			NumberOfBars  = numberOfBars;
+			BarDiameter   = barDiameter;
+			Area          = CalculateArea().ToUnit(barDiameter.Unit.GetAreaUnit());
+			_concreteArea = concreteArea;
+			Steel         = steel;
 		}
 
-        /// <summary>
-        /// Reinforcement for uniaxial calculations
-        /// </summary>
-        /// <param name="numberOfBars">The number of bars of reinforcement.</param>
-        /// <param name="barDiameter">The bar diameter.</param>
-        /// <param name="steel">The steel object.</param>
-        /// <param name="concreteArea">The concrete area.</param>
-        public UniaxialReinforcement(int numberOfBars, Length barDiameter, Steel steel, Area concreteArea)
-		{
-			NumberOfBars = numberOfBars;
+		#endregion
 
-			_phi  = barDiameter;
-			_As   = CalculateArea();
-			_Ac   = concreteArea;
-			Steel = steel;
-		}
+		#region
 
 		/// <summary>
-		/// Calculated reinforcement area, in mm2.
-		/// </summary>
-		private double ReinforcementArea()
-		{
-			if (IsSet)
-				return
-					0.25 * NumberOfBars * Constants.Pi * BarDiameter * BarDiameter;
-
-			return 0;
-		}
-
-		/// <summary>
-		/// Calculated reinforcement area, in mm2.
-		/// </summary>
-		private Area CalculateArea()
-		{
-			if (IsSet)
-				return
-					0.25 * NumberOfBars * Constants.Pi * _phi * _phi;
-
-			return UnitsNet.Area.Zero;
-		}
-
-		/// <summary>
-		/// Calculate current force, in N.
+		///     Calculate current force.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public double CalculateForce(double strain)
-		{
-			return
-				Area * Steel.CalculateStress(strain);
-		}
+		public Force CalculateForce(double strain) => Area * Steel.CalculateStress(strain);
 
 		/// <summary>
-		/// Calculate tension stiffening coefficient (for DSFM).
+		///     Calculate tension stiffening coefficient (for DSFM).
 		/// </summary>
-		public double TensionStiffeningCoefficient()
-		{
-			// Calculate coefficient for tension stiffening effect
-			return
-				0.25 * BarDiameter / Ratio;
-		}
+		public double TensionStiffeningCoefficient() => 0.25 * BarDiameter.Millimeters / Ratio;
 
 		/// <summary>
-		/// Calculate maximum value of tensile strength that can be transmitted across cracks.
+		///     Calculate maximum value of tensile strength that can be transmitted across cracks.
 		/// </summary>
-		public double MaximumPrincipalTensileStress()
-		{
-			// Get reinforcement stress
-			double
-				fs = Steel.Stress,
-				fy = Steel.YieldStress;
-
-			// Check the maximum value of fc1 that can be transmitted across cracks
-			return
-				Ratio * (fy - fs);
-		}
+		public Pressure MaximumPrincipalTensileStress() => Ratio * (Steel.YieldStress - Steel.Stress);
 
 		/// <summary>
-		/// Set steel strain.
+		///     Set steel strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public void SetStrain(double strain)
-		{
-			Steel.SetStrain(strain);
-		}
+		public void SetStrain(double strain) => Steel.SetStrain(strain);
 
 		/// <summary>
-		/// Set steel stress, given strain.
+		///     Set steel stress, given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public void SetStress(double strain)
-		{
-			Steel.SetStress(strain);
-		}
+		public void SetStress(double strain) => Steel.SetStress(strain);
 
 		/// <summary>
-		/// Set steel strain and stress.
+		///     Set steel strain and stress.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public void SetStrainAndStress(double strain)
+		public void SetStrainAndStress(double strain) => Steel.SetStrainAndStress(strain);
+
+		public UniaxialReinforcement Clone() => new UniaxialReinforcement(NumberOfBars, BarDiameter, Steel.Clone(), _concreteArea);
+
+		public bool Approaches(UniaxialReinforcement other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance) && Steel == other.Steel;
+
+
+		public void ChangeUnit(LengthUnit unit)
 		{
-			Steel.SetStrainAndStress(strain);
+			if (Unit == unit)
+				return;
+
+			BarDiameter = BarDiameter.ToUnit(unit);
+			Area        = Area.ToUnit(unit.GetAreaUnit());
 		}
 
+		public UniaxialReinforcement Convert(LengthUnit unit) => new UniaxialReinforcement(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), _concreteArea.ToUnit(unit.GetAreaUnit()));
+
 		/// <summary>
-		/// Create a copy of this <see cref="UniaxialReinforcement"/> object.
+		///     Calculated reinforcement area.
 		/// </summary>
-		public UniaxialReinforcement Copy() => new UniaxialReinforcement(NumberOfBars, _phi, Steel.Copy(), _Ac);
+		private Area CalculateArea() => 0.25 * NumberOfBars * Constants.Pi * BarDiameter * BarDiameter;
+
+		public int CompareTo(UniaxialReinforcement other) =>
+			other is null || Area > other.Area
+				? 1
+				: Area == other.Area
+					?  0
+					: -1;
+
+		/// <summary>
+		///     Compare two reinforcement objects.
+		///     <para>Returns true if parameters are equal.</para>
+		/// </summary>
+		/// <param name="other">The other reinforcement object.</param>
+		public virtual bool Equals(UniaxialReinforcement other) => Approaches(other, Length.FromMillimeters(1E-3));
 
 		public override string ToString()
 		{
-			char phi = (char) Characters.Phi;
+			var phi = (char) Characters.Phi;
 
 			return
-				$"Reinforcement: {NumberOfBars} {phi} {_phi} ({_As})\n\n"
+				$"Reinforcement: {NumberOfBars} {phi} {BarDiameter} ({Area})\n\n"
 				+ Steel;
 		}
 
 		/// <summary>
-		/// Compare two reinforcement objects.
-		/// <para>Returns true if <see cref="NumberOfBars"/> and <see cref="BarDiameter"/> are equal.</para>
+		///     Compare two reinforcement objects.
+		///     <para>Returns true if <see cref="NumberOfBars" /> and <see cref="BarDiameter" /> are equal.</para>
 		/// </summary>
 		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool EqualsNumberAndDiameter(UniaxialReinforcement other) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter);
-
-		/// <summary>
-		/// Compare two reinforcement objects.
-		/// <para>Returns true if parameters are equal.</para>
-		/// </summary>
-		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool Equals(UniaxialReinforcement other) => !(other is null) && EqualsNumberAndDiameter(other) && Steel == other.Steel;
+		public virtual bool EqualsNumberAndDiameter(UniaxialReinforcement other, Length tolerance) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
 
 		public override bool Equals(object other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
 
-		public override int GetHashCode() => (int)BarDiameter.Pow(NumberOfBars);
+		public override int GetHashCode() => (int) BarDiameter.Millimeters.Pow(NumberOfBars);
+
+		#endregion
+
+		#region Operators
 
 		/// <summary>
-		/// Returns true if steel parameters are equal.
+		///     Returns true if steel parameters are equal.
 		/// </summary>
 		public static bool operator == (UniaxialReinforcement left, UniaxialReinforcement right) => !(left is null) && left.Equals(right);
 
 		/// <summary>
-		/// Returns true if steel parameters are different.
+		///     Returns true if steel parameters are different.
 		/// </summary>
 		public static bool operator != (UniaxialReinforcement left, UniaxialReinforcement right) => !(left is null) && !left.Equals(right);
+
+		#endregion
 	}
 }
