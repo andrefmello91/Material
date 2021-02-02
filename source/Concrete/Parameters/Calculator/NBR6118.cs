@@ -38,24 +38,14 @@ namespace Material.Concrete
 
 			#region
 
-			private double AlphaE()
-			{
-				switch (Type)
+			private double AlphaE() =>
+				Type switch
 				{
-					case AggregateType.Basalt:
-						return 1.2;
-
-					case AggregateType.Quartzite:
-						return 1;
-
-					case AggregateType.Limestone:
-						return 0.9;
-
-					// Sandstone
-					default:
-						return 0.7;
-				}
-			}
+					AggregateType.Basalt    => 1.2,
+					AggregateType.Quartzite => 1,
+					AggregateType.Limestone => 0.9,
+					_                       => 0.7
+				};
 
 			private double AlphaI() => Math.Min(0.8 + 0.2 * Strength.Megapascals / 80, 1);
 

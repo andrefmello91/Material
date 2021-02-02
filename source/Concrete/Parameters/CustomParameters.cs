@@ -127,7 +127,7 @@ namespace Material.Concrete
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
 		public CustomParameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new CustomParameters(Strength.ToUnit(stressUnit), TensileStrength.ToUnit(stressUnit), ElasticModule.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), PlasticStrain, UltimateStrain);
 
-		public bool Approaches(IParameters other, Pressure tolerance) => Model == other.Model && Strength.Approx(other.Strength, tolerance);
+		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 
 		public CustomParameters Clone() => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
 
@@ -135,14 +135,14 @@ namespace Material.Concrete
 		///     <see cref="Strength" /> is compared.
 		/// </remarks>
 		/// <inheritdoc />
-		public int CompareTo(IParameters other) =>
-			Strength == other.Strength
+		public int CompareTo(IParameters? other) =>
+			Strength == other?.Strength
 				? 0
-				: Strength > other.Strength
+				: Strength > other?.Strength
 					?  1
 					: -1;
 
-		public bool Equals(IParameters other) => Approaches(other, Parameters.Tolerance);
+		public bool Equals(IParameters? other) => Approaches(other, Parameters.Tolerance);
 
 		public override string ToString()
 		{
@@ -161,7 +161,7 @@ namespace Material.Concrete
 		}
 
 
-		public override bool Equals(object obj) => obj is CustomParameters other && Equals(other);
+		public override bool Equals(object? obj) => obj is CustomParameters other && Equals(other);
 
 		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
 

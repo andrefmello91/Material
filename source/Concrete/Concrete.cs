@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Runtime.InteropServices.ComTypes;
 using Material.Concrete.Biaxial;
 using Material.Concrete.Uniaxial;
+using UnitsNet;
 
 namespace Material.Concrete
 {
@@ -55,27 +57,23 @@ namespace Material.Concrete
         /// <param name="direction">Uniaxial or biaxial?</param>
         /// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.Parameters"/>).</param>
         /// <param name="model">Concrete constitutive object (<see cref="ConstitutiveModel"/>).</param>
-        ///<param name="concreteArea">The concrete area, in mm2 (only for uniaxial case).</param>
-        /// <returns></returns>
-        public static Concrete ReadConcrete(Direction direction, Parameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT, double concreteArea = 0)
-        {
-	        switch (direction)
+        ///<param name="concreteArea">The concrete area (only for uniaxial case).</param>
+        public static Concrete ReadConcrete(Direction direction, Parameters parameters, Area? concreteArea = null, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
+	        direction switch
 	        {
-		        case Direction.Uniaxial:
-			        return new UniaxialConcrete(parameters, concreteArea, model);
+		        Direction.Uniaxial => new UniaxialConcrete(parameters, concreteArea ?? Area.Zero, model),
+		        _                  => new BiaxialConcrete(parameters, model)
+	        };
 
-		        default:
-			        return new BiaxialConcrete(parameters, model);
-	        }
-        }
+        
 
-        public override string ToString() => Parameters.ToString();
+        public override string ToString() => Parameters.ToString()!;
 
-        public virtual bool Equals(IConcrete other) => !(other is null) && (Model == other.Model && Parameters == other.Parameters);
+        public virtual bool Equals(IConcrete? other) => !(other is null) && (Model == other.Model && Parameters == other.Parameters);
 
-		public int CompareTo(IConcrete other) => Parameters.CompareTo(other.Parameters);
+		public int CompareTo(IConcrete? other) => Parameters.CompareTo(other?.Parameters);
 
-		public override bool Equals(object obj) => obj is Concrete concrete && Equals(concrete);
+		public override bool Equals(object? obj) => obj is Concrete concrete && Equals(concrete);
 
 		public override int GetHashCode() => Parameters.GetHashCode();
 

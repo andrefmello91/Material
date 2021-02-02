@@ -164,7 +164,7 @@ namespace Material.Concrete
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
 		public Parameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new Parameters(Strength.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), Model, Type);
 
-		public bool Approaches(IParameters other, Pressure tolerance) => Model == other.Model && Strength.Approx(other.Strength, tolerance);
+		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 
 		public Parameters Clone() => new Parameters(Strength, AggregateDiameter, Model, Type);
 
@@ -172,14 +172,14 @@ namespace Material.Concrete
 		///     <see cref="Strength" /> is compared.
 		/// </remarks>
 		/// <inheritdoc />
-		public int CompareTo(IParameters other) =>
-			Strength == other.Strength
+		public int CompareTo(IParameters? other) =>
+			Strength == other?.Strength
 				? 0
-				: Strength > other.Strength
+				: Strength > other?.Strength
 					? 1
 					: -1;
 
-		public bool Equals(IParameters other) => Approaches(other, Tolerance);
+		public bool Equals(IParameters? other) => Approaches(other, Tolerance);
 
 		public override string ToString()
 		{
@@ -198,7 +198,7 @@ namespace Material.Concrete
 		}
 
 
-		public override bool Equals(object obj) => obj is Parameters other && Equals(other);
+		public override bool Equals(object? obj) => obj is Parameters other && Equals(other);
 
 		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
 

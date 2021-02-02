@@ -18,7 +18,7 @@ namespace Material.Concrete
 			public override ParameterModel Model => ParameterModel.MCFT;
 
 			/// <summary>
-			///		Parameter calculator based on Classic MCFT formulation.
+			///		Parameter calculator based on Classic DSFM formulation.
 			/// </summary>
 			/// <inheritdoc/>
 			public DSFM(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength,  type)

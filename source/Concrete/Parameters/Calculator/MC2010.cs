@@ -57,21 +57,13 @@ namespace Material.Concrete
 
 			#region
 
-			private double AlphaE()
-			{
-				switch (Type)
+			private double AlphaE() =>
+				Type switch
 				{
-					case AggregateType.Basalt:
-						return 1.2;
-
-					case AggregateType.Quartzite:
-						return 1;
-
-					// Limestone or sandstone
-					default:
-						return 0.9;
-				}
-			}
+					AggregateType.Basalt    => 1.2,
+					AggregateType.Quartzite => 1,
+					_                       => 0.9
+				};
 
 			private double fctm() => Strength.Megapascals <= 50 ? 0.3 * Strength.Megapascals.Pow(2.0 / 3) : 2.12 * Math.Log(1 + 0.1 * Strength.Megapascals);
 
@@ -93,17 +85,15 @@ namespace Material.Concrete
 						-0.003;
 
 				// Get classes and ultimate strains
-				if (_classes.Contains(Strength.Megapascals))
-				{
-					var i = Array.IndexOf(_classes, Strength.Megapascals);
-
-					return
-						_ultimateStrain[i];
-				}
-
 				// Interpolate values
+				if (!_classes.Contains(Strength.Megapascals))
+					return
+						UltimateStrainSpline().Interpolate(Strength.Megapascals);
+
+				var i = Array.IndexOf(_classes, Strength.Megapascals);
+
 				return
-					UltimateStrainSpline().Interpolate(Strength.Megapascals);
+					_ultimateStrain[i];
 			}
 
 			/// <summary>

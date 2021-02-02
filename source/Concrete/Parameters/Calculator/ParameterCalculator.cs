@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Material.Concrete;
 using UnitsNet;
 
 namespace Material.Concrete
@@ -28,7 +23,7 @@ namespace Material.Concrete
 			/// <summary>
 			///     The type of concrete aggregate.
 			/// </summary>
-			protected AggregateType Type;
+			protected readonly AggregateType Type;
 
 			/// <summary>
 			///     Concrete strength.
@@ -76,26 +71,16 @@ namespace Material.Concrete
 			/// </summary>
 			/// <param name="model">The <see cref="ParameterModel"/>.</param>
 			/// <inheritdoc cref="ParameterCalculator(Pressure, AggregateType)"/>
-			public static ParameterCalculator GetCalculator(Pressure strength, ParameterModel model, AggregateType type)
-			{
-				switch (model)
+			public static ParameterCalculator GetCalculator(Pressure strength, ParameterModel model, AggregateType type) =>
+				model switch
 				{
-					case ParameterModel.MC2010:
-						return new MC2010(strength, type);
+					ParameterModel.MC2010  => new MC2010(strength, type),
+					ParameterModel.NBR6118 => new NBR6118(strength, type),
+					ParameterModel.MCFT    => new MCFT(strength, type),
+					_                      => new DSFM(strength, type)
+				};
 
-					case ParameterModel.NBR6118:
-						return new NBR6118(strength, type);
-
-					case ParameterModel.MCFT:
-						return new MCFT(strength, type);
-
-					default:
-						return new DSFM(strength, type);
-
-				}
-			}
-
-			public bool Equals(ParameterCalculator other) => !(other is null) && Model == other.Model;
+			public bool Equals(ParameterCalculator? other) => !(other is null) && Model == other.Model;
 		}
 	}
 }

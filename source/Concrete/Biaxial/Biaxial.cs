@@ -1,8 +1,11 @@
-﻿using Material.Reinforcement.Biaxial;
+﻿using Extensions;
+using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using OnPlaneComponents;
+using UnitsNet;
+using UnitsNet.Units;
 
 namespace Material.Concrete.Biaxial
 {
@@ -28,7 +31,7 @@ namespace Material.Concrete.Biaxial
 		public bool Cracked => _constitutive.Cracked;
 
 		/// <summary>
-		///     Get concrete initial stiffness <see cref="Matrix" />.
+		///     Get concrete initial stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal"/>.
 		/// </summary>
 		public Matrix<double> InitialStiffness
 		{
@@ -62,21 +65,23 @@ namespace Material.Concrete.Biaxial
 		public PrincipalStressState PrincipalStresses { get; private set; }
 
 		/// <summary>
-		///     Calculate current secant module of concrete, in MPa.
+		///     Calculate current secant module of concrete.
 		/// </summary>
-		private (double Ec1, double Ec2) SecantModule
+		private (Pressure Ec1, Pressure Ec2) SecantModule
 		{
 			get
 			{
 				// Get values
 				double
 					ec1 = PrincipalStrains.Epsilon1,
-					ec2 = PrincipalStrains.Epsilon2,
-					fc1 = PrincipalStresses.Sigma1.Megapascals,
-					fc2 = PrincipalStresses.Sigma2.Megapascals;
+					ec2 = PrincipalStrains.Epsilon2;
+
+				Pressure
+					fc1 = PrincipalStresses.Sigma1,
+					fc2 = PrincipalStresses.Sigma2;
 
 				// Calculate modules
-				double
+				Pressure
 					Ec1 = _constitutive.SecantModule(fc1, ec1),
 					Ec2 = _constitutive.SecantModule(fc2, ec2);
 
@@ -86,13 +91,14 @@ namespace Material.Concrete.Biaxial
 		}
 
 		/// <summary>
-		///     Get concrete stiffness <see cref="Matrix" />.
+		///     Get concrete stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal"/>.
 		/// </summary>
 		public Matrix<double> Stiffness
 		{
 			get
 			{
-				var (Ec1, Ec2) = SecantModule;
+				var Ecs = SecantModule;
+				var (Ec1, Ec2) = (Ecs.Ec1.Megapascals, Ecs.Ec2.Megapascals);
 
 				var Gc = Ec1 * Ec2 / (Ec1 + Ec2);
 
@@ -145,7 +151,7 @@ namespace Material.Concrete.Biaxial
 		/// <param name="strains">Current <see cref="StrainState" /> in concrete.</param>
 		/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 		/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-		public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement, double referenceLength = 0)
+		public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement, Length? referenceLength = null)
 		{
 			// Get strains
 			Strains = strains.Clone();
@@ -161,13 +167,12 @@ namespace Material.Concrete.Biaxial
 		/// <summary>
 		///     Set tensile stress.
 		/// </summary>
-		/// <param name="fc1">Concrete tensile stress, in MPa.</param>
-		public void SetTensileStress(double fc1)
+		/// <param name="fc1">Concrete tensile stress.</param>
+		public void SetTensileStress(Pressure fc1)
 		{
 			// Get compressive stress and theta1
-			double
-				fc2    = PrincipalStresses.Sigma2.Megapascals,
-				theta1 = PrincipalStresses.Theta1;
+			var fc2    = PrincipalStresses.Sigma2;
+			var theta1 = PrincipalStresses.Theta1;
 
 			// Set new state
 			PrincipalStresses = new PrincipalStressState(fc1, fc2, theta1);
@@ -177,9 +182,9 @@ namespace Material.Concrete.Biaxial
 		public BiaxialConcrete Clone() => new BiaxialConcrete(Parameters, Model);
 
 		/// <inheritdoc />
-		public override bool Equals(IConcrete other) => other is BiaxialConcrete && base.Equals(other);
+		public override bool Equals(IConcrete? other) => other is BiaxialConcrete && base.Equals(other);
 
-		public override bool Equals(object obj) => obj is BiaxialConcrete concrete && Equals(concrete);
+		public override bool Equals(object? obj) => obj is BiaxialConcrete concrete && Equals(concrete);
 
 		public override int GetHashCode() => Parameters.GetHashCode();
 

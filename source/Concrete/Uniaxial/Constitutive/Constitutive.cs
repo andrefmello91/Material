@@ -1,5 +1,7 @@
-﻿using Extensions;
+﻿using System;
+using Extensions;
 using Material.Reinforcement.Uniaxial;
+using UnitsNet;
 
 namespace Material.Concrete.Uniaxial
 {
@@ -47,22 +49,12 @@ namespace Material.Concrete.Uniaxial
 			/// </summary>
 			/// <param name="constitutiveModel">The <see cref="ConstitutiveModel" /> for concrete.</param>
 			/// <param name="parameters">Concrete <see cref="Parameters" />.</param>
-			public static Constitutive Read(ConstitutiveModel constitutiveModel, IParameters parameters)
-			{
-				switch (constitutiveModel)
+			public static Constitutive Read(ConstitutiveModel constitutiveModel, IParameters parameters) =>
+				constitutiveModel switch
 				{
-					case ConstitutiveModel.MCFT:
-						return
-							new MCFTConstitutive(parameters);
-
-					case ConstitutiveModel.DSFM:
-						return
-							new DSFMConstitutive(parameters);
-				}
-
-				// Linear:
-				return null;
-			}
+					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
+					_                      => new MCFTConstitutive(parameters),
+				};
 
 			/// <summary>
 			///     Calculate stress (in MPa) given <paramref name="strain" />.
@@ -73,33 +65,32 @@ namespace Material.Concrete.Uniaxial
 			///     The <see cref="UniaxialReinforcement" /> reinforcement (only for
 			///     <see cref="DSFMConstitutive" />).
 			/// </param>
-			public double CalculateStress(double strain, UniaxialReinforcement reinforcement = null)
-			{
-				if (strain.ApproxZero())
-					return 0;
-
-				return strain > 0 ? TensileStress(strain, reinforcement) : CompressiveStress(strain);
-			}
+			public Pressure CalculateStress(double strain, UniaxialReinforcement reinforcement = null) =>
+				strain.ApproxZero()
+					? Pressure.Zero
+					: strain > 0
+						? TensileStress(strain, reinforcement)
+						: CompressiveStress(strain);
 
 			/// <summary>
-			///     Calculate current secant module, in MPa.
+			///     Calculate current secant module.
 			/// </summary>
-			/// <param name="stress">Current stress in MPa.</param>
+			/// <param name="stress">Current stress.</param>
 			/// <param name="strain">Current strain.</param>
-			public double SecantModule(double stress, double strain) => stress.Abs() <= 1E-6 || strain.Abs() <= 1E-9 ? Parameters.ElasticModule.Megapascals : stress / strain;
+			public Pressure SecantModule(Pressure stress, double strain) => stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9 ? Parameters.ElasticModule : stress / strain;
 
 			/// <summary>
 			///     Calculate tensile stress for <see cref="UniaxialConcrete" /> case.
 			/// </summary>
 			/// <param name="strain">Tensile strain in concrete.</param>
 			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-			protected abstract double TensileStress(double strain, UniaxialReinforcement reinforcement = null);
+			protected abstract Pressure TensileStress(double strain, UniaxialReinforcement reinforcement = null);
 
 			/// <summary>
 			///     Calculate compressive stress for <see cref="UniaxialConcrete" /> case.
 			/// </summary>
 			/// <param name="strain">Compressive strain (negative) in concrete.</param>
-			protected abstract double CompressiveStress(double strain);
+			protected abstract Pressure CompressiveStress(double strain);
 
 			/// <summary>
 			///     Check if concrete is cracked for <see cref="UniaxialConcrete" /> case and set cracked property.
@@ -111,7 +102,7 @@ namespace Material.Concrete.Uniaxial
 					Cracked = true;
 			}
 
-			public bool Equals(IConstitutive other) => !(other is null) && Model == other.Model;
+			public bool Equals(IConstitutive? other) => Model == other?.Model;
 
 			public override string ToString() => $"{Model}";
 

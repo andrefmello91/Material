@@ -1,5 +1,12 @@
-﻿using Material.Reinforcement.Uniaxial;
+﻿#nullable enable
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+using Extensions;
+using Material.Reinforcement.Uniaxial;
 using OnPlaneComponents;
+using UnitsNet;
+using Force = UnitsNet.Force;
 
 namespace Material.Concrete.Uniaxial
 {
@@ -20,9 +27,9 @@ namespace Material.Concrete.Uniaxial
 		#region Properties
 
 		/// <summary>
-		///     Get concrete area, in mm2.
+		///     Get concrete area.
 		/// </summary>
-		public double Area { get; }
+		public Area Area { get; }
 
 		/// <summary>
 		///     Returns true if concrete is cracked.
@@ -30,24 +37,24 @@ namespace Material.Concrete.Uniaxial
 		public bool Cracked => _constitutive.Cracked;
 
 		/// <summary>
-		///     Calculate current concrete force, in N.
+		///     Calculate current concrete force.
 		/// </summary>
-		public double Force => Stress * Area;
+		public Force Force => Stress * Area;
 
 		/// <summary>
-		///     Calculate maximum force resisted by concrete, in N (negative value).
+		///     Calculate maximum force resisted by concrete (negative value).
 		/// </summary>
-		public double MaxForce => -Parameters.Strength.Megapascals * Area;
+		public Force MaxForce => -Parameters.Strength * Area;
 
 		/// <summary>
-		///     Calculate current secant module of concrete, in MPa.
+		///     Calculate current secant module of concrete.
 		/// </summary>
-		public double SecantModule => _constitutive.SecantModule(Stress, Strain);
+		public Pressure SecantModule => _constitutive.SecantModule(Stress, Strain);
 
 		/// <summary>
-		///     Calculate normal stiffness, in N.
+		///     Calculate normal stiffness.
 		/// </summary>
-		public double Stiffness => Parameters.ElasticModule.Megapascals * Area;
+		public Force Stiffness => Parameters.ElasticModule * Area;
 
 		/// <summary>
 		///     Get/set concrete strain.
@@ -57,7 +64,7 @@ namespace Material.Concrete.Uniaxial
 		/// <summary>
 		///     Get/set concrete stress.
 		/// </summary>
-		public double Stress { get; private set; }
+		public Pressure Stress { get; private set; }
 
 		#endregion
 
@@ -66,9 +73,9 @@ namespace Material.Concrete.Uniaxial
 		/// <summary>
 		///     Concrete for uniaxial calculations.
 		/// </summary>
-		/// <param name="concreteArea">The concrete area, in mm2.</param>
+		/// <param name="concreteArea">The concrete cross-section area.</param>
 		/// <inheritdoc cref="Concrete(IParameters, ConstitutiveModel)" />
-		public UniaxialConcrete(IParameters parameters, double concreteArea, ConstitutiveModel model = ConstitutiveModel.MCFT)
+		public UniaxialConcrete(IParameters parameters, Area concreteArea, ConstitutiveModel model = ConstitutiveModel.MCFT)
 			: base(parameters, model)
 		{
 			Area          = concreteArea;
@@ -84,14 +91,14 @@ namespace Material.Concrete.Uniaxial
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
-		public double CalculateForce(double strain, UniaxialReinforcement reinforcement = null) => Area * CalculateStress(strain, reinforcement);
+		public Force CalculateForce(double strain, UniaxialReinforcement reinforcement = null) => Area * CalculateStress(strain, reinforcement);
 
 		/// <summary>
-		///     Calculate stress (in MPa) given strain.
+		///     Calculate stress given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-		public double CalculateStress(double strain, UniaxialReinforcement reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
+		public Pressure CalculateStress(double strain, UniaxialReinforcement reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
 
 		/// <summary>
 		///     Set concrete strain.
@@ -120,9 +127,9 @@ namespace Material.Concrete.Uniaxial
 		public UniaxialConcrete Clone() => new UniaxialConcrete(Parameters, Area, Model);
 
 		/// <inheritdoc />
-		public override bool Equals(IConcrete other) => other is UniaxialConcrete && base.Equals(other);
+		public override bool Equals(IConcrete? other) => other is UniaxialConcrete && base.Equals(other);
 
-		public override bool Equals(object obj) => obj is UniaxialConcrete concrete && Equals(concrete);
+		public override bool Equals(object? obj) => obj is UniaxialConcrete concrete && Equals(concrete);
 
 		public override int GetHashCode() => Parameters.GetHashCode();
 

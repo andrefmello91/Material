@@ -1,5 +1,6 @@
 ﻿using System;
 using Material.Reinforcement.Uniaxial;
+using UnitsNet;
 
 namespace Material.Concrete.Uniaxial
 {
@@ -25,30 +26,31 @@ namespace Material.Concrete.Uniaxial
 			#region
 
 			/// <inheritdoc />
-			protected override double CompressiveStress(double strain)
+			protected override Pressure CompressiveStress(double strain)
 			{
 				double
 					ec = Parameters.PlasticStrain,
 					fc = Parameters.Strength.Megapascals,
-					n  = strain / ec;
+					n  = strain / ec,
+					f  = -fc * (2 * n - n * n);
 
 				return
-					-fc * (2 * n - n * n);
+					Pressure.FromMegapascals(f);
 			}
 
 			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
 
 			/// <inheritdoc />
-			protected override double TensileStress(double strain, UniaxialReinforcement reinforcement = null) =>
+			protected override Pressure TensileStress(double strain, UniaxialReinforcement reinforcement = null) =>
 				strain <= Parameters.CrackingStrain
-					? strain * Parameters.ElasticModule.Megapascals
+					? strain * Parameters.ElasticModule
 					: CrackedStress(strain);
 
 			/// <summary>
-			///     Calculate tensile stress, in MPa, for cracked concrete.
+			///     Calculate tensile stress, for cracked concrete.
 			/// </summary>
 			/// <param name="strain">Current tensile strain.</param>
-			private double CrackedStress(double strain) => Parameters.TensileStrength.Megapascals / (1 + Math.Sqrt(500 * strain));
+			private Pressure CrackedStress(double strain) => Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
 
 
 			#endregion
