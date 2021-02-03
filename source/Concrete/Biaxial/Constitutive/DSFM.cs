@@ -3,6 +3,7 @@ using Extensions;
 using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
 using UnitsNet;
+using static Extensions.UnitExtensions;
 
 #nullable enable
 
@@ -33,7 +34,7 @@ namespace Material.Concrete.Biaxial
 
 			#endregion
 
-			#region
+			#region Methods
 
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
@@ -67,7 +68,7 @@ namespace Material.Concrete.Biaxial
 			}
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement reinforcement = null)
+			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null)
 			{
 				// Get strains
 				double
@@ -90,9 +91,7 @@ namespace Material.Concrete.Biaxial
 
 				// Return maximum
 				return
-					fc1a >= fc1b
-						? fc1a
-						: fc1b;
+					Max(fc1a, fc1b);
 			}
 
 			/// <summary>
@@ -101,22 +100,20 @@ namespace Material.Concrete.Biaxial
 			/// <param name="strain">The tensile strain to calculate stress.</param>
 			/// <param name="theta1">The angle of maximum principal strain, in radians.</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
-			private Pressure TensionStiffening(double strain, double theta1, WebReinforcement reinforcement)
+			private Pressure TensionStiffening(double strain, double theta1, WebReinforcement? reinforcement)
 			{
 				// Calculate coefficient for tension stiffening effect
-				var m = reinforcement.TensionStiffeningCoefficient(theta1);
+				var m = reinforcement?.TensionStiffeningCoefficient(theta1) ?? 0;
 
 				// Calculate concrete postcracking stress associated with tension stiffening
 				var fc1b = Parameters.TensileStrength / (1 + (2.2 * m * strain).Sqrt());
 
 				// Check the maximum value of fc1 that can be transmitted across cracks
-				var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
+				var fc1s = reinforcement?.MaximumPrincipalTensileStress(theta1) ?? Pressure.Zero;
 
 				// Return minimum
 				return
-					fc1b <= fc1s
-						? fc1b
-						: fc1s;
+					Min(fc1b, fc1s);
 			}
 
 			/// <summary>

@@ -2,6 +2,9 @@
 using Extensions;
 using Material.Reinforcement.Uniaxial;
 using UnitsNet;
+using static Extensions.UnitExtensions;
+
+#nullable enable
 
 namespace Material.Concrete.Uniaxial
 {
@@ -65,7 +68,7 @@ namespace Material.Concrete.Uniaxial
 			///     The <see cref="UniaxialReinforcement" /> reinforcement (only for
 			///     <see cref="DSFMConstitutive" />).
 			/// </param>
-			public Pressure CalculateStress(double strain, UniaxialReinforcement reinforcement = null) =>
+			public Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) =>
 				strain.ApproxZero()
 					? Pressure.Zero
 					: strain > 0
@@ -77,14 +80,17 @@ namespace Material.Concrete.Uniaxial
 			/// </summary>
 			/// <param name="stress">Current stress.</param>
 			/// <param name="strain">Current strain.</param>
-			public Pressure SecantModule(Pressure stress, double strain) => stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9 ? Parameters.ElasticModule : stress / strain;
+			public Pressure SecantModule(Pressure stress, double strain) =>
+				stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9 
+					? Parameters.ElasticModule 
+					: stress / strain;
 
 			/// <summary>
 			///     Calculate tensile stress for <see cref="UniaxialConcrete" /> case.
 			/// </summary>
 			/// <param name="strain">Tensile strain in concrete.</param>
 			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-			protected abstract Pressure TensileStress(double strain, UniaxialReinforcement reinforcement = null);
+			protected abstract Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null);
 
 			/// <summary>
 			///     Calculate compressive stress for <see cref="UniaxialConcrete" /> case.

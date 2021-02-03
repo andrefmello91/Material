@@ -105,7 +105,7 @@ namespace Material.Reinforcement.Uniaxial
 
 		#endregion
 
-		#region
+		#region Methods
 
 		/// <summary>
 		///     Calculate current force.

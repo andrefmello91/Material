@@ -275,7 +275,6 @@ namespace Material.Reinforcement.Biaxial
 		/// <inheritdoc cref="WebReinforcement(Length, Length, Steel, Length, double)" />
 		public static WebReinforcement DirectionYOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle = Constants.PiOver2) => new WebReinforcement(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), width);
 
-
 		/// <summary>
 		///     Calculate angles (in radians) related to crack angle.
 		/// </summary>

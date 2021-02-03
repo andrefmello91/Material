@@ -7,6 +7,8 @@ using OnPlaneComponents;
 using UnitsNet;
 using UnitsNet.Units;
 
+#nullable enable
+
 namespace Material.Concrete.Biaxial
 {
 	/// <summary>
@@ -29,6 +31,16 @@ namespace Material.Concrete.Biaxial
 		///     Returns true if concrete is cracked.
 		/// </summary>
 		public bool Cracked => _constitutive.Cracked;
+
+		/// <summary>
+		///     Get/set crack slip consideration.
+		/// </summary>
+		public bool ConsiderCrackSlip
+		{
+			get => _constitutive.ConsiderCrackSlip;
+			set => _constitutive.ConsiderCrackSlip = value;
+		}
+
 
 		/// <summary>
 		///     Get concrete initial stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal"/>.
@@ -151,7 +163,7 @@ namespace Material.Concrete.Biaxial
 		/// <param name="strains">Current <see cref="StrainState" /> in concrete.</param>
 		/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 		/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-		public void CalculatePrincipalStresses(StrainState strains, WebReinforcement reinforcement, Length? referenceLength = null)
+		public void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Get strains
 			Strains = strains.Clone();

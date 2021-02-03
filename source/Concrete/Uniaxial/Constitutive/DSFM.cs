@@ -2,6 +2,9 @@
 using Extensions;
 using Material.Reinforcement.Uniaxial;
 using UnitsNet;
+using static Extensions.UnitExtensions;
+
+#nullable enable
 
 namespace Material.Concrete.Uniaxial
 {
@@ -35,10 +38,10 @@ namespace Material.Concrete.Uniaxial
 
 			#endregion
 
-			#region
+			#region Methods
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, UniaxialReinforcement reinforcement = null)
+			protected override Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null)
 			{
 				// Check if concrete is cracked
 				if (strain <= Parameters.CrackingStrain) // Not cracked
@@ -88,33 +91,30 @@ namespace Material.Concrete.Uniaxial
 			/// </summary>
 			/// <param name="strain">The tensile strain to calculate stress.</param>
 			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" />.</param>
-			private Pressure TensionStiffening(double strain, UniaxialReinforcement reinforcement)
+			private Pressure TensionStiffening(double strain, UniaxialReinforcement? reinforcement)
 			{
 				if (reinforcement is null)
 					return Pressure.Zero;
 
 				// Calculate coefficient for tension stiffening effect
-				var m = reinforcement.TensionStiffeningCoefficient();
+				var m = reinforcement?.TensionStiffeningCoefficient() ?? 0;
 
 				// Calculate concrete postcracking stress associated with tension stiffening
 				var fc1b = Parameters.TensileStrength / (1 + Math.Sqrt(2.2 * m * strain));
 
 				// Check the maximum value of fc1 that can be transmitted across cracks
-				var fc1s = reinforcement.MaximumPrincipalTensileStress();
+				var fc1s = reinforcement?.MaximumPrincipalTensileStress() ?? Pressure.Zero;
 
 				// Return minimum
 				return
-					fc1b <= fc1s
-						? fc1b
-						: fc1s;
+					Min(fc1s, fc1b);
 			}
 
 			/// <summary>
 			///     Calculate concrete post-cracking stress associated with tension softening.
 			/// </summary>
-			/// <param name="strain">The tensile strain to calculate stress.</param>
-			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" />.</param>
-			private Pressure TensionSoftening(double strain, UniaxialReinforcement reinforcement)
+			/// <inheritdoc cref="TensionStiffening"/>
+			private Pressure TensionSoftening(double strain, UniaxialReinforcement? reinforcement)
 			{
 				double
 					Gf = Parameters.FractureParameter.NewtonsPerMillimeter,
@@ -129,13 +129,13 @@ namespace Material.Concrete.Uniaxial
 			/// <summary>
 			///     Calculate reference length.
 			/// </summary>
-			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" />.</param>
-			private Length ReferenceLength(UniaxialReinforcement reinforcement)
+			/// <inheritdoc cref="TensionStiffening"/>
+			private Length ReferenceLength(UniaxialReinforcement? reinforcement)
 			{
 				if (!_refLength.HasValue)
-					_refLength = reinforcement is null
+					_refLength = 0.5 * (reinforcement is null
 						? Length.FromMillimeters(21)
-						: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio;
+						: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio);
 
 				return _refLength.Value;
 			}

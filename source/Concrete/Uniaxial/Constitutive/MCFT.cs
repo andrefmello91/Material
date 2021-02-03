@@ -1,6 +1,9 @@
 ﻿using System;
 using Material.Reinforcement.Uniaxial;
 using UnitsNet;
+using static Extensions.UnitExtensions;
+
+#nullable enable
 
 namespace Material.Concrete.Uniaxial
 {
@@ -23,7 +26,7 @@ namespace Material.Concrete.Uniaxial
 
 			#endregion
 
-			#region
+			#region Methods
 
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain)
@@ -41,7 +44,7 @@ namespace Material.Concrete.Uniaxial
 			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, UniaxialReinforcement reinforcement = null) =>
+			protected override Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null) =>
 				strain <= Parameters.CrackingStrain
 					? strain * Parameters.ElasticModule
 					: CrackedStress(strain);

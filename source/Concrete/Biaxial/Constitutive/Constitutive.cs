@@ -4,6 +4,9 @@ using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
 using OnPlaneComponents;
 using UnitsNet;
+using static Extensions.UnitExtensions;
+
+#nullable enable
 
 namespace Material.Concrete.Biaxial
 {
@@ -25,7 +28,7 @@ namespace Material.Concrete.Biaxial
 
 			#region Properties
 
-			public bool ConsiderCrackSlip { get; protected set; }
+			public bool ConsiderCrackSlip { get; set; }
 
 			public bool Cracked { get; set; }
 
@@ -75,7 +78,7 @@ namespace Material.Concrete.Biaxial
 			/// <param name="principalStrains">The <see cref="PrincipalStrainState" /> in concrete.</param
 			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-			public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement reinforcement, Length? referenceLength = null)
+			public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement? reinforcement, Length? referenceLength = null)
 			{
 				if (principalStrains.IsZero)
 					return PrincipalStressState.Zero;
@@ -116,7 +119,7 @@ namespace Material.Concrete.Biaxial
 			/// <param name="theta1">The angle of <paramref name="strain" /> related to horizontal axis, in radians.</param>
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-			protected abstract Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement reinforcement = null);
+			protected abstract Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null);
 
 			/// <summary>
 			///     Calculate compressive stress for <see cref="BiaxialConcrete" /> case.
@@ -137,7 +140,7 @@ namespace Material.Concrete.Biaxial
 			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
 			/// <param name="theta1">The angle of <paramref name="strain" /> related to horizontal axis, in radians.</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" /> object.</param>
-			protected Pressure UncrackedStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, WebReinforcement reinforcement = null)
+			protected Pressure UncrackedStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, WebReinforcement? reinforcement = null)
 			{
 				if (Cracked)
 					return Pressure.Zero;
@@ -160,9 +163,7 @@ namespace Material.Concrete.Biaxial
 				var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
 
 				return
-					fc1 <= fc1s
-						? fc1
-						: fc1s;
+					Min(fc1, fc1s);
 			}
 
 			/// <summary>
@@ -176,19 +177,18 @@ namespace Material.Concrete.Biaxial
 				if (Cracked)
 					return;
 
-				double
-					ft = Parameters.TensileStrength.Megapascals,
-					ec = Parameters.PlasticStrain;
+				var ft = Parameters.TensileStrength;
+				var	ec = Parameters.PlasticStrain;
 
 				// Calculate current cracking stress
 				var fcr1 = ft * (1 - ec2 / ec);
 
 				// Verify limits
-				var fcr = Math.Max(fcr1, 0.25 * ft);
-				fcr = Math.Min(fcr, ft);
+				var fcr = Max(fcr1, 0.25 * ft);
+				fcr     = Min(fcr, ft);
 
 				// Verify is concrete is cracked
-				if (fc1.Megapascals >= fcr)
+				if (fc1 >= fcr)
 					// Set cracked state
 					Cracked = true;
 			}
@@ -198,9 +198,7 @@ namespace Material.Concrete.Biaxial
 			/// </summary>
 			/// <param name="principalStrains">
 			///     The <see cref="PrincipalStrainState" />, in pure compression.
-			///     <para>See: <see cref="PrincipalStrainState.PureCompression" />.</para>
 			/// </param>
-			/// <returns></returns>
 			private PrincipalStressState ConfinementStresses(PrincipalStrainState principalStrains)
 			{
 				// Get strains

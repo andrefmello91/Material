@@ -2,6 +2,9 @@
 using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
 using UnitsNet;
+using static Extensions.UnitExtensions;
+
+#nullable enable
 
 namespace Material.Concrete.Biaxial
 {
@@ -30,7 +33,7 @@ namespace Material.Concrete.Biaxial
 
 			#endregion
 
-			#region
+			#region Methods
 
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
@@ -39,24 +42,26 @@ namespace Material.Concrete.Biaxial
 				double
 					ec1 = transverseStrain,
 					ec2 = strain,
-					fc  = Parameters.Strength.Megapascals,
 					ec  = Parameters.PlasticStrain;
 
-
+				var fc = Parameters.Strength;
+				
 				// Calculate the maximum concrete compressive stress
-				double
-					f2maxA = ec1 > 0 ? -fc / (0.8 - 0.34 * ec1 / ec) : -fc,
-					f2max  = Math.Max(f2maxA, -fc) * confinementFactor;
+				Pressure
+					f2maxA = ec1 > 0 
+						? -fc / (0.8 - 0.34 * ec1 / ec) 
+						: -fc,
+					f2max  = Max(f2maxA, -fc) * confinementFactor;
 
 				// Calculate the principal compressive stress in concrete
 				var n = ec2 / ec;
 
 				return
-					Pressure.FromMegapascals(f2max) * (2 * n - n * n);
+					f2max * (2 * n - n * n);
 			}
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement reinforcement = null)
+			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null)
 			{
 				// Get strains
 				double
@@ -67,12 +72,10 @@ namespace Material.Concrete.Biaxial
 				var fc1 = UncrackedStress(ec1, ec2, theta1, reinforcement);
 
 				// Not cracked
-				if (!Cracked)
-					return fc1;
-
-				// Else, cracked
-				return
-					CrackedStress(ec1);
+				return 
+					!Cracked 
+						? fc1 
+						: CrackedStress(ec1);
 			}
 
 			/// <summary>

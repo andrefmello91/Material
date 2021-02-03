@@ -72,7 +72,7 @@ namespace Material.Reinforcement.Biaxial
 		/// <summary>
 		///     Get reinforcement ratio.
 		/// </summary>
-		public double Ratio => CalculateRatio();
+		public double Ratio => CalculateRatio(this);
 
 		/// <summary>
 		///     Get the steel object.
@@ -159,6 +159,24 @@ namespace Material.Reinforcement.Biaxial
 				? null
 				: new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle);
 
+		/// <summary>
+		///     Calculate the crack spacing at <paramref name="direction" />, according to Kaklauskas (2019) expression.
+		/// </summary>
+		/// <inheritdoc cref="CrackSpacing()" />
+		/// <param name="direction">The <see cref="WebReinforcementDirection" />.</param>
+		public static Length CrackSpacing(WebReinforcementDirection? direction) =>
+			direction is null || direction.BarDiameter.ApproxZero(Tolerance) || direction.Ratio.ApproxZero()
+				? Length.FromMillimeters(21)
+				: Length.FromMillimeters(21) + 0.155 * direction.BarDiameter / direction.Ratio;
+
+		/// <summary>
+		///     Calculate reinforcement ratio for distributed reinforcement.
+		/// </summary>
+		public static double CalculateRatio(WebReinforcementDirection? direction) =>
+			direction is null || direction.BarDiameter.ApproxZero(Tolerance) || direction.BarSpacing.ApproxZero(Tolerance) || direction.Width.ApproxZero(Tolerance)
+				? 0
+				: 0.5 * Constants.Pi * direction.BarDiameter * direction.BarDiameter / (direction.BarSpacing * direction.Width);
+
 		public void ChangeUnit(LengthUnit unit)
 		{
 			if (Unit == unit)
@@ -200,12 +218,12 @@ namespace Material.Reinforcement.Biaxial
 		public bool Approaches(WebReinforcementDirection? other, Length tolerance) => !(other is null) && EqualsDiameterAndSpacing(other, tolerance) && Steel == other.Steel;
 
 		/// <summary>
-		///     Calculate reinforcement ratio for distributed reinforcement.
+		///     Calculate the crack spacing at this direction, according to Kaklauskas (2019) expression.
 		/// </summary>
-		private double CalculateRatio() =>
-			BarDiameter.ApproxZero(Tolerance) || BarSpacing.ApproxZero(Tolerance) || Width.ApproxZero(Tolerance)
-				? 0
-				: 0.5 * Constants.Pi * BarDiameter * BarDiameter / (BarSpacing * Width);
+		/// <remarks>
+		///     sm = 21 mm + 0.155 <see cref="BarDiameter" /> / <see cref="Ratio" />
+		/// </remarks>
+		public Length CrackSpacing() => CrackSpacing(this);
 
 		public int CompareTo(WebReinforcementDirection? other) =>
 			other is null || BarDiameter > other.BarDiameter || BarDiameter.Approx(other.BarDiameter, Tolerance) && BarSpacing > other.BarSpacing
