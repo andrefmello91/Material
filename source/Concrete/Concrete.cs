@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Runtime.InteropServices.ComTypes;
+using System.Diagnostics.CodeAnalysis;
 using Material.Concrete.Biaxial;
 using Material.Concrete.Uniaxial;
 using UnitsNet;
+
+#nullable enable
 
 namespace Material.Concrete
 {
@@ -69,7 +71,7 @@ namespace Material.Concrete
 
         public override string ToString() => Parameters.ToString()!;
 
-        public virtual bool Equals(IConcrete? other) => !(other is null) && (Model == other.Model && Parameters == other.Parameters);
+        public virtual bool Equals(IConcrete? other) => Model == other?.Model && Parameters == other?.Parameters;
 
 		public int CompareTo(IConcrete? other) => Parameters.CompareTo(other?.Parameters);
 
@@ -80,7 +82,7 @@ namespace Material.Concrete
         /// <summary>
         /// Returns true if parameters and constitutive model are equal.
         /// </summary>
-        public static bool operator == (Concrete left, Concrete right) => !(left is null) && left.Equals(right);
+        public static bool operator == (Concrete? left, Concrete right) => !(left is null) && left.Equals(right);
 
         /// <summary>
         /// Returns true if parameters and constitutive model are different.

@@ -160,7 +160,9 @@ namespace Material.Concrete.Biaxial
 				var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
 
 				return
-					Math.Min(fc1, fc1s);
+					fc1 <= fc1s
+						? fc1
+						: fc1s;
 			}
 
 			/// <summary>

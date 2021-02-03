@@ -1,6 +1,7 @@
 ﻿using System;
 using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
+using UnitsNet;
 
 namespace Material.Concrete.Biaxial
 {
@@ -32,7 +33,7 @@ namespace Material.Concrete.Biaxial
 			#region
 
 			/// <inheritdoc />
-			protected override double CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
+			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 			{
 				// Get strains
 				double
@@ -51,11 +52,11 @@ namespace Material.Concrete.Biaxial
 				var n = ec2 / ec;
 
 				return
-					f2max * (2 * n - n * n);
+					Pressure.FromMegapascals(f2max) * (2 * n - n * n);
 			}
 
 			/// <inheritdoc />
-			protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, WebReinforcement reinforcement = null)
+			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement reinforcement = null)
 			{
 				// Get strains
 				double
@@ -78,7 +79,7 @@ namespace Material.Concrete.Biaxial
 			///     Calculate tensile stress for cracked concrete.
 			/// </summary>
 			/// <param name="strain">Current tensile strain.</param>
-			private double CrackedStress(double strain) => Parameters.TensileStrength.Megapascals / (1 + Math.Sqrt(500 * strain));
+			private Pressure CrackedStress(double strain) => Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
 
 			#endregion
 		}

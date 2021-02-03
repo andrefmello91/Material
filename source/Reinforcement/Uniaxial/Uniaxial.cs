@@ -1,10 +1,10 @@
 ﻿using System;
 using Extensions;
 using MathNet.Numerics;
-using OnPlaneComponents;
 using UnitsNet;
 using UnitsNet.Units;
-using Force = UnitsNet.Force;
+
+#nullable enable
 
 namespace Material.Reinforcement.Uniaxial
 {
@@ -19,6 +19,11 @@ namespace Material.Reinforcement.Uniaxial
 		///     Concrete area.
 		/// </summary>
 		private readonly Area _concreteArea;
+
+		/// <summary>
+		///     The tolerance to consider displacements equal.
+		/// </summary>
+		public static readonly Length Tolerance = Length.FromMillimeters(1E-3);
 
 		#endregion
 
@@ -138,7 +143,7 @@ namespace Material.Reinforcement.Uniaxial
 
 		public UniaxialReinforcement Clone() => new UniaxialReinforcement(NumberOfBars, BarDiameter, Steel.Clone(), _concreteArea);
 
-		public bool Approaches(UniaxialReinforcement other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance) && Steel == other.Steel;
+		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance) && Steel == other.Steel;
 
 
 		public void ChangeUnit(LengthUnit unit)
@@ -157,7 +162,7 @@ namespace Material.Reinforcement.Uniaxial
 		/// </summary>
 		private Area CalculateArea() => 0.25 * NumberOfBars * Constants.Pi * BarDiameter * BarDiameter;
 
-		public int CompareTo(UniaxialReinforcement other) =>
+		public int CompareTo(UniaxialReinforcement? other) =>
 			other is null || Area > other.Area
 				? 1
 				: Area == other.Area
@@ -169,7 +174,7 @@ namespace Material.Reinforcement.Uniaxial
 		///     <para>Returns true if parameters are equal.</para>
 		/// </summary>
 		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool Equals(UniaxialReinforcement other) => Approaches(other, Length.FromMillimeters(1E-3));
+		public virtual bool Equals(UniaxialReinforcement? other) => Approaches(other, Tolerance);
 
 		public override string ToString()
 		{
@@ -185,9 +190,9 @@ namespace Material.Reinforcement.Uniaxial
 		///     <para>Returns true if <see cref="NumberOfBars" /> and <see cref="BarDiameter" /> are equal.</para>
 		/// </summary>
 		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool EqualsNumberAndDiameter(UniaxialReinforcement other, Length tolerance) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
+		public virtual bool EqualsNumberAndDiameter(UniaxialReinforcement? other, Length tolerance) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
 
-		public override bool Equals(object other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
+		public override bool Equals(object? other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
 
 		public override int GetHashCode() => (int) BarDiameter.Millimeters.Pow(NumberOfBars);
 

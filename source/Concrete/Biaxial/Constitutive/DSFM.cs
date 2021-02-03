@@ -2,6 +2,9 @@
 using Extensions;
 using Material.Reinforcement.Biaxial;
 using MathNet.Numerics;
+using UnitsNet;
+
+#nullable enable
 
 namespace Material.Concrete.Biaxial
 {
@@ -33,27 +36,29 @@ namespace Material.Concrete.Biaxial
 			#region
 
 			/// <inheritdoc />
-			protected override double CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
+			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 			{
+				var fc = Parameters.Strength;
+
 				// Get strains
 				double
 					ec1 = transverseStrain,
 					ec2 = strain,
-					fc  = Parameters.Strength.Megapascals,
 					ec  = Parameters.PlasticStrain;
 
 				// Calculate beta D
 				var betaD = SofteningFactor(ec2, ec1);
 
 				// Calculate fp and ep
-				double
-					fp = -betaD * fc * confinementFactor,
-					ep =  betaD * ec * confinementFactor;
+				var fp = -betaD * fc * confinementFactor;
+				var	ep =  betaD * ec * confinementFactor;
 
 				// Calculate parameters of concrete
 				double
-					k = ep <= ec2 ? 1 : 0.67 - fp / 62,
-					n = 0.8 - fp / 17,
+					k = ep <= ec2 
+						? 1 
+						: 0.67 - fp.Megapascals / 62,
+					n      = 0.8 - fp.Megapascals / 17,
 					ec2_ep = ec2 / ep;
 
 				// Calculate the principal compressive stress in concrete
@@ -62,7 +67,7 @@ namespace Material.Concrete.Biaxial
 			}
 
 			/// <inheritdoc />
-			protected override double TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, double referenceLength = 0, WebReinforcement reinforcement = null)
+			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement reinforcement = null)
 			{
 				// Get strains
 				double
@@ -78,14 +83,16 @@ namespace Material.Concrete.Biaxial
 
 				// Cracked
 				// Calculate concrete post-cracking stress associated with tension softening
-				var fc1a = TensionSoftening(ec1, referenceLength);
+				var fc1a = TensionSoftening(ec1, referenceLength!.Value);
 
 				// Calculate concrete post-cracking stress associated with tension stiffening.
 				var fc1b = TensionStiffening(ec1, theta1, reinforcement);
 
 				// Return maximum
 				return
-					Math.Max(fc1a, fc1b);
+					fc1a >= fc1b
+						? fc1a
+						: fc1b;
 			}
 
 			/// <summary>
@@ -94,20 +101,22 @@ namespace Material.Concrete.Biaxial
 			/// <param name="strain">The tensile strain to calculate stress.</param>
 			/// <param name="theta1">The angle of maximum principal strain, in radians.</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
-			private double TensionStiffening(double strain, double theta1, WebReinforcement reinforcement)
+			private Pressure TensionStiffening(double strain, double theta1, WebReinforcement reinforcement)
 			{
 				// Calculate coefficient for tension stiffening effect
 				var m = reinforcement.TensionStiffeningCoefficient(theta1);
 
 				// Calculate concrete postcracking stress associated with tension stiffening
-				var fc1b = Parameters.TensileStrength.Megapascals / (1 + (2.2 * m * strain).Sqrt());
+				var fc1b = Parameters.TensileStrength / (1 + (2.2 * m * strain).Sqrt());
 
 				// Check the maximum value of fc1 that can be transmitted across cracks
 				var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
 
 				// Return minimum
 				return
-					Math.Min(fc1b, fc1s);
+					fc1b <= fc1s
+						? fc1b
+						: fc1s;
 			}
 
 			/// <summary>
@@ -137,13 +146,14 @@ namespace Material.Concrete.Biaxial
 			/// </summary>
 			/// <param name="strain">The tensile strain to calculate stress.</param>
 			/// <param name="referenceLength">The reference length.</param>
-			private double TensionSoftening(double strain, double referenceLength)
+			private Pressure TensionSoftening(double strain, Length referenceLength)
 			{
+				var ft = Parameters.TensileStrength;
+
 				double
 					Gf  = Parameters.FractureParameter.NewtonsPerMillimeter,
-					ft  = Parameters.TensileStrength.Megapascals,
 					ecr = Parameters.CrackingStrain,
-					ets = 2.0 * Gf / (ft * referenceLength);
+					ets = 2.0 * Gf / (ft.Megapascals * referenceLength.Millimeters);
 
 				return
 					ft * (1.0 - (strain - ecr) / (ets - ecr));
