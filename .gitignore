@@ -4,6 +4,6 @@
 
 /.vs
 /packages
-/Material/bin/Debug
-/Material/obj/Debug
-/Material/obj/Release
+/bin/Debug
+/obj/Debug
+/obj/Release
