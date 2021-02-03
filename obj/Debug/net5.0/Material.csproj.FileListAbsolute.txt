@@ -1,5 +1,0 @@
-D:\André\OneDrive\source\repos\andrefmello91\Material\obj\Debug\net5.0\Material.csprojAssemblyReference.cache
-D:\André\OneDrive\source\repos\andrefmello91\Material\obj\Debug\net5.0\Material.GeneratedMSBuildEditorConfig.editorconfig
-D:\André\OneDrive\source\repos\andrefmello91\Material\obj\Debug\net5.0\Material.AssemblyInfoInputs.cache
-D:\André\OneDrive\source\repos\andrefmello91\Material\obj\Debug\net5.0\Material.AssemblyInfo.cs
-D:\André\OneDrive\source\repos\andrefmello91\Material\obj\Debug\net5.0\Material.csproj.CoreCompileInputs.cache
