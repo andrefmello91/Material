@@ -1,5 +1,6 @@
 ﻿using System;
 using Extensions;
+using Material.Concrete.Biaxial;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -46,6 +47,7 @@ namespace Material.Reinforcement.Biaxial
 		/// <summary>
 		///     Get initial <see cref="WebReinforcement" /> stiffness <see cref="Matrix" />.
 		/// </summary>
+		/// <inheritdoc cref="BiaxialConcrete.InitialStiffness"/>
 		public Matrix<double> InitialStiffness
 		{
 			get

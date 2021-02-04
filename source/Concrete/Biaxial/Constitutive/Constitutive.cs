@@ -249,8 +249,12 @@ namespace Material.Concrete.Biaxial
 				// Get absolute value
 				var fcn_fc = (transverseStress / Parameters.Strength).Abs();
 
+				var c = 1 + 0.92 * fcn_fc - 0.76 * fcn_fc * fcn_fc;
+
 				return
-					1 + 0.92 * fcn_fc - 0.76 * fcn_fc * fcn_fc;
+					c.IsFinite() && c > 1 && c < 2
+						? c 
+						: 1;
 			}
 
 			public bool Equals(IConstitutive? other) => !(other is null) && Model == other.Model;

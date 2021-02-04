@@ -43,8 +43,11 @@ namespace Material.Concrete.Biaxial
 
 
 		/// <summary>
-		///     Get concrete initial stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal"/>.
+		///     Get concrete initial stiffness <see cref="Matrix" />.
 		/// </summary>
+		/// <remarks>
+		///		Elements are expressed in <see cref="PressureUnit.Megapascal"/>.
+		/// </remarks>
 		public Matrix<double> InitialStiffness
 		{
 			get
