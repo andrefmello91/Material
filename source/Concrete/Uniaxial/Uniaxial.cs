@@ -1,12 +1,9 @@
-﻿#nullable enable
-
-using System;
-using System.Diagnostics.CodeAnalysis;
-using Extensions;
+﻿using Extensions;
 using Material.Reinforcement.Uniaxial;
-using OnPlaneComponents;
 using UnitsNet;
 using Force = UnitsNet.Force;
+
+#nullable enable
 
 namespace Material.Concrete.Uniaxial
 {
@@ -91,14 +88,14 @@ namespace Material.Concrete.Uniaxial
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
-		public Force CalculateForce(double strain, UniaxialReinforcement reinforcement = null) => Area * CalculateStress(strain, reinforcement);
+		public Force CalculateForce(double strain, UniaxialReinforcement? reinforcement = null) => Area * CalculateStress(strain, reinforcement);
 
 		/// <summary>
 		///     Calculate stress given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-		public Pressure CalculateStress(double strain, UniaxialReinforcement reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
+		public Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
 
 		/// <summary>
 		///     Set concrete strain.
@@ -111,14 +108,14 @@ namespace Material.Concrete.Uniaxial
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-		public void SetStress(double strain, UniaxialReinforcement reinforcement = null) => Stress = CalculateStress(strain, reinforcement);
+		public void SetStress(double strain, UniaxialReinforcement? reinforcement = null) => Stress = CalculateStress(strain, reinforcement);
 
 		/// <summary>
 		///     Set concrete strain and calculate stress, in MPa.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-		public void SetStrainsAndStresses(double strain, UniaxialReinforcement reinforcement = null)
+		public void SetStrainsAndStresses(double strain, UniaxialReinforcement? reinforcement = null)
 		{
 			SetStrain(strain);
 			SetStress(strain, reinforcement);
