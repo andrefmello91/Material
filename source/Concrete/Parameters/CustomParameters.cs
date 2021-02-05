@@ -54,7 +54,7 @@ namespace Material.Concrete
 
 		public double CrackingStrain => TensileStrength / ElasticModule;
 
-		public Pressure TransverseModule => (SecantModule / 2.4).ToUnit(StressUnit);
+		public Pressure TransverseModule => (ElasticModule / 2.4).ToUnit(StressUnit);
 
 		public ForcePerLength FractureParameter => ForcePerLength.FromNewtonsPerMillimeter(0.075);
 
