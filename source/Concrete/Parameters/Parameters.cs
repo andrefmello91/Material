@@ -3,6 +3,8 @@ using OnPlaneComponents;
 using UnitsNet;
 using UnitsNet.Units;
 
+#nullable enable
+
 namespace Material.Concrete
 {
 	/// <summary>
@@ -103,7 +105,7 @@ namespace Material.Concrete
 
 		#endregion
 
-		#region
+		#region Methods
 
 		/// <summary>
 		///     Get concrete class C20 (fc = 20 MPa).
