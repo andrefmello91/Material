@@ -40,6 +40,8 @@ namespace Material.Concrete
 
 		public ParameterModel Model => ParameterModel.Custom;
 
+		public AggregateType Type { get; }
+
 		public Length AggregateDiameter { get; private set; }
 
 		public Pressure TensileStrength { get; private set; }
@@ -84,6 +86,7 @@ namespace Material.Concrete
 			PlasticStrain     = - plasticStrain.Abs();
 			UltimateStrain    = - ultimateStrain.Abs();
 			AggregateDiameter = aggregateDiameter;
+			Type              = AggregateType.Quartzite;
 		}
 
 		#endregion

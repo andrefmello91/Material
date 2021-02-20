@@ -190,7 +190,7 @@ namespace Material.Reinforcement.Uniaxial
 		///     <para>Returns true if <see cref="NumberOfBars" /> and <see cref="BarDiameter" /> are equal.</para>
 		/// </summary>
 		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool EqualsNumberAndDiameter(UniaxialReinforcement? other, Length tolerance) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
+		public bool EqualsNumberAndDiameter(UniaxialReinforcement? other, Length tolerance) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
 
 		public override bool Equals(object? other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
 

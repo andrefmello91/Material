@@ -37,6 +37,11 @@ namespace Material.Concrete
 		#region Properties
 
 		/// <summary>
+		///		Get the aggregate type.
+		/// </summary>
+		public AggregateType Type { get; }
+
+		/// <summary>
 		///     Get/set maximum diameter of concrete aggregate.
 		/// </summary>
 		Length AggregateDiameter { get; }
