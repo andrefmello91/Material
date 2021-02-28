@@ -215,7 +215,7 @@ namespace Material.Reinforcement.Biaxial
 
 		public WebReinforcementDirection Clone() => new WebReinforcementDirection(BarDiameter, BarSpacing, Steel.Clone(), Width, Angle);
 
-		public bool Approaches(WebReinforcementDirection? other, Length tolerance) => !(other is null) && EqualsDiameterAndSpacing(other, tolerance) && Steel == other.Steel;
+		public bool Approaches(WebReinforcementDirection? other, Length tolerance) => !(other is null) && EqualsDiameterAndSpacing(other, tolerance);
 
 		/// <summary>
 		///     Calculate the crack spacing at this direction, according to Kaklauskas (2019) expression.

@@ -143,8 +143,7 @@ namespace Material.Reinforcement.Uniaxial
 
 		public UniaxialReinforcement Clone() => new UniaxialReinforcement(NumberOfBars, BarDiameter, Steel.Clone(), _concreteArea);
 
-		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance) && Steel == other.Steel;
-
+		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance);
 
 		public void ChangeUnit(LengthUnit unit)
 		{
