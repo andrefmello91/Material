@@ -32,15 +32,19 @@ namespace Material.Concrete
 			/// <inheritdoc />
 			public MCFT(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength,  type)
 			{
-				TensileStrength = Pressure.FromMegapascals(fcr());
-				ElasticModule   = Ec();
-				PlasticStrain   = ec;
-				UltimateStrain  = ecu;
 			}
 
 			#endregion
 
 			#region
+
+			protected override void CalculateCustomParameters()
+			{
+				TensileStrength = Pressure.FromMegapascals(fcr());
+				ElasticModule   = Ec();
+				PlasticStrain   = ec;
+				UltimateStrain  = ecu;
+			}
 
 			private double fcr() => 0.33 * Strength.Megapascals.Sqrt();
 

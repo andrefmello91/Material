@@ -28,15 +28,19 @@ namespace Material.Concrete
 			public NBR6118(Pressure strength, AggregateType type = AggregateType.Quartzite)
 				: base(strength, type)
 			{
-				TensileStrength = Pressure.FromMegapascals(fctm());
-				ElasticModule   = Pressure.FromMegapascals(Eci());
-				PlasticStrain   = ec2();
-				UltimateStrain  = ecu();
 			}
 
 			#endregion
 
 			#region
+
+			protected override void CalculateCustomParameters()
+			{
+				TensileStrength = Pressure.FromMegapascals(fctm());
+				ElasticModule   = Pressure.FromMegapascals(Eci());
+				PlasticStrain   = ec2();
+				UltimateStrain  = ecu();
+			}
 
 			private double AlphaE() =>
 				Type switch

@@ -39,12 +39,12 @@ namespace Material.Concrete
 		/// <summary>
 		///		Get the aggregate type.
 		/// </summary>
-		public AggregateType Type { get; }
+		public AggregateType Type { get; set; }
 
 		/// <summary>
 		///     Get/set maximum diameter of concrete aggregate.
 		/// </summary>
-		Length AggregateDiameter { get; }
+		Length AggregateDiameter { get; set; }
 
 		/// <summary>
 		///     Get concrete cracking strain.
@@ -84,7 +84,7 @@ namespace Material.Concrete
 		/// <summary>
 		///     Get the compressive strength of concrete (positive value).
 		/// </summary>
-		Pressure Strength { get; }
+		Pressure Strength { get; set; }
 
 		/// <summary>
 		///     Get/set the unit of concrete strength parameters.

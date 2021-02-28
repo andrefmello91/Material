@@ -13,6 +13,9 @@ namespace Material.Concrete
 	{
 		#region Fields
 
+		private Length _aggDiameter;
+		private Pressure _strength;
+
 		/// <summary>
 		///     The default <see cref="Pressure" /> tolerance.
 		/// </summary>
@@ -21,7 +24,7 @@ namespace Material.Concrete
 		/// <summary>
 		///     Calculator for concrete parameters.
 		/// </summary>
-		private readonly ParameterCalculator Calculator;
+		private ParameterCalculator _calculator;
 
 		#endregion
 
@@ -51,29 +54,56 @@ namespace Material.Concrete
 			set => ChangeUnit(value);
 		}
 
-		public Pressure Strength { get; private set; }
+		public Pressure Strength
+		{
+			get => _strength;
+			set
+			{
+				_strength = value.ToUnit(StressUnit);
+				_calculator.Strength = _strength;
+			}
+		}
 
-		public ParameterModel Model => Calculator.Model;
+		public ParameterModel Model
+		{
+			get => _calculator.Model;
+			set
+			{
+				if (value == _calculator.Model)
+					return;
 
-		public Length AggregateDiameter { get; private set; }
+				// Change model
+				_calculator = ParameterCalculator.GetCalculator(Strength, value, Type);
+			}
+		}
 
-		public Pressure TensileStrength => Calculator.TensileStrength.ToUnit(StressUnit);
+		public Length AggregateDiameter
+		{
+			get => _aggDiameter; 
+			set => _aggDiameter = value.ToUnit(DiameterUnit);
+		}
 
-		public Pressure ElasticModule => Calculator.ElasticModule.ToUnit(StressUnit);
+		public Pressure TensileStrength => _calculator.TensileStrength.ToUnit(StressUnit);
 
-		public Pressure SecantModule => Calculator.SecantModule.ToUnit(StressUnit);
+		public Pressure ElasticModule => _calculator.ElasticModule.ToUnit(StressUnit);
 
-		public double PlasticStrain => Calculator.PlasticStrain;
+		public Pressure SecantModule => _calculator.SecantModule.ToUnit(StressUnit);
 
-		public double UltimateStrain => Calculator.UltimateStrain;
+		public double PlasticStrain => _calculator.PlasticStrain;
+
+		public double UltimateStrain => _calculator.UltimateStrain;
 
 		public double CrackingStrain => TensileStrength / ElasticModule;
 
 		public Pressure TransverseModule => (ElasticModule / 2.4).ToUnit(StressUnit);
 
-		public ForcePerLength FractureParameter => Calculator.FractureParameter;
+		public ForcePerLength FractureParameter => _calculator.FractureParameter;
 
-		public AggregateType Type { get; }
+		public AggregateType Type
+		{
+			get => _calculator.Type;
+			set => _calculator.Type = value;
+		}
 
 		#endregion
 
@@ -96,10 +126,9 @@ namespace Material.Concrete
 		/// <param name="model">The <see cref="ParameterModel" />.</param>
 		public Parameters(Pressure strength, Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite)
 		{
-			Strength = strength;
-			AggregateDiameter = aggregateDiameter;
-			Type = type;
-			Calculator = ParameterCalculator.GetCalculator(strength, model, type);
+			_strength    = strength;
+			_aggDiameter = aggregateDiameter;
+			_calculator   = ParameterCalculator.GetCalculator(strength, model, type);
 		}
 
 		#endregion
@@ -139,7 +168,7 @@ namespace Material.Concrete
 			if (unit == DiameterUnit)
 				return;
 
-			AggregateDiameter = AggregateDiameter.ToUnit(unit);
+			_aggDiameter = _aggDiameter.ToUnit(unit);
 		}
 
 		public IParameters Convert(LengthUnit unit) => new Parameters(Strength, AggregateDiameter.ToUnit(unit), Model, Type);
@@ -153,7 +182,7 @@ namespace Material.Concrete
 			if (unit == StressUnit)
 				return;
 
-			Strength = Strength.ToUnit(unit);
+			_strength = _strength.ToUnit(unit);
 		}
 
 		public IParameters Convert(PressureUnit unit) => new Parameters(Strength.ToUnit(unit), AggregateDiameter, Model, Type);

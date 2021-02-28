@@ -10,6 +10,9 @@ namespace Material.Concrete
 		/// </summary>
 		private abstract class ParameterCalculator : IEquatable<ParameterCalculator>
 		{
+			private AggregateType _type;
+			private Pressure _strength;
+
 			/// <summary>
 			///		Get the <see cref="ParameterModel"/>.
 			/// </summary>
@@ -23,12 +26,28 @@ namespace Material.Concrete
 			/// <summary>
 			///     The type of concrete aggregate.
 			/// </summary>
-			protected readonly AggregateType Type;
+			public AggregateType Type
+			{
+				get => _type;
+				set
+				{
+					_type = value;
+					CalculateCustomParameters();
+				}
+			}
 
 			/// <summary>
 			///     Concrete strength.
 			/// </summary>
-			protected Pressure Strength;
+			public Pressure Strength
+			{
+				get => _strength;
+				set
+				{
+					_strength = value;
+					CalculateCustomParameters();
+				}
+			}
 
 			/// <summary>
 			///     Get initial elastic module.
@@ -62,8 +81,9 @@ namespace Material.Concrete
 			/// <param name="type">The <see cref="AggregateType"/>.</param>
 			protected ParameterCalculator(Pressure strength, AggregateType type)
 			{
-				Strength = strength;
-				Type     = type;
+				_strength = strength;
+				_type     = type;
+				CalculateCustomParameters();
 			}
 
 			/// <summary>
@@ -79,6 +99,11 @@ namespace Material.Concrete
 					ParameterModel.MCFT    => new MCFT(strength, type),
 					_                      => new DSFM(strength, type)
 				};
+
+			/// <summary>
+			///		Calculate and update values for custom parameters.
+			/// </summary>
+			protected abstract void CalculateCustomParameters();
 
 			public bool Equals(ParameterCalculator? other) => !(other is null) && Model == other.Model;
 		}

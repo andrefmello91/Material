@@ -10,6 +10,13 @@ namespace Material.Concrete
 	/// </summary>
 	public struct CustomParameters : IParameters, ICloneable<CustomParameters>
 	{
+		private Length _aggDiameter;
+		private Pressure _strength;
+		private Pressure _tensileStrength;
+		private Pressure _elasticModule;
+		private double _plasticStrain;
+		private double _ultimateStrain;
+
 		#region Properties
 
 		PressureUnit IUnitConvertible<IParameters, PressureUnit>.Unit
@@ -36,23 +43,47 @@ namespace Material.Concrete
 			set => ChangeUnit(value);
 		}
 
-		public Pressure Strength { get; private set; }
+		public Pressure Strength
+		{
+			get => _strength; 
+			set => _strength = value.ToUnit(StressUnit);
+		}
 
 		public ParameterModel Model => ParameterModel.Custom;
 
-		public AggregateType Type { get; }
+		public AggregateType Type { get; set; }
 
-		public Length AggregateDiameter { get; private set; }
+		public Length AggregateDiameter
+		{
+			get => _aggDiameter;
+			set => _aggDiameter = value.ToUnit(DiameterUnit);
+		}
 
-		public Pressure TensileStrength { get; private set; }
+		public Pressure TensileStrength
+		{
+			get => _tensileStrength;
+			set => _tensileStrength = value.ToUnit(StressUnit);
+		}
 
-		public Pressure ElasticModule { get; private set; }
+		public Pressure ElasticModule
+		{
+			get => _elasticModule;
+			set => _elasticModule = value.ToUnit(StressUnit);
+		}
 
 		public Pressure SecantModule => Strength / PlasticStrain;
 
-		public double PlasticStrain { get;  }
+		public double PlasticStrain
+		{
+			get => _plasticStrain;
+			set => _plasticStrain = - value.Abs();
+		}
 
-		public double UltimateStrain { get;  }
+		public double UltimateStrain
+		{
+			get => _ultimateStrain;
+			set => _ultimateStrain = - value.Abs();
+		}
 
 		public double CrackingStrain => TensileStrength / ElasticModule;
 
@@ -80,12 +111,12 @@ namespace Material.Concrete
 		/// <param name="ultimateStrain">Concrete ultimate strain (positive or negative value).</param>
 		public CustomParameters(Pressure strength, Pressure tensileStrength, Pressure elasticModule, Length aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035)
 		{
-			Strength          = strength.Abs();
-			TensileStrength   = tensileStrength;
-			ElasticModule     = elasticModule;
-			PlasticStrain     = - plasticStrain.Abs();
-			UltimateStrain    = - ultimateStrain.Abs();
-			AggregateDiameter = aggregateDiameter;
+			_strength         = strength.Abs();
+			_tensileStrength  = tensileStrength;
+			_elasticModule    = elasticModule;
+			_plasticStrain    = - plasticStrain.Abs();
+			_ultimateStrain   = - ultimateStrain.Abs();
+			_aggDiameter      = aggregateDiameter;
 			Type              = AggregateType.Quartzite;
 		}
 
@@ -102,7 +133,7 @@ namespace Material.Concrete
 			if (unit == DiameterUnit)
 				return;
 
-			AggregateDiameter = AggregateDiameter.ToUnit(unit);
+			_aggDiameter = _aggDiameter.ToUnit(unit);
 		}
 
 		public IParameters Convert(LengthUnit unit) => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter.ToUnit(unit), PlasticStrain, UltimateStrain);
@@ -116,9 +147,9 @@ namespace Material.Concrete
 			if (unit == StressUnit)
 				return;
 
-			Strength        = Strength.ToUnit(unit);
-			TensileStrength = TensileStrength.ToUnit(unit);
-			ElasticModule   = ElasticModule.ToUnit(unit);
+			_strength        = _strength.ToUnit(unit);
+			_tensileStrength = _tensileStrength.ToUnit(unit);
+			_elasticModule   = _elasticModule.ToUnit(unit);
 		}
 
 		public IParameters Convert(PressureUnit unit) => new CustomParameters(Strength.ToUnit(unit), TensileStrength.ToUnit(unit), ElasticModule.ToUnit(unit), AggregateDiameter, PlasticStrain, UltimateStrain);

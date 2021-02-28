@@ -47,15 +47,19 @@ namespace Material.Concrete
 			/// <inheritdoc />
 			public MC2010(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength, type)
 			{
-				TensileStrength = Pressure.FromMegapascals(fctm());
-				ElasticModule   = Pressure.FromMegapascals(Eci());
-				PlasticStrain   = ec1();
-				UltimateStrain  = ecu();
 			}
 
 			#endregion
 
 			#region
+
+			protected override void CalculateCustomParameters()
+			{
+				TensileStrength = Pressure.FromMegapascals(fctm());
+				ElasticModule   = Pressure.FromMegapascals(Eci());
+				PlasticStrain   = ec1();
+				UltimateStrain  = ecu();
+			}
 
 			private double AlphaE() =>
 				Type switch
