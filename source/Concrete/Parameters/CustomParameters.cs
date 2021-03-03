@@ -49,7 +49,13 @@ namespace Material.Concrete
 			set => _strength = value.ToUnit(StressUnit);
 		}
 
-		public ParameterModel Model => ParameterModel.Custom;
+		public ParameterModel Model
+		{
+			get => ParameterModel.Custom;
+			set
+			{
+			}
+		}
 
 		public AggregateType Type { get; set; }
 
@@ -122,7 +128,7 @@ namespace Material.Concrete
 
 		#endregion
 
-		#region
+		#region Methods
 
 		/// <summary>
 		///     Change <see cref="AggregateDiameter" /> unit.
@@ -164,6 +170,13 @@ namespace Material.Concrete
 		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 
 		public CustomParameters Clone() => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
+
+		/// <summary>
+		///		Get a <see cref="Parameters"/> from this object.
+		/// </summary>
+		/// <param name="model">The required <see cref="ParameterModel"/>. Not <see cref="ParameterModel.Custom"/>.</param>
+		/// <param name="type">The <see cref="AggregateType"/>.</param>
+		public Parameters ToParameters(ParameterModel model, AggregateType type = AggregateType.Quartzite) => new Parameters(Strength, AggregateDiameter, model, type);
 
 		/// <remarks>
 		///     <see cref="Strength" /> is compared.

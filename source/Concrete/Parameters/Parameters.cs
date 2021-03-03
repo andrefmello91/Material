@@ -198,6 +198,11 @@ namespace Material.Concrete
 
 		public Parameters Clone() => new Parameters(Strength, AggregateDiameter, Model, Type);
 
+		/// <summary>
+		///		Get a <see cref="CustomParameters"/> from this object.
+		/// </summary>
+		public CustomParameters ToCustomParameters() => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
+
 		/// <remarks>
 		///     <see cref="Strength" /> is compared.
 		/// </remarks>

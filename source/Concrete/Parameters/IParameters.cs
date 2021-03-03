@@ -69,7 +69,7 @@ namespace Material.Concrete
 		/// <summary>
 		///     Get the <see cref="ParameterModel" />.
 		/// </summary>
-		ParameterModel Model { get; }
+		ParameterModel Model { get; set; }
 
 		/// <summary>
 		///     Get concrete plastic (peak) strain (negative value).
