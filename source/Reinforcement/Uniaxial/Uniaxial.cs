@@ -16,11 +16,6 @@ namespace Material.Reinforcement.Uniaxial
 		#region Fields
 
 		/// <summary>
-		///     Concrete area.
-		/// </summary>
-		private readonly Area _concreteArea;
-
-		/// <summary>
 		///     The tolerance to consider displacements equal.
 		/// </summary>
 		public static readonly Length Tolerance = Length.FromMillimeters(1E-3);
@@ -46,6 +41,11 @@ namespace Material.Reinforcement.Uniaxial
 		public Length BarDiameter { get; private set; }
 
 		/// <summary>
+		///     Get/set concrete area.
+		/// </summary>
+		public Area ConcreteArea { get; set; }
+
+		/// <summary>
 		///     Get current force.
 		/// </summary>
 		public Force Force => Area * Steel.Stress;
@@ -58,7 +58,7 @@ namespace Material.Reinforcement.Uniaxial
 		/// <summary>
 		///     Get reinforcement ratio in the cross-section.
 		/// </summary>
-		public double Ratio => _concreteArea == Area.Zero ? 0 : Area / _concreteArea;
+		public double Ratio => ConcreteArea == Area.Zero ? 0 : Area / ConcreteArea;
 
 		/// <summary>
 		///     Get <see cref="Reinforcement.Steel" /> of this.
@@ -96,16 +96,16 @@ namespace Material.Reinforcement.Uniaxial
 		/// <param name="concreteArea">The concrete area.</param>
 		public UniaxialReinforcement(int numberOfBars, Length barDiameter, Steel steel, Area concreteArea)
 		{
-			NumberOfBars  = numberOfBars;
-			BarDiameter   = barDiameter;
-			Area          = CalculateArea().ToUnit(barDiameter.Unit.GetAreaUnit());
-			_concreteArea = concreteArea;
-			Steel         = steel;
+			NumberOfBars = numberOfBars;
+			BarDiameter  = barDiameter;
+			Area         = CalculateArea().ToUnit(barDiameter.Unit.GetAreaUnit());
+			ConcreteArea = concreteArea;
+			Steel        = steel;
 		}
 
 		#endregion
 
-		#region Methods
+		#region  Methods
 
 		/// <summary>
 		///     Calculate current force.
@@ -141,7 +141,7 @@ namespace Material.Reinforcement.Uniaxial
 		/// <param name="strain">Current strain.</param>
 		public void SetStrainAndStress(double strain) => Steel.SetStrainAndStress(strain);
 
-		public UniaxialReinforcement Clone() => new UniaxialReinforcement(NumberOfBars, BarDiameter, Steel.Clone(), _concreteArea);
+		public UniaxialReinforcement Clone() => new UniaxialReinforcement(NumberOfBars, BarDiameter, Steel.Clone(), ConcreteArea);
 
 		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance);
 
@@ -154,7 +154,7 @@ namespace Material.Reinforcement.Uniaxial
 			Area        = Area.ToUnit(unit.GetAreaUnit());
 		}
 
-		public UniaxialReinforcement Convert(LengthUnit unit) => new UniaxialReinforcement(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), _concreteArea.ToUnit(unit.GetAreaUnit()));
+		public UniaxialReinforcement Convert(LengthUnit unit) => new UniaxialReinforcement(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), ConcreteArea.ToUnit(unit.GetAreaUnit()));
 
 		/// <summary>
 		///     Calculated reinforcement area.
