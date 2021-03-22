@@ -27,4 +27,10 @@ jobs:
       uses: brandedoutcast/publish-nuget@v2.5.2  
       with:   
        PROJECT_FILE_PATH: andrefmello91.Material/andrefmello91.Material.csproj  
-       NUGET_KEY: ${{secrets.NUGET_API_KEY}} 
+       NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    - name: PublishGitHub  
+      uses: Rebel028/publish-nuget@2.6.1  
+      with:   
+       PROJECT_FILE_PATH: andrefmello91.Material/andrefmello91.Material.csproj  
+       NUGET_SOURCE: https://nuget.pkg.github.com/andrefmello91
+       NUGET_KEY: ${{secrets.NUGET_GITHUB_KEY}}
