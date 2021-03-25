@@ -5,7 +5,7 @@ using UnitsNet;
 using UnitsNet.Units;
 #nullable enable
 
-namespace andrefmello91.Material.Reinforcement.Uniaxial
+namespace andrefmello91.Material.Reinforcement
 {
 	/// <summary>
 	///     Uniaxial reinforcement class.
@@ -80,7 +80,7 @@ namespace andrefmello91.Material.Reinforcement.Uniaxial
 
 		/// <param name="concreteArea">The concrete area, in <see cref="AreaUnit" /> compatible to <paramref name="unit" />.</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of <paramref name="barDiameter" />.</param>
-		/// <inheritdoc cref="UniaxialReinforcement(int, Length, Steel, Area)" />
+		/// <inheritdoc cref="UniaxialReinforcement" />
 		public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0, LengthUnit unit = LengthUnit.Millimeter)
 			: this (numberOfBars, Length.From(barDiameter, unit), steel, Area.From(concreteArea, unit.GetAreaUnit()))
 		{
