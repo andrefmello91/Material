@@ -8,7 +8,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
-using static andrefmello91.Material.Reinforcement.Uniaxial.UniaxialReinforcement;
+using static andrefmello91.Material.Reinforcement.UniaxialReinforcement;
 
 #nullable enable
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using andrefmello91.Material.Reinforcement.Uniaxial;
+using andrefmello91.Material.Reinforcement;
 using UnitsNet;
 
 #nullable enable
