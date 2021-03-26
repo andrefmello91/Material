@@ -349,3 +349,4 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 .idea/
+/andrefmello91.Material/andrefmello91.Material.csproj.DotSettings
