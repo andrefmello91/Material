@@ -1,10 +1,10 @@
-﻿using andrefmello91.Material.Reinforcement;
+﻿using andrefmello91.Extensions;
+using andrefmello91.Material.Reinforcement;
 using andrefmello91.OnPlaneComponents.Strain;
 using andrefmello91.OnPlaneComponents.Stress;
-using Extensions;
 using MathNet.Numerics;
 using UnitsNet;
-using static Extensions.UnitExtensions;
+using static andrefmello91.Extensions.UnitExtensions;
 
 #nullable enable
 
@@ -17,6 +17,7 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private abstract class Constitutive : IConstitutive
 		{
+
 			#region Fields
 
 			/// <summary>
@@ -42,7 +43,7 @@ namespace andrefmello91.Material.Concrete
 			/// <summary>
 			///     Base class for concrete behavior
 			/// </summary>
-			/// <inheritdoc cref="Read"/>
+			/// <inheritdoc cref="Read" />
 			protected Constitutive(IParameters parameters) => Parameters = parameters;
 
 			#endregion
@@ -58,18 +59,8 @@ namespace andrefmello91.Material.Concrete
 				constitutiveModel switch
 				{
 					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
-					_                      => new MCFTConstitutive(parameters),
+					_                      => new MCFTConstitutive(parameters)
 				};
-
-			/// <summary>
-			///     Calculate current secant module.
-			/// </summary>
-			/// <param name="stress">Current stress.</param>
-			/// <param name="strain">Current strain.</param>
-			public Pressure SecantModule(Pressure stress, double strain) =>
-				stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9
-					? Parameters.ElasticModule
-					: stress / strain;
 
 			/// <summary>
 			///     Calculate concrete <see cref="PrincipalStressState" /> related to <see cref="PrincipalStrainState" />.
@@ -112,14 +103,16 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <summary>
-			///     Calculate tensile stress for <see cref="Material.Concrete.BiaxialConcrete" /> case.
+			///     Calculate current secant module.
 			/// </summary>
-			/// <param name="strain">The tensile strain to calculate stress.</param>
-			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
-			/// <param name="theta1">The angle of <paramref name="strain" /> related to horizontal axis, in radians.</param>
-			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-			/// <param name="reinforcement">The <see cref="WebReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-			protected abstract Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null);
+			/// <param name="stress">Current stress.</param>
+			/// <param name="strain">Current strain.</param>
+			public Pressure SecantModule(Pressure stress, double strain) =>
+				stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9
+					? Parameters.ElasticModule
+					: stress / strain;
+
+			public bool Equals(IConstitutive? other) => !(other is null) && Model == other.Model;
 
 			/// <summary>
 			///     Calculate compressive stress for <see cref="Material.Concrete.BiaxialConcrete" /> case.
@@ -132,6 +125,16 @@ namespace andrefmello91.Material.Concrete
 			/// </param>
 			/// <returns>Compressive stress in MPa</returns>
 			protected abstract Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1);
+
+			/// <summary>
+			///     Calculate tensile stress for <see cref="Material.Concrete.BiaxialConcrete" /> case.
+			/// </summary>
+			/// <param name="strain">The tensile strain to calculate stress.</param>
+			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
+			/// <param name="theta1">The angle of <paramref name="strain" /> related to horizontal axis, in radians.</param>
+			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
+			/// <param name="reinforcement">The <see cref="WebReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
+			protected abstract Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null);
 
 			/// <summary>
 			///     Calculate <see cref="Material.Concrete.BiaxialConcrete" /> tensile stress for uncracked state.
@@ -167,30 +170,20 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <summary>
-			///     Check if concrete is cracked for <see cref="Material.Concrete.BiaxialConcrete" /> case and set cracked property, from Gupta (1998)
-			///     formulation.
+			///     Calculate confinement strength factor according to Kupfer et. al. (1969).
 			/// </summary>
-			/// <param name="fc1">Principal tensile stress.</param>
-			/// <param name="ec2">Principal compressive strain.</param>
-			private void VerifyCrackedState(Pressure fc1, double ec2)
+			/// <param name="transverseStress">The stress acting on the transverse direction of the analyzed direction.</param>
+			private double ConfinementFactor(Pressure transverseStress)
 			{
-				if (Cracked)
-					return;
+				// Get absolute value
+				var fcn_fc = (transverseStress / Parameters.Strength).Abs();
 
-				var ft = Parameters.TensileStrength;
-				var	ec = Parameters.PlasticStrain;
+				var c = 1 + 0.92 * fcn_fc - 0.76 * fcn_fc * fcn_fc;
 
-				// Calculate current cracking stress
-				var fcr1 = ft * (1 - ec2 / ec);
-
-				// Verify limits
-				var fcr = Max(fcr1, 0.25 * ft);
-				fcr     = Min(fcr, ft);
-
-				// Verify is concrete is cracked
-				if (fc1 >= fcr)
-					// Set cracked state
-					Cracked = true;
+				return
+					c.IsFinite() && c > 1 && c < 2
+						? c
+						: 1;
 			}
 
 			/// <summary>
@@ -241,27 +234,38 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <summary>
-			///     Calculate confinement strength factor according to Kupfer et. al. (1969).
+			///     Check if concrete is cracked for <see cref="Material.Concrete.BiaxialConcrete" /> case and set cracked property,
+			///     from Gupta (1998)
+			///     formulation.
 			/// </summary>
-			/// <param name="transverseStress">The stress acting on the transverse direction of the analyzed direction.</param>
-			private double ConfinementFactor(Pressure transverseStress)
+			/// <param name="fc1">Principal tensile stress.</param>
+			/// <param name="ec2">Principal compressive strain.</param>
+			private void VerifyCrackedState(Pressure fc1, double ec2)
 			{
-				// Get absolute value
-				var fcn_fc = (transverseStress / Parameters.Strength).Abs();
+				if (Cracked)
+					return;
 
-				var c = 1 + 0.92 * fcn_fc - 0.76 * fcn_fc * fcn_fc;
+				var ft = Parameters.TensileStrength;
+				var ec = Parameters.PlasticStrain;
 
-				return
-					c.IsFinite() && c > 1 && c < 2
-						? c 
-						: 1;
+				// Calculate current cracking stress
+				var fcr1 = ft * (1 - ec2 / ec);
+
+				// Verify limits
+				var fcr = Max(fcr1, 0.25 * ft);
+				fcr = Min(fcr, ft);
+
+				// Verify is concrete is cracked
+				if (fc1 >= fcr)
+
+					// Set cracked state
+					Cracked = true;
 			}
-
-			public bool Equals(IConstitutive? other) => !(other is null) && Model == other.Model;
 
 			public override string ToString() => $"{Model}";
 
 			#endregion
+
 		}
 	}
 }

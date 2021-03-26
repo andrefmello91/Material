@@ -1,8 +1,8 @@
 ﻿using System;
+using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
-using Extensions;
 using UnitsNet;
-using static Extensions.UnitExtensions;
+using static andrefmello91.Extensions.UnitExtensions;
 
 #nullable enable
 
@@ -15,6 +15,7 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private class DSFMConstitutive : Constitutive
 		{
+
 			#region Fields
 
 			private Length? _refLength;
@@ -30,15 +31,39 @@ namespace andrefmello91.Material.Concrete
 			#region Constructors
 
 			/// <summary>
-			///		DSFM constitutive object.
+			///     DSFM constitutive object.
 			/// </summary>
-			/// <inheritdoc cref="Concrete"/>
+			/// <inheritdoc cref="Concrete" />
 			/// <param name="considerCrackSlip">Consider crack slip? (default: true)</param>
 			public DSFMConstitutive(IParameters parameters, bool considerCrackSlip = true) : base(parameters) => ConsiderCrackSlip = considerCrackSlip;
 
 			#endregion
 
 			#region Methods
+
+			/// <inheritdoc />
+			protected override Pressure CompressiveStress(double strain)
+			{
+				// Calculate the principal compressive stress in concrete
+				// Get strains
+				var ec2 = strain;
+
+				// Calculate fp and ep
+				var fp = -Parameters.Strength;
+				var ep = Parameters.PlasticStrain;
+
+				// Calculate parameters of concrete
+				double
+					k = ep <= ec2
+						? 1
+						: 0.67 - fp.Megapascals / 62,
+					n      = 0.8 - fp.Megapascals / 17,
+					ec2_ep = ec2 / ep;
+
+				// Calculate the principal compressive stress in concrete
+				return
+					fp * n * ec2_ep / (n - 1 + ec2_ep.Pow(n * k));
+			}
 
 			/// <inheritdoc />
 			protected override Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null)
@@ -62,32 +87,39 @@ namespace andrefmello91.Material.Concrete
 						: fc1b;
 			}
 
-			/// <inheritdoc />
-			protected override Pressure CompressiveStress(double strain)
+			/// <summary>
+			///     Calculate reference length.
+			/// </summary>
+			/// <inheritdoc cref="TensionStiffening" />
+			private Length ReferenceLength(UniaxialReinforcement? reinforcement)
 			{
-				// Calculate the principal compressive stress in concrete
-				// Get strains
-				var ec2 = strain;
+				if (!_refLength.HasValue)
+					_refLength = 0.5 * (reinforcement is null
+						? Length.FromMillimeters(21)
+						: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio);
 
-				// Calculate fp and ep
-				var fp = -Parameters.Strength;
-				var ep =  Parameters.PlasticStrain;
-
-				// Calculate parameters of concrete
-				double
-					k  = ep <= ec2 
-						? 1 
-						: 0.67 - fp.Megapascals / 62,
-					n      = 0.8 - fp.Megapascals / 17,
-					ec2_ep = ec2 / ep;
-
-				// Calculate the principal compressive stress in concrete
-				return
-					fp * n * ec2_ep / (n - 1 + ec2_ep.Pow(n * k));
+				return _refLength.Value;
 			}
 
 			/// <summary>
-			///     Calculate concrete post-cracking stress associated with tension stiffening (for <see cref="Material.Concrete.UniaxialConcrete" />).
+			///     Calculate concrete post-cracking stress associated with tension softening.
+			/// </summary>
+			/// <inheritdoc cref="TensionStiffening" />
+			private Pressure TensionSoftening(double strain, UniaxialReinforcement? reinforcement)
+			{
+				double
+					Gf  = Parameters.FractureParameter.NewtonsPerMillimeter,
+					ft  = Parameters.TensileStrength.Megapascals,
+					ecr = Parameters.CrackingStrain,
+					ets = 2.0 * Gf / (ft * ReferenceLength(reinforcement).Millimeters);
+
+				return
+					Parameters.TensileStrength * (1.0 - (strain - ecr) / (ets - ecr));
+			}
+
+			/// <summary>
+			///     Calculate concrete post-cracking stress associated with tension stiffening (for
+			///     <see cref="Material.Concrete.UniaxialConcrete" />).
 			/// </summary>
 			/// <param name="strain">The tensile strain to calculate stress.</param>
 			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" />.</param>
@@ -110,37 +142,8 @@ namespace andrefmello91.Material.Concrete
 					Min(fc1s, fc1b);
 			}
 
-			/// <summary>
-			///     Calculate concrete post-cracking stress associated with tension softening.
-			/// </summary>
-			/// <inheritdoc cref="TensionStiffening"/>
-			private Pressure TensionSoftening(double strain, UniaxialReinforcement? reinforcement)
-			{
-				double
-					Gf = Parameters.FractureParameter.NewtonsPerMillimeter,
-					ft = Parameters.TensileStrength.Megapascals,
-					ecr = Parameters.CrackingStrain,
-					ets = 2.0 * Gf / (ft * ReferenceLength(reinforcement).Millimeters);
-
-				return
-					Parameters.TensileStrength * (1.0 - (strain - ecr) / (ets - ecr));
-			}
-
-			/// <summary>
-			///     Calculate reference length.
-			/// </summary>
-			/// <inheritdoc cref="TensionStiffening"/>
-			private Length ReferenceLength(UniaxialReinforcement? reinforcement)
-			{
-				if (!_refLength.HasValue)
-					_refLength = 0.5 * (reinforcement is null
-						? Length.FromMillimeters(21)
-						: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio);
-
-				return _refLength.Value;
-			}
-
 			#endregion
+
 		}
 	}
 }

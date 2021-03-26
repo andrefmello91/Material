@@ -1,7 +1,6 @@
 ﻿using System;
 using andrefmello91.Material.Reinforcement;
 using UnitsNet;
-
 #nullable enable
 
 namespace andrefmello91.Material.Concrete
@@ -13,12 +12,19 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private class MCFTConstitutive : Constitutive
 		{
+
+			#region Properties
+
+			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
+
+			#endregion
+
 			#region Constructors
 
 			/// <summary>
-			///		MCFT constitutive object.
+			///     MCFT constitutive object.
 			/// </summary>
-			/// <inheritdoc cref="Concrete"/>
+			/// <inheritdoc cref="Concrete" />
 			public MCFTConstitutive(IParameters parameters) : base(parameters)
 			{
 			}
@@ -40,8 +46,6 @@ namespace andrefmello91.Material.Concrete
 					Pressure.FromMegapascals(f);
 			}
 
-			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
-
 			/// <inheritdoc />
 			protected override Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null) =>
 				strain <= Parameters.CrackingStrain
@@ -54,8 +58,8 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="strain">Current tensile strain.</param>
 			private Pressure CrackedStress(double strain) => Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
 
-
 			#endregion
+
 		}
 	}
 }

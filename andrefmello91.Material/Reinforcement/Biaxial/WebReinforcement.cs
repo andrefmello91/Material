@@ -1,8 +1,8 @@
 ﻿using System;
+using andrefmello91.Extensions;
 using andrefmello91.Material.Concrete;
 using andrefmello91.OnPlaneComponents.Strain;
 using andrefmello91.OnPlaneComponents.Stress;
-using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -19,6 +19,7 @@ namespace andrefmello91.Material.Reinforcement
 	/// </summary>
 	public class WebReinforcement : IUnitConvertible<WebReinforcement, LengthUnit>, IApproachable<WebReinforcement, Length>, IComparable<WebReinforcement>, IEquatable<WebReinforcement>, ICloneable<WebReinforcement>
 	{
+
 		#region Fields
 
 		private Length _width;
@@ -26,12 +27,6 @@ namespace andrefmello91.Material.Reinforcement
 		#endregion
 
 		#region Properties
-
-		public LengthUnit Unit
-		{
-			get => DirectionX?.Unit ?? DirectionY?.Unit ?? Width.Unit;
-			set => ChangeUnit(value);
-		}
 
 		// Properties
 		/// <summary>
@@ -47,7 +42,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get initial <see cref="WebReinforcement" /> stiffness <see cref="Matrix" />.
 		/// </summary>
-		/// <inheritdoc cref="BiaxialConcrete.InitialStiffness"/>
+		/// <inheritdoc cref="BiaxialConcrete.InitialStiffness" />
 		public Matrix<double> InitialStiffness
 		{
 			get
@@ -139,7 +134,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Returns true if reinforcement <see cref="DirectionX" /> exists.
 		/// </summary>
-		public bool XReinforced  => !(DirectionX is null) && DirectionX.BarDiameter > Length.Zero && DirectionX.BarSpacing > Length.Zero;
+		public bool XReinforced => !(DirectionX is null) && DirectionX.BarDiameter > Length.Zero && DirectionX.BarSpacing > Length.Zero;
 
 		/// <summary>
 		///     Returns true if reinforcement <see cref="DirectionX" /> and <see cref="DirectionY" /> exist.
@@ -149,7 +144,14 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Returns true if reinforcement <see cref="DirectionY" /> exists.
 		/// </summary>
-		public bool YReinforced  => !(DirectionY is null) && DirectionY.BarDiameter > Length.Zero && DirectionY.BarSpacing > Length.Zero;
+		public bool YReinforced => !(DirectionY is null) && DirectionY.BarDiameter > Length.Zero && DirectionY.BarSpacing > Length.Zero;
+
+		/// <inheritdoc />
+		public LengthUnit Unit
+		{
+			get => DirectionX?.Unit ?? DirectionY?.Unit ?? Width.Unit;
+			set => ChangeUnit(value);
+		}
 
 		#endregion
 
@@ -198,14 +200,14 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="barSpacingY">The bar spacing for Y direction.</param>
 		/// <param name="steelY">The steel object for Y direction (not the same <paramref name="steelX" /> object).</param>
 		public WebReinforcement(Length barDiameterX, Length barSpacingX, Steel steelX, Length barDiameterY, Length barSpacingY, Steel steelY, Length width, double angleX = 0)
-			: this (WebReinforcementDirection.Read(barDiameterX, barSpacingX, steelX,  width, angleX), WebReinforcementDirection.Read(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2), width)
+			: this(WebReinforcementDirection.Read(barDiameterX, barSpacingX, steelX, width, angleX), WebReinforcementDirection.Read(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2), width)
 		{
 		}
 
 		/// <inheritdoc cref="WebReinforcement(WebReinforcementDirection, WebReinforcementDirection, Length)" />
 		/// <inheritdoc cref="WebReinforcement(double, double, Steel, double, double, LengthUnit)" />
 		public WebReinforcement(WebReinforcementDirection? directionX, WebReinforcementDirection? directionY, double width, LengthUnit unit = LengthUnit.Millimeter)
-			: this (directionX, directionY, Length.From(width, unit))
+			: this(directionX, directionY, Length.From(width, unit))
 		{
 		}
 
@@ -239,14 +241,14 @@ namespace andrefmello91.Material.Reinforcement
 
 		#endregion
 
-		#region  Methods
+		#region Methods
 
 		/// <param name="unit">
 		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
 		///     <paramref name="width" />.
 		/// </param>
 		/// <inheritdoc cref="DirectionXOnly(Length,Length,Steel,Length,double)" />
-		public static WebReinforcement DirectionXOnly(double barDiameter, double barSpacing, Steel steel, double width, double angleX = 0, LengthUnit unit = LengthUnit.Millimeter) => new WebReinforcement(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX, unit), null, width, unit);
+		public static WebReinforcement DirectionXOnly(double barDiameter, double barSpacing, Steel steel, double width, double angleX = 0, LengthUnit unit = LengthUnit.Millimeter) => new(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX, unit), null, width, unit);
 
 		/// <summary>
 		///     Get a <see cref="WebReinforcement" /> with <see cref="DirectionX" /> only.
@@ -255,14 +257,14 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="barSpacing">The bar spacing for X direction.</param>
 		/// <param name="steel">The steel objects for X direction.</param>
 		/// <inheritdoc cref="WebReinforcement(Length, Length, Steel, Length, double)" />
-		public static WebReinforcement DirectionXOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angleX = 0) => new WebReinforcement(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX), null, width);
+		public static WebReinforcement DirectionXOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angleX = 0) => new(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX), null, width);
 
 		/// <param name="unit">
 		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
 		///     <paramref name="width" />.
 		/// </param>
 		/// <inheritdoc cref="DirectionYOnly(Length,Length,Steel,Length,double)" />
-		public static WebReinforcement DirectionYOnly(double barDiameter, double barSpacing, Steel steel, double width, double angle = Constants.PiOver2, LengthUnit unit = LengthUnit.Millimeter) => new WebReinforcement(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle, unit), width, unit);
+		public static WebReinforcement DirectionYOnly(double barDiameter, double barSpacing, Steel steel, double width, double angle = Constants.PiOver2, LengthUnit unit = LengthUnit.Millimeter) => new(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle, unit), width, unit);
 
 		/// <summary>
 		///     Get a <see cref="WebReinforcement" /> with <see cref="DirectionY" /> only.
@@ -275,7 +277,7 @@ namespace andrefmello91.Material.Reinforcement
 		///     <para><paramref name="angle" /> is positive if counterclockwise.</para>
 		/// </param>
 		/// <inheritdoc cref="WebReinforcement(Length, Length, Steel, Length, double)" />
-		public static WebReinforcement DirectionYOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle = Constants.PiOver2) => new WebReinforcement(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), width);
+		public static WebReinforcement DirectionYOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle = Constants.PiOver2) => new(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), width);
 
 		/// <summary>
 		///     Calculate angles (in radians) related to crack angle.
@@ -305,6 +307,34 @@ namespace andrefmello91.Material.Reinforcement
 			SetStrainsAndStresses(StrainState.Transform(Strains, DirectionX?.Angle ?? 0));
 		}
 
+		/// <inheritdoc />
+		public override bool Equals(object? other) => other is WebReinforcement reinforcement && Equals(reinforcement);
+
+		/// <summary>
+		///     Calculate maximum value of principal tensile strength (fc1) that can be transmitted across cracks.
+		/// </summary>
+		/// <param name="theta1">Principal tensile strain angle, in radians.</param>
+		public Pressure MaximumPrincipalTensileStress(double theta1)
+		{
+			if (DirectionX is null && DirectionY is null)
+				return Pressure.Zero;
+
+			// Get reinforcement angles and stresses
+			var (thetaNx, thetaNy) = Angles(theta1);
+
+			Pressure
+				fcx = DirectionX?.CapacityReserve ?? Pressure.Zero,
+				fcy = DirectionY?.CapacityReserve ?? Pressure.Zero;
+
+			double
+				cosNx = thetaNx.Cos(true),
+				cosNy = thetaNy.Cos(true);
+
+			// Check the maximum value of fc1 that can be transmitted across cracks
+			return
+				fcx * cosNx * cosNx + fcy * cosNy * cosNy;
+		}
+
 		/// <summary>
 		///     Set steel <see cref="StrainState" />.
 		/// </summary>
@@ -316,16 +346,6 @@ namespace andrefmello91.Material.Reinforcement
 		}
 
 		/// <summary>
-		///     Set steel <see cref="StressState" />, given <see cref="StrainState" />.
-		/// </summary>
-		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
-		public void SetStresses(StrainState strainsState)
-		{
-			DirectionX?.Steel?.SetStress(strainsState.EpsilonX);
-			DirectionY?.Steel?.SetStress(strainsState.EpsilonY);
-		}
-
-		/// <summary>
 		///     Set steel <see cref="StrainState" /> and calculate <see cref="StressState" />, in MPa.
 		/// </summary>
 		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
@@ -333,6 +353,16 @@ namespace andrefmello91.Material.Reinforcement
 		{
 			SetStrains(strainsState);
 			SetStresses(strainsState);
+		}
+
+		/// <summary>
+		///     Set steel <see cref="StressState" />, given <see cref="StrainState" />.
+		/// </summary>
+		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
+		public void SetStresses(StrainState strainsState)
+		{
+			DirectionX?.Steel?.SetStress(strainsState.EpsilonX);
+			DirectionY?.Steel?.SetStress(strainsState.EpsilonY);
 		}
 
 		/// <summary>
@@ -375,35 +405,39 @@ namespace andrefmello91.Material.Reinforcement
 				0.25 / den;
 		}
 
-		/// <summary>
-		///     Calculate maximum value of principal tensile strength (fc1) that can be transmitted across cracks.
-		/// </summary>
-		/// <param name="theta1">Principal tensile strain angle, in radians.</param>
-		public Pressure MaximumPrincipalTensileStress(double theta1)
-		{
-			if (DirectionX is null && DirectionY is null)
-				return Pressure.Zero;
-
-			// Get reinforcement angles and stresses
-			var (thetaNx, thetaNy) = Angles(theta1);
-
-			Pressure
-				fcx = DirectionX?.CapacityReserve ?? Pressure.Zero,
-				fcy = DirectionY?.CapacityReserve ?? Pressure.Zero;
-
-			double
-				cosNx = thetaNx.Cos(true),
-				cosNy = thetaNy.Cos(true);
-
-			// Check the maximum value of fc1 that can be transmitted across cracks
-			return
-				fcx * cosNx * cosNx + fcy * cosNy * cosNy;
-		}
-
-		public WebReinforcement Clone() => new WebReinforcement(DirectionX?.Clone(), DirectionY?.Clone(), Width);
-
+		/// <inheritdoc />
 		public bool Approaches(WebReinforcement? other, Length tolerance) => !(other is null) && (DirectionX?.Approaches(other.DirectionX, tolerance) ?? false) && (DirectionY?.Approaches(other.DirectionY, tolerance) ?? false);
 
+		/// <inheritdoc />
+		public WebReinforcement Clone() => new(DirectionX?.Clone(), DirectionY?.Clone(), Width);
+
+		/// <inheritdoc />
+		public int CompareTo(WebReinforcement? other)
+		{
+			if (other is null)
+				return 1;
+
+			int
+				x = DirectionX?.CompareTo(other?.DirectionX) ?? -1,
+				y = DirectionY?.CompareTo(other?.DirectionY) ?? -1;
+
+			return x switch
+			{
+				1             => 1,
+				0 when y == 0 => 0,
+				0 when y > 0  => 1,
+				_             => -1
+			};
+		}
+
+		/// <summary>
+		///     Compare two reinforcement objects.
+		///     <para>Returns true if parameters are equal.</para>
+		/// </summary>
+		/// <param name="other">The other reinforcement object.</param>
+		public virtual bool Equals(WebReinforcement? other) => Approaches(other, Tolerance);
+
+		/// <inheritdoc />
 		public void ChangeUnit(LengthUnit unit)
 		{
 			if (Unit == unit)
@@ -418,57 +452,34 @@ namespace andrefmello91.Material.Reinforcement
 			_width = _width.ToUnit(unit);
 		}
 
-		public WebReinforcement Convert(LengthUnit unit) => new WebReinforcement(DirectionX?.Convert(unit), DirectionY?.Convert(unit), _width.ToUnit(unit));
+		/// <inheritdoc />
+		public WebReinforcement Convert(LengthUnit unit) => new(DirectionX?.Convert(unit), DirectionY?.Convert(unit), _width.ToUnit(unit));
 
-		public int CompareTo(WebReinforcement? other)
-		{
-			if (other is null)
-				return 1;
+		/// <inheritdoc />
+		public override int GetHashCode() => DirectionX?.GetHashCode() ?? 1 * DirectionY?.GetHashCode() ?? 1 * (int) Width.Millimeters;
 
-			int
-				x = DirectionX?.CompareTo(other?.DirectionX) ?? -1,
-				y = DirectionY?.CompareTo(other?.DirectionY) ?? -1;
-
-			return x switch
-			{
-				1             =>  1,
-				0 when y == 0 =>  0,
-				0 when y > 0  =>  1,
-				_             => -1
-			};
-		}
-
-		/// <summary>
-		///     Compare two reinforcement objects.
-		///     <para>Returns true if parameters are equal.</para>
-		/// </summary>
-		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool Equals(WebReinforcement? other) => Approaches(other, Tolerance);
-
+		/// <inheritdoc />
 		public override string ToString() =>
 			"Reinforcement (x):\n" +
 			$"{DirectionX?.ToString() ?? "null"}\n\n" +
 			"Reinforcement (y):\n" +
 			$"{DirectionY?.ToString() ?? "null"}";
 
-		public override bool Equals(object? other) => other is WebReinforcement reinforcement && Equals(reinforcement);
-
-		public override int GetHashCode() => DirectionX?.GetHashCode() ?? 1 * DirectionY?.GetHashCode() ?? 1 * (int) Width.Millimeters;
-
 		#endregion
 
 		#region Operators
 
 		/// <summary>
-		///     Returns true if steel parameters are equal.
+		///     Returns true if objects are equal.
 		/// </summary>
-		public static bool operator == (WebReinforcement left, WebReinforcement right) => !(left is null) && left.Equals(right);
+		public static bool operator ==(WebReinforcement? left, WebReinforcement? right) => left.IsEqualTo(right);
 
 		/// <summary>
-		///     Returns true if steel parameters are different.
+		///     Returns true if objects are different.
 		/// </summary>
-		public static bool operator != (WebReinforcement left, WebReinforcement right) => !(left is null) && !left.Equals(right);
+		public static bool operator !=(WebReinforcement? left, WebReinforcement? right) => left.IsNotEqualTo(right);
 
 		#endregion
+
 	}
 }

@@ -1,4 +1,4 @@
-﻿using Extensions;
+﻿using andrefmello91.Extensions;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -44,7 +44,7 @@ namespace andrefmello91.Material.Concrete
 
 		public Pressure Strength
 		{
-			get => _strength; 
+			get => _strength;
 			set => _strength = value.ToUnit(StressUnit);
 		}
 
@@ -81,13 +81,13 @@ namespace andrefmello91.Material.Concrete
 		public double PlasticStrain
 		{
 			get => _plasticStrain;
-			set => _plasticStrain = - value.Abs();
+			set => _plasticStrain = -value.Abs();
 		}
 
 		public double UltimateStrain
 		{
 			get => _ultimateStrain;
-			set => _ultimateStrain = - value.Abs();
+			set => _ultimateStrain = -value.Abs();
 		}
 
 		public double CrackingStrain => TensileStrength / ElasticModule;
@@ -116,13 +116,13 @@ namespace andrefmello91.Material.Concrete
 		/// <param name="ultimateStrain">Concrete ultimate strain (positive or negative value).</param>
 		public CustomParameters(Pressure strength, Pressure tensileStrength, Pressure elasticModule, Length aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035)
 		{
-			_strength         = strength.Abs();
-			_tensileStrength  = tensileStrength;
-			_elasticModule    = elasticModule;
-			_plasticStrain    = - plasticStrain.Abs();
-			_ultimateStrain   = - ultimateStrain.Abs();
-			_aggDiameter      = aggregateDiameter;
-			Type              = AggregateType.Quartzite;
+			_strength        = strength.Abs();
+			_tensileStrength = tensileStrength;
+			_elasticModule   = elasticModule;
+			_plasticStrain   = -plasticStrain.Abs();
+			_ultimateStrain  = -ultimateStrain.Abs();
+			_aggDiameter     = aggregateDiameter;
+			Type             = AggregateType.Quartzite;
 		}
 
 		#endregion
@@ -164,18 +164,18 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
-		public CustomParameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new CustomParameters(Strength.ToUnit(stressUnit), TensileStrength.ToUnit(stressUnit), ElasticModule.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), PlasticStrain, UltimateStrain);
+		public CustomParameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new(Strength.ToUnit(stressUnit), TensileStrength.ToUnit(stressUnit), ElasticModule.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), PlasticStrain, UltimateStrain);
 
 		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 
-		public CustomParameters Clone() => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
+		public CustomParameters Clone() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
 
 		/// <summary>
-		///		Get a <see cref="Parameters"/> from this object.
+		///     Get a <see cref="Parameters" /> from this object.
 		/// </summary>
-		/// <param name="model">The required <see cref="ParameterModel"/>. Not <see cref="ParameterModel.Custom"/>.</param>
-		/// <param name="type">The <see cref="AggregateType"/>.</param>
-		public Parameters ToParameters(ParameterModel model, AggregateType type = AggregateType.Quartzite) => new Parameters(Strength, AggregateDiameter, model, type);
+		/// <param name="model">The required <see cref="ParameterModel" />. Not <see cref="ParameterModel.Custom" />.</param>
+		/// <param name="type">The <see cref="AggregateType" />.</param>
+		public Parameters ToParameters(ParameterModel model, AggregateType type = AggregateType.Quartzite) => new(Strength, AggregateDiameter, model, type);
 
 		/// <remarks>
 		///     <see cref="Strength" /> is compared.
@@ -185,7 +185,7 @@ namespace andrefmello91.Material.Concrete
 			Strength == other?.Strength
 				? 0
 				: Strength > other?.Strength
-					?  1
+					? 1
 					: -1;
 
 		public bool Equals(IParameters? other) => Approaches(other, Parameters.Tolerance);
@@ -220,5 +220,6 @@ namespace andrefmello91.Material.Concrete
 		public static bool operator !=(CustomParameters left, IParameters right) => !(right is null) && !left.Equals(right);
 
 		#endregion
+
 	}
 }

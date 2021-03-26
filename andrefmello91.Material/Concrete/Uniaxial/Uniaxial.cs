@@ -1,8 +1,6 @@
-﻿using andrefmello91.Material.Reinforcement;
-using Extensions;
+﻿using andrefmello91.Extensions;
+using andrefmello91.Material.Reinforcement;
 using UnitsNet;
-using Force = UnitsNet.Force;
-
 #nullable enable
 
 namespace andrefmello91.Material.Concrete
@@ -12,6 +10,7 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public partial class UniaxialConcrete : Concrete, ICloneable<UniaxialConcrete>
 	{
+
 		#region Fields
 
 		/// <summary>
@@ -94,7 +93,10 @@ namespace andrefmello91.Material.Concrete
 		///     Calculate stress given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="UniaxialConcrete.DSFMConstitutive" />).</param>
+		/// <param name="reinforcement">
+		///     The <see cref="UniaxialReinforcement" /> (only for
+		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
+		/// </param>
 		public Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
 
 		/// <summary>
@@ -107,29 +109,39 @@ namespace andrefmello91.Material.Concrete
 		///     Set concrete stress (in MPa) given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="UniaxialConcrete.DSFMConstitutive" />).</param>
+		/// <param name="reinforcement">
+		///     The <see cref="UniaxialReinforcement" /> (only for
+		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
+		/// </param>
 		public void SetStress(double strain, UniaxialReinforcement? reinforcement = null) => Stress = CalculateStress(strain, reinforcement);
 
 		/// <summary>
 		///     Set concrete strain and calculate stress, in MPa.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="UniaxialConcrete.DSFMConstitutive" />).</param>
+		/// <param name="reinforcement">
+		///     The <see cref="UniaxialReinforcement" /> (only for
+		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
+		/// </param>
 		public void SetStrainsAndStresses(double strain, UniaxialReinforcement? reinforcement = null)
 		{
 			SetStrain(strain);
 			SetStress(strain, reinforcement);
 		}
 
-		public UniaxialConcrete Clone() => new UniaxialConcrete(Parameters, Area, Model);
+		/// <inheritdoc />
+		public UniaxialConcrete Clone() => new(Parameters, Area, Model);
 
 		/// <inheritdoc />
-		public override bool Equals(IConcrete? other) => other is UniaxialConcrete && base.Equals(other);
+		public override bool Equals(Concrete? other) => other is UniaxialConcrete && base.Equals(other);
 
-		public override bool Equals(object? obj) => obj is UniaxialConcrete concrete && Equals(concrete);
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is UniaxialConcrete concrete && base.Equals(concrete);
 
+		/// <inheritdoc />
 		public override int GetHashCode() => Parameters.GetHashCode();
 
 		#endregion
+
 	}
 }

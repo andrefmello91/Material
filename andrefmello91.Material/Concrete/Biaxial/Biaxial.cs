@@ -1,7 +1,7 @@
-﻿using andrefmello91.Material.Reinforcement;
+﻿using andrefmello91.Extensions;
+using andrefmello91.Material.Reinforcement;
 using andrefmello91.OnPlaneComponents.Strain;
 using andrefmello91.OnPlaneComponents.Stress;
-using Extensions;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -12,25 +12,21 @@ using UnitsNet.Units;
 namespace andrefmello91.Material.Concrete
 {
 	/// <summary>
-	///		Biaxial concrete for membrane calculations.
+	///     Biaxial concrete for membrane calculations.
 	/// </summary>
 	public partial class BiaxialConcrete : Concrete, ICloneable<BiaxialConcrete>
 	{
+
 		#region Fields
 
 		/// <summary>
 		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
 		/// </summary>
-		private Constitutive _constitutive;
+		private readonly Constitutive _constitutive;
 
 		#endregion
 
 		#region Properties
-
-		/// <summary>
-		///     Returns true if concrete is cracked.
-		/// </summary>
-		public bool Cracked => _constitutive.Cracked;
 
 		/// <summary>
 		///     Get/set crack slip consideration.
@@ -41,12 +37,17 @@ namespace andrefmello91.Material.Concrete
 			set => _constitutive.ConsiderCrackSlip = value;
 		}
 
+		/// <summary>
+		///     Returns true if concrete is cracked.
+		/// </summary>
+		public bool Cracked => _constitutive.Cracked;
+
 
 		/// <summary>
 		///     Get concrete initial stiffness <see cref="Matrix" />.
 		/// </summary>
 		/// <remarks>
-		///		Elements are expressed in <see cref="PressureUnit.Megapascal"/>.
+		///     Elements are expressed in <see cref="PressureUnit.Megapascal" />.
 		/// </remarks>
 		public Matrix<double> InitialStiffness
 		{
@@ -80,33 +81,7 @@ namespace andrefmello91.Material.Concrete
 		public PrincipalStressState PrincipalStresses { get; private set; }
 
 		/// <summary>
-		///     Calculate current secant module of concrete.
-		/// </summary>
-		private (Pressure Ec1, Pressure Ec2) SecantModule
-		{
-			get
-			{
-				// Get values
-				double
-					ec1 = PrincipalStrains.Epsilon1,
-					ec2 = PrincipalStrains.Epsilon2;
-
-				Pressure
-					fc1 = PrincipalStresses.Sigma1,
-					fc2 = PrincipalStresses.Sigma2;
-
-				// Calculate modules
-				Pressure
-					Ec1 = _constitutive.SecantModule(fc1, ec1),
-					Ec2 = _constitutive.SecantModule(fc2, ec2);
-
-				return
-					(Ec1, Ec2);
-			}
-		}
-
-		/// <summary>
-		///     Get concrete stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal"/>.
+		///     Get concrete stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal" />.
 		/// </summary>
 		public Matrix<double> Stiffness
 		{
@@ -140,7 +115,33 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Get/set concrete <see cref="StressState" />.
 		/// </summary>
-		public StressState Stresses { get; private  set; }
+		public StressState Stresses { get; private set; }
+
+		/// <summary>
+		///     Calculate current secant module of concrete.
+		/// </summary>
+		private (Pressure Ec1, Pressure Ec2) SecantModule
+		{
+			get
+			{
+				// Get values
+				double
+					ec1 = PrincipalStrains.Epsilon1,
+					ec2 = PrincipalStrains.Epsilon2;
+
+				Pressure
+					fc1 = PrincipalStresses.Sigma1,
+					fc2 = PrincipalStresses.Sigma2;
+
+				// Calculate modules
+				Pressure
+					Ec1 = _constitutive.SecantModule(fc1, ec1),
+					Ec2 = _constitutive.SecantModule(fc2, ec2);
+
+				return
+					(Ec1, Ec2);
+			}
+		}
 
 		#endregion
 
@@ -151,14 +152,12 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		/// <inheritdoc />
 		public BiaxialConcrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
-			: base(parameters, model)
-		{
-			_constitutive = Material.Concrete.BiaxialConcrete.Constitutive.Read(model, parameters);
-		}
+			: base(parameters, model) =>
+			_constitutive = Constitutive.Read(model, parameters);
 
 		#endregion
 
-		#region
+		#region Methods
 
 		/// <summary>
 		///     Set concrete <see cref="StressState" /> given <see cref="StrainState" />
@@ -179,6 +178,12 @@ namespace andrefmello91.Material.Concrete
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
+		/// <inheritdoc />
+		public override bool Equals(Concrete? other) => other is BiaxialConcrete && base.Equals(other);
+
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is BiaxialConcrete concrete && Equals(concrete);
+
 		/// <summary>
 		///     Set tensile stress.
 		/// </summary>
@@ -194,15 +199,13 @@ namespace andrefmello91.Material.Concrete
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
-		public BiaxialConcrete Clone() => new BiaxialConcrete(Parameters, Model);
+		/// <inheritdoc />
+		public BiaxialConcrete Clone() => new(Parameters, Model);
 
 		/// <inheritdoc />
-		public override bool Equals(IConcrete? other) => other is BiaxialConcrete && base.Equals(other);
-
-		public override bool Equals(object? obj) => obj is BiaxialConcrete concrete && Equals(concrete);
-
 		public override int GetHashCode() => Parameters.GetHashCode();
 
 		#endregion
+
 	}
 }

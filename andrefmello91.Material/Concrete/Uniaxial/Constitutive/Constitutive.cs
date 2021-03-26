@@ -1,7 +1,6 @@
-﻿using andrefmello91.Material.Reinforcement;
-using Extensions;
+﻿using andrefmello91.Extensions;
+using andrefmello91.Material.Reinforcement;
 using UnitsNet;
-
 #nullable enable
 
 namespace andrefmello91.Material.Concrete
@@ -13,6 +12,7 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private abstract class Constitutive : IConstitutive
 		{
+
 			#region Fields
 
 			/// <summary>
@@ -54,7 +54,7 @@ namespace andrefmello91.Material.Concrete
 				constitutiveModel switch
 				{
 					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
-					_                      => new MCFTConstitutive(parameters),
+					_                      => new MCFTConstitutive(parameters)
 				};
 
 			/// <summary>
@@ -79,9 +79,17 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="stress">Current stress.</param>
 			/// <param name="strain">Current strain.</param>
 			public Pressure SecantModule(Pressure stress, double strain) =>
-				stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9 
-					? Parameters.ElasticModule 
+				stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9
+					? Parameters.ElasticModule
 					: stress / strain;
+
+			public bool Equals(IConstitutive? other) => Model == other?.Model;
+
+			/// <summary>
+			///     Calculate compressive stress for <see cref="UniaxialConcrete" /> case.
+			/// </summary>
+			/// <param name="strain">Compressive strain (negative) in concrete.</param>
+			protected abstract Pressure CompressiveStress(double strain);
 
 			/// <summary>
 			///     Calculate tensile stress for <see cref="UniaxialConcrete" /> case.
@@ -89,12 +97,6 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="strain">Tensile strain in concrete.</param>
 			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
 			protected abstract Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null);
-
-			/// <summary>
-			///     Calculate compressive stress for <see cref="UniaxialConcrete" /> case.
-			/// </summary>
-			/// <param name="strain">Compressive strain (negative) in concrete.</param>
-			protected abstract Pressure CompressiveStress(double strain);
 
 			/// <summary>
 			///     Check if concrete is cracked for <see cref="UniaxialConcrete" /> case and set cracked property.
@@ -106,11 +108,10 @@ namespace andrefmello91.Material.Concrete
 					Cracked = true;
 			}
 
-			public bool Equals(IConstitutive? other) => Model == other?.Model;
-
 			public override string ToString() => $"{Model}";
 
 			#endregion
+
 		}
 	}
 }

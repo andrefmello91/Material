@@ -1,4 +1,4 @@
-﻿using Extensions;
+﻿using andrefmello91.Extensions;
 using UnitsNet;
 
 namespace andrefmello91.Material.Concrete
@@ -10,10 +10,11 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private class MCFT : ParameterCalculator
 		{
+
 			#region Fields
 
 			// Strains
-			private const double ec  = -0.002;
+			private const double ec = -0.002;
 			private const double ecu = -0.0035;
 
 			#endregion
@@ -30,7 +31,7 @@ namespace andrefmello91.Material.Concrete
 			///     Parameter calculator based on Classic MCFT formulation.
 			/// </summary>
 			/// <inheritdoc />
-			public MCFT(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength,  type)
+			public MCFT(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength, type)
 			{
 			}
 
@@ -48,9 +49,10 @@ namespace andrefmello91.Material.Concrete
 
 			private double fcr() => 0.33 * Strength.Megapascals.Sqrt();
 
-			private Pressure Ec()  => -2 * Strength / ec;
+			private Pressure Ec() => -2 * Strength / ec;
 
 			#endregion
+
 		}
 	}
 }

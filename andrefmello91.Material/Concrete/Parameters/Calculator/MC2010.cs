@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Extensions;
+using andrefmello91.Extensions;
 using MathNet.Numerics.Interpolation;
 using UnitsNet;
 
@@ -13,6 +13,7 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private class MC2010 : ParameterCalculator
 		{
+
 			#region Fields
 
 			/// <summary>
@@ -69,13 +70,11 @@ namespace andrefmello91.Material.Concrete
 					_                       => 0.9
 				};
 
-			private double fctm() => Strength.Megapascals <= 50 ? 0.3 * Strength.Megapascals.Pow(2.0 / 3) : 2.12 * Math.Log(1 + 0.1 * Strength.Megapascals);
-
-			private double Eci() => 21500 * AlphaE() * (0.1 * Strength.Megapascals).Pow(1.0 / 3);
-
 			private double ec1() => -1.6 / 1000 * (0.1 * Strength.Megapascals).Pow(0.25);
 
 			private Pressure Ec1() => Strength / ec1();
+
+			private double Eci() => 21500 * AlphaE() * (0.1 * Strength.Megapascals).Pow(1.0 / 3);
 
 			private double ecu()
 			{
@@ -100,12 +99,15 @@ namespace andrefmello91.Material.Concrete
 					_ultimateStrain[i];
 			}
 
+			private double fctm() => Strength.Megapascals <= 50 ? 0.3 * Strength.Megapascals.Pow(2.0 / 3) : 2.12 * Math.Log(1 + 0.1 * Strength.Megapascals);
+
 			/// <summary>
 			///     Interpolation for ultimate strains.
 			/// </summary>
 			private CubicSpline UltimateStrainSpline() => CubicSpline.InterpolateAkimaSorted(_classes, _ultimateStrain);
 
 			#endregion
+
 		}
 	}
 }

@@ -1,13 +1,13 @@
 ﻿using System;
-using andrefmello91.Material.Concrete;
+using andrefmello91.Extensions;
 using UnitsNet;
 #nullable enable
 
 namespace andrefmello91.Material.Concrete
 {
 	/// <summary>
-    /// Directions for concrete.
-    /// </summary>
+	///     Directions for concrete.
+	/// </summary>
 	public enum Direction
 	{
 		Uniaxial,
@@ -15,75 +15,88 @@ namespace andrefmello91.Material.Concrete
 	}
 
 	/// <summary>
-	///		Concrete interface.
+	///     Base class for concrete object.
 	/// </summary>
-	public interface IConcrete : IEquatable<IConcrete>, IComparable<IConcrete>
+	public abstract class Concrete : IEquatable<Concrete>, IComparable<Concrete>
 	{
-		/// <summary>
-		///     Get concrete <see cref="Material.Concrete.Parameters"/>.
-		/// </summary>
-		IParameters Parameters { get; }
+
+		#region Properties
 
 		/// <summary>
-		///     Get concrete <see cref="ConstitutiveModel"/>.
+		///     Get concrete <see cref="ConstitutiveModel" />.
 		/// </summary>
 		public ConstitutiveModel Model { get; }
-	}
 
-    /// <summary>
-    ///		Base class for concrete object.
-    /// </summary>
-    public abstract class Concrete : IConcrete
-	{
+		/// <summary>
+		///     Get concrete <see cref="Material.Concrete.IParameters" />.
+		/// </summary>
 		public IParameters Parameters { get; }
 
-		public ConstitutiveModel Model { get; }
+		#endregion
+
+		#region Constructors
 
 		/// <summary>
-		/// Base concrete object.
+		///     Base concrete object.
 		/// </summary>
-		/// <param name="parameters">Concrete <see cref="IParameters"/> object.</param>
-		/// <param name="model">The <see cref="ConstitutiveModel"/>.</param>
+		/// <param name="parameters">Concrete <see cref="IParameters" /> object.</param>
+		/// <param name="model">The <see cref="ConstitutiveModel" />.</param>
 		protected Concrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
-        {
-	        Parameters = parameters;
-	        Model      = model;
-        }
+		{
+			Parameters = parameters;
+			Model      = model;
+		}
 
-        /// <summary>
-        /// Read concrete.
-        /// </summary>
-        /// <param name="direction">Uniaxial or biaxial?</param>
-        /// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.Parameters.Parameters"/>).</param>
-        /// <param name="model">Concrete constitutive object (<see cref="ConstitutiveModel"/>).</param>
-        ///<param name="concreteArea">The concrete area (only for uniaxial case).</param>
-        public static Concrete ReadConcrete(Direction direction, IParameters parameters, Area? concreteArea = null, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
-	        direction switch
-	        {
-		        Direction.Uniaxial => new UniaxialConcrete(parameters, concreteArea ?? Area.Zero, model),
-		        _                  => new BiaxialConcrete(parameters, model)
-	        };
+		#endregion
 
-        
+		#region Methods
 
-        public override string ToString() => Parameters.ToString()!;
+		/// <summary>
+		///     Read concrete.
+		/// </summary>
+		/// <param name="direction">Uniaxial or biaxial?</param>
+		/// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.IParameters" />).</param>
+		/// <param name="model">Concrete constitutive object (<see cref="ConstitutiveModel" />).</param>
+		/// <param name="concreteArea">The concrete area (only for uniaxial case).</param>
+		public static Concrete ReadConcrete(Direction direction, IParameters parameters, Area? concreteArea = null, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
+			direction switch
+			{
+				Direction.Uniaxial => new UniaxialConcrete(parameters, concreteArea ?? Area.Zero, model),
+				_                  => new BiaxialConcrete(parameters, model)
+			};
 
-        public virtual bool Equals(IConcrete? other) => Model == other?.Model && Parameters == other?.Parameters;
-
-		public int CompareTo(IConcrete? other) => Parameters.CompareTo(other?.Parameters);
-
+		/// <inheritdoc />
 		public override bool Equals(object? obj) => obj is Concrete concrete && Equals(concrete);
 
+		/// <inheritdoc />
+		public int CompareTo(Concrete? other) => Parameters.CompareTo(other?.Parameters);
+
+		/// <inheritdoc />
+		public virtual bool Equals(Concrete? other) => Model == other?.Model && Parameters == other?.Parameters;
+
+		/// <inheritdoc />
 		public override int GetHashCode() => Parameters.GetHashCode();
 
-        /// <summary>
-        /// Returns true if parameters and constitutive model are equal.
-        /// </summary>
-        public static bool operator == (Concrete? left, Concrete right) => !(left is null) && left.Equals(right);
 
-        /// <summary>
-        /// Returns true if parameters and constitutive model are different.
-        /// </summary>
-        public static bool operator != (Concrete left, Concrete right) => !(left is null) && !left.Equals(right);
+
+		/// <inheritdoc />
+		public override string ToString() => Parameters.ToString()!;
+
+		#endregion
+
+		#region Operators
+
+		/// <summary>
+		///     Returns true if parameters and constitutive model are equal.
+		/// </summary>
+		public static bool operator ==(Concrete? left, Concrete? right) => left.IsEqualTo(right);
+
+		/// <summary>
+		///     Returns true if parameters and constitutive model are different.
+		/// </summary>
+		public static bool operator !=(Concrete? left, Concrete? right) => left.IsNotEqualTo(right);
+
+		#endregion
+
 	}
 }

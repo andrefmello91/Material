@@ -6,17 +6,57 @@ namespace andrefmello91.Material.Concrete
 	public partial struct Parameters
 	{
 		/// <summary>
-		///		Parameter calculator base class.
+		///     Parameter calculator base class.
 		/// </summary>
 		private abstract class ParameterCalculator : IEquatable<ParameterCalculator>
 		{
-			private AggregateType _type;
+
+			#region Fields
+
 			private Pressure _strength;
+			private AggregateType _type;
+
+			#endregion
+
+			#region Properties
 
 			/// <summary>
-			///		Get the <see cref="ParameterModel"/>.
+			///     Get initial elastic module.
+			/// </summary>
+			public Pressure ElasticModule { get; protected set; }
+
+			/// <summary>
+			///     Get fracture parameter.
+			/// </summary>
+			public virtual ForcePerLength FractureParameter => ForcePerLength.FromNewtonsPerMillimeter(0.075);
+
+			/// <summary>
+			///     Get the <see cref="ParameterModel" />.
 			/// </summary>
 			public abstract ParameterModel Model { get; }
+
+			/// <summary>
+			///     Get concrete plastic (peak) strain (negative value).
+			/// </summary>
+			public double PlasticStrain { get; protected set; }
+
+			/// <summary>
+			///     Get secant module.
+			/// </summary>
+			public virtual Pressure SecantModule => Strength / PlasticStrain;
+
+			/// <summary>
+			///     Concrete strength.
+			/// </summary>
+			public Pressure Strength
+			{
+				get => _strength;
+				set
+				{
+					_strength = value;
+					CalculateCustomParameters();
+				}
+			}
 
 			/// <summary>
 			///     Get tensile strength.
@@ -37,48 +77,19 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <summary>
-			///     Concrete strength.
-			/// </summary>
-			public Pressure Strength
-			{
-				get => _strength;
-				set
-				{
-					_strength = value;
-					CalculateCustomParameters();
-				}
-			}
-
-			/// <summary>
-			///     Get initial elastic module.
-			/// </summary>
-			public Pressure ElasticModule { get; protected set; }
-
-			/// <summary>
-			///     Get secant module.
-			/// </summary>
-			public virtual Pressure SecantModule => Strength / PlasticStrain;
-
-			/// <summary>
-			///     Get concrete plastic (peak) strain (negative value).
-			/// </summary>
-			public double PlasticStrain { get; protected set; }
-
-			/// <summary>
 			///     Get concrete ultimate strain (negative value).
 			/// </summary>
 			public double UltimateStrain { get; protected set; }
 
-			/// <summary>
-			///     Get fracture parameter.
-			/// </summary>
-			public virtual ForcePerLength FractureParameter => ForcePerLength.FromNewtonsPerMillimeter(0.075);
+			#endregion
+
+			#region Constructors
 
 			/// <summary>
-			/// Base parameter calculator class.
+			///     Base parameter calculator class.
 			/// </summary>
 			/// <param name="strength">Concrete compressive strength (positive value).</param>
-			/// <param name="type">The <see cref="AggregateType"/>.</param>
+			/// <param name="type">The <see cref="AggregateType" />.</param>
 			protected ParameterCalculator(Pressure strength, AggregateType type)
 			{
 				_strength = strength;
@@ -86,11 +97,15 @@ namespace andrefmello91.Material.Concrete
 				CalculateCustomParameters();
 			}
 
+			#endregion
+
+			#region Methods
+
 			/// <summary>
-			///		Get the <see cref="ParameterCalculator"/> based on <see cref="ParameterModel"/>.
+			///     Get the <see cref="ParameterCalculator" /> based on <see cref="ParameterModel" />.
 			/// </summary>
-			/// <param name="model">The <see cref="ParameterModel"/>.</param>
-			/// <inheritdoc cref="ParameterCalculator(Pressure, AggregateType)"/>
+			/// <param name="model">The <see cref="ParameterModel" />.</param>
+			/// <inheritdoc cref="ParameterCalculator(Pressure, AggregateType)" />
 			public static ParameterCalculator GetCalculator(Pressure strength, ParameterModel model, AggregateType type) =>
 				model switch
 				{
@@ -100,12 +115,15 @@ namespace andrefmello91.Material.Concrete
 					_                      => new DSFM(strength, type)
 				};
 
+			public bool Equals(ParameterCalculator? other) => !(other is null) && Model == other.Model;
+
 			/// <summary>
-			///		Calculate and update values for custom parameters.
+			///     Calculate and update values for custom parameters.
 			/// </summary>
 			protected abstract void CalculateCustomParameters();
 
-			public bool Equals(ParameterCalculator? other) => !(other is null) && Model == other.Model;
+			#endregion
+
 		}
 	}
 }

@@ -5,26 +5,26 @@
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
         <PackageId>andrefmello91.Material</PackageId>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
         <Authors>andrefmello91</Authors>
         <PackageDescription>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</PackageDescription>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-        <PackageVersion>1.0.2</PackageVersion>
+        <PackageVersion>1.0.3</PackageVersion>
         <Description>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</Description>
         <RepositoryUrl>https://github.com/andrefmello91/Material</RepositoryUrl>
         <PackageProjectUrl>https://github.com/andrefmello91/Material</PackageProjectUrl>
-        <PackageReleaseNotes>Updated namespaces.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updated extensions package.</PackageReleaseNotes>
         <AssemblyName>andrefmello91.Material</AssemblyName>
         <RootNamespace>andrefmello91.Material</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.0.2" />
         <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
         <PackageReference Include="UnitsNet" Version="4.86.0" />
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.2" />
-        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.0.1" />
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.3" />
     </ItemGroup>
 
 </Project>
