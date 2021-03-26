@@ -1,4 +1,4 @@
-﻿using Extensions;
+﻿using andrefmello91.Extensions;
 using UnitsNet;
 using UnitsNet.Units;
 #nullable enable
@@ -10,6 +10,7 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public partial struct Parameters : IParameters, ICloneable<Parameters>
 	{
+
 		#region Fields
 
 		private Length _aggDiameter;
@@ -41,28 +42,32 @@ namespace andrefmello91.Material.Concrete
 			set => DiameterUnit = value;
 		}
 
+		/// <inheritdoc />
 		public PressureUnit StressUnit
 		{
 			get => Strength.Unit;
 			set => ChangeUnit(value);
 		}
 
+		/// <inheritdoc />
 		public LengthUnit DiameterUnit
 		{
 			get => AggregateDiameter.Unit;
 			set => ChangeUnit(value);
 		}
 
+		/// <inheritdoc />
 		public Pressure Strength
 		{
 			get => _strength;
 			set
 			{
-				_strength = value.ToUnit(StressUnit);
+				_strength            = value.ToUnit(StressUnit);
 				_calculator.Strength = _strength;
 			}
 		}
 
+		/// <inheritdoc />
 		public ParameterModel Model
 		{
 			get => _calculator.Model;
@@ -76,28 +81,38 @@ namespace andrefmello91.Material.Concrete
 			}
 		}
 
+		/// <inheritdoc />
 		public Length AggregateDiameter
 		{
-			get => _aggDiameter; 
+			get => _aggDiameter;
 			set => _aggDiameter = value.ToUnit(DiameterUnit);
 		}
 
+		/// <inheritdoc />
 		public Pressure TensileStrength => _calculator.TensileStrength.ToUnit(StressUnit);
 
+		/// <inheritdoc />
 		public Pressure ElasticModule => _calculator.ElasticModule.ToUnit(StressUnit);
 
+		/// <inheritdoc />
 		public Pressure SecantModule => _calculator.SecantModule.ToUnit(StressUnit);
 
+		/// <inheritdoc />
 		public double PlasticStrain => _calculator.PlasticStrain;
 
+		/// <inheritdoc />
 		public double UltimateStrain => _calculator.UltimateStrain;
 
+		/// <inheritdoc />
 		public double CrackingStrain => TensileStrength / ElasticModule;
 
+		/// <inheritdoc />
 		public Pressure TransverseModule => (ElasticModule / 2.4).ToUnit(StressUnit);
 
+		/// <inheritdoc />
 		public ForcePerLength FractureParameter => _calculator.FractureParameter;
 
+		/// <inheritdoc />
 		public AggregateType Type
 		{
 			get => _calculator.Type;
@@ -127,7 +142,7 @@ namespace andrefmello91.Material.Concrete
 		{
 			_strength    = strength;
 			_aggDiameter = aggregateDiameter;
-			_calculator   = ParameterCalculator.GetCalculator(strength, model, type);
+			_calculator  = ParameterCalculator.GetCalculator(strength, model, type);
 		}
 
 		#endregion
@@ -138,25 +153,25 @@ namespace andrefmello91.Material.Concrete
 		///     Get concrete class C20 (fc = 20 MPa).
 		/// </summary>
 		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C20(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new Parameters(Pressure.FromMegapascals(20), aggregateDiameter, model, type);
+		public static Parameters C20(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(20), aggregateDiameter, model, type);
 
 		/// <summary>
 		///     Get concrete class C30 (fc = 30 MPa).
 		/// </summary>
 		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C30(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new Parameters(Pressure.FromMegapascals(30), aggregateDiameter, model, type);
+		public static Parameters C30(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(30), aggregateDiameter, model, type);
 
 		/// <summary>
 		///     Get concrete class C40 (fc = 40 MPa).
 		/// </summary>
 		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C40(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new Parameters(Pressure.FromMegapascals(40), aggregateDiameter, model, type);
+		public static Parameters C40(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(40), aggregateDiameter, model, type);
 
 		/// <summary>
 		///     Get concrete class C50 (fc = 40 MPa).
 		/// </summary>
 		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C50(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new Parameters(Pressure.FromMegapascals(50), aggregateDiameter, model, type);
+		public static Parameters C50(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(50), aggregateDiameter, model, type);
 
 		/// <summary>
 		///     Change <see cref="AggregateDiameter" /> unit.
@@ -170,6 +185,7 @@ namespace andrefmello91.Material.Concrete
 			_aggDiameter = _aggDiameter.ToUnit(unit);
 		}
 
+		/// <inheritdoc />
 		public IParameters Convert(LengthUnit unit) => new Parameters(Strength, AggregateDiameter.ToUnit(unit), Model, Type);
 
 		/// <summary>
@@ -184,6 +200,7 @@ namespace andrefmello91.Material.Concrete
 			_strength = _strength.ToUnit(unit);
 		}
 
+		/// <inheritdoc />
 		public IParameters Convert(PressureUnit unit) => new Parameters(Strength.ToUnit(unit), AggregateDiameter, Model, Type);
 
 		/// <summary>
@@ -191,16 +208,18 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
-		public Parameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new Parameters(Strength.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), Model, Type);
+		public Parameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new(Strength.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), Model, Type);
 
+		/// <inheritdoc />
 		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 
-		public Parameters Clone() => new Parameters(Strength, AggregateDiameter, Model, Type);
+		/// <inheritdoc />
+		public Parameters Clone() => new(Strength, AggregateDiameter, Model, Type);
 
 		/// <summary>
-		///		Get a <see cref="CustomParameters"/> from this object.
+		///     Get a <see cref="CustomParameters" /> from this object.
 		/// </summary>
-		public CustomParameters ToCustomParameters() => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
+		public CustomParameters ToCustomParameters() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
 
 		/// <remarks>
 		///     <see cref="Strength" /> is compared.
@@ -213,8 +232,10 @@ namespace andrefmello91.Material.Concrete
 					? 1
 					: -1;
 
+		/// <inheritdoc />
 		public bool Equals(IParameters? other) => Approaches(other, Tolerance);
 
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			char
@@ -232,18 +253,27 @@ namespace andrefmello91.Material.Concrete
 		}
 
 
+		/// <inheritdoc />
 		public override bool Equals(object? obj) => obj is Parameters other && Equals(other);
 
+		/// <inheritdoc />
 		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
 
 		#endregion
 
 		#region Operators
 
-		public static bool operator == (Parameters left, IParameters right) => !(right is null) && left.Equals(right);
+		/// <summary>
+		///     Returns true if objects are equal.
+		/// </summary>
+		public static bool operator ==(Parameters left, IParameters right) => left.Equals(right);
 
-		public static bool operator != (Parameters left, IParameters right) => !(right is null) && !left.Equals(right);
+		/// <summary>
+		///     Returns true if objects are not equal.
+		/// </summary>
+		public static bool operator !=(Parameters left, IParameters right) => !left.Equals(right);
 
 		#endregion
+
 	}
 }

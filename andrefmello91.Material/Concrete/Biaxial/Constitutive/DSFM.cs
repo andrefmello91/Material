@@ -1,9 +1,9 @@
 ﻿using System;
+using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
-using Extensions;
 using MathNet.Numerics;
 using UnitsNet;
-using static Extensions.UnitExtensions;
+using static andrefmello91.Extensions.UnitExtensions;
 
 #nullable enable
 
@@ -16,6 +16,7 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private class DSFMConstitutive : Constitutive
 		{
+
 			#region Properties
 
 			public override ConstitutiveModel Model { get; }
@@ -26,10 +27,10 @@ namespace andrefmello91.Material.Concrete
 
 			//
 			/// <summary>
-			///		DSFM constitutive object.
+			///     DSFM constitutive object.
 			/// </summary>
 			/// <param name="considerCrackSlip">Consider crack slip (default: true)</param>
-			/// <inheritdoc cref="Constitutive(IParameters)"/>
+			/// <inheritdoc cref="Constitutive(IParameters)" />
 			public DSFMConstitutive(IParameters parameters, bool considerCrackSlip = true) : base(parameters) => ConsiderCrackSlip = considerCrackSlip;
 
 			#endregion
@@ -52,12 +53,12 @@ namespace andrefmello91.Material.Concrete
 
 				// Calculate fp and ep
 				var fp = -betaD * fc * confinementFactor;
-				var	ep =  betaD * ec * confinementFactor;
+				var ep = betaD * ec * confinementFactor;
 
 				// Calculate parameters of concrete
 				double
-					k = ep <= ec2 
-						? 1 
+					k = ep <= ec2
+						? 1
 						: 0.67 - fp.Megapascals / 62,
 					n      = 0.8 - fp.Megapascals / 17,
 					ec2_ep = ec2 / ep;
@@ -95,28 +96,6 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <summary>
-			///     Calculate concrete post-cracking stress associated with tension stiffening (for <see cref="Material.Concrete.BiaxialConcrete" />).
-			/// </summary>
-			/// <param name="strain">The tensile strain to calculate stress.</param>
-			/// <param name="theta1">The angle of maximum principal strain, in radians.</param>
-			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
-			private Pressure TensionStiffening(double strain, double theta1, WebReinforcement? reinforcement)
-			{
-				// Calculate coefficient for tension stiffening effect
-				var m = reinforcement?.TensionStiffeningCoefficient(theta1) ?? 0;
-
-				// Calculate concrete postcracking stress associated with tension stiffening
-				var fc1b = Parameters.TensileStrength / (1 + (2.2 * m * strain).Sqrt());
-
-				// Check the maximum value of fc1 that can be transmitted across cracks
-				var fc1s = reinforcement?.MaximumPrincipalTensileStress(theta1) ?? Pressure.Zero;
-
-				// Return minimum
-				return
-					Min(fc1b, fc1s);
-			}
-
-			/// <summary>
 			///     Calculate compression softening factor (beta D).
 			/// </summary>
 			/// <param name="strain">The compressive strain (negative) to calculate stress.</param>
@@ -124,7 +103,7 @@ namespace andrefmello91.Material.Concrete
 			private double SofteningFactor(double strain, double transverseStrain)
 			{
 				// Calculate strain ratio
-				var r  = Math.Min(-transverseStrain / strain, 400);
+				var r = Math.Min(-transverseStrain / strain, 400);
 
 				if (r < 0.28) // Cd = 0
 					return 1;
@@ -156,7 +135,31 @@ namespace andrefmello91.Material.Concrete
 					ft * (1.0 - (strain - ecr) / (ets - ecr));
 			}
 
+			/// <summary>
+			///     Calculate concrete post-cracking stress associated with tension stiffening (for
+			///     <see cref="Material.Concrete.BiaxialConcrete" />).
+			/// </summary>
+			/// <param name="strain">The tensile strain to calculate stress.</param>
+			/// <param name="theta1">The angle of maximum principal strain, in radians.</param>
+			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
+			private Pressure TensionStiffening(double strain, double theta1, WebReinforcement? reinforcement)
+			{
+				// Calculate coefficient for tension stiffening effect
+				var m = reinforcement?.TensionStiffeningCoefficient(theta1) ?? 0;
+
+				// Calculate concrete postcracking stress associated with tension stiffening
+				var fc1b = Parameters.TensileStrength / (1 + (2.2 * m * strain).Sqrt());
+
+				// Check the maximum value of fc1 that can be transmitted across cracks
+				var fc1s = reinforcement?.MaximumPrincipalTensileStress(theta1) ?? Pressure.Zero;
+
+				// Return minimum
+				return
+					Min(fc1b, fc1s);
+			}
+
 			#endregion
+
 		}
 	}
 }

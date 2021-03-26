@@ -10,10 +10,11 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private class DSFM : ParameterCalculator
 		{
+
 			#region Fields
 
 			// Strains
-			private const double ec  = -0.002;
+			private const double ec = -0.002;
 			private const double ecu = -0.0035;
 
 			#endregion
@@ -30,7 +31,7 @@ namespace andrefmello91.Material.Concrete
 			///     Parameter calculator based on Classic DSFM formulation.
 			/// </summary>
 			/// <inheritdoc />
-			public DSFM(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength,  type)
+			public DSFM(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength, type)
 			{
 				TensileStrength = Pressure.FromMegapascals(fcr());
 				ElasticModule   = Ec();
@@ -40,7 +41,7 @@ namespace andrefmello91.Material.Concrete
 
 			#endregion
 
-			#region  Methods
+			#region Methods
 
 			protected override void CalculateCustomParameters()
 			{
@@ -50,11 +51,12 @@ namespace andrefmello91.Material.Concrete
 				UltimateStrain  = ecu;
 			}
 
+			private Pressure Ec() => -2 * Strength / ec;
+
 			private double fcr() => 0.65 * Math.Pow(Strength.Megapascals, 0.33);
 
-			private Pressure Ec()  => -2 * Strength / ec;
-
 			#endregion
+
 		}
 	}
 }

@@ -7,8 +7,19 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public enum ConstitutiveModel
 	{
+		/// <summary>
+		///     Elastic constitutive model.
+		/// </summary>
 		Linear,
+
+		/// <summary>
+		///     Modified Compression Field constitutive model.
+		/// </summary>
 		MCFT,
+
+		/// <summary>
+		///     Disturbed Stress Field constitutive model.
+		/// </summary>
 		DSFM
 	}
 
@@ -17,6 +28,7 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public interface IConstitutive : IEquatable<IConstitutive>
 	{
+
 		#region Properties
 
 		/// <summary>
@@ -30,10 +42,11 @@ namespace andrefmello91.Material.Concrete
 		bool Cracked { get; set; }
 
 		/// <summary>
-		///		Get the <see cref="ConstitutiveModel"/>.
+		///     Get the <see cref="ConstitutiveModel" />.
 		/// </summary>
 		ConstitutiveModel Model { get; }
 
 		#endregion
+
 	}
 }

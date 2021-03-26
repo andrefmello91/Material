@@ -1,5 +1,5 @@
 ﻿using System;
-using Extensions;
+using andrefmello91.Extensions;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -33,12 +33,8 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public interface IParameters : IUnitConvertible<IParameters, PressureUnit>, IUnitConvertible<IParameters, LengthUnit>, IApproachable<IParameters, Pressure>, IEquatable<IParameters>, IComparable<IParameters>
 	{
-		#region Properties
 
-		/// <summary>
-		///		Get the aggregate type.
-		/// </summary>
-		public AggregateType Type { get; set; }
+		#region Properties
 
 		/// <summary>
 		///     Get/set maximum diameter of concrete aggregate.
@@ -101,10 +97,16 @@ namespace andrefmello91.Material.Concrete
 		Pressure TransverseModule { get; }
 
 		/// <summary>
+		///     Get the aggregate type.
+		/// </summary>
+		public AggregateType Type { get; set; }
+
+		/// <summary>
 		///     Get concrete ultimate strain (negative value).
 		/// </summary>
 		double UltimateStrain { get; }
 
 		#endregion
+
 	}
 }

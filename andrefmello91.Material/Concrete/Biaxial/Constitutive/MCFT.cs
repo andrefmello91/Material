@@ -2,7 +2,7 @@
 using andrefmello91.Material.Reinforcement;
 using MathNet.Numerics;
 using UnitsNet;
-using static Extensions.UnitExtensions;
+using static andrefmello91.Extensions.UnitExtensions;
 
 #nullable enable
 
@@ -15,6 +15,7 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private class MCFTConstitutive : Constitutive
 		{
+
 			#region Properties
 
 			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
@@ -24,9 +25,9 @@ namespace andrefmello91.Material.Concrete
 			#region Constructors
 
 			/// <summary>
-			///		MCFT constitutive object.
+			///     MCFT constitutive object.
 			/// </summary>
-			/// <inheritdoc cref="Constitutive(IParameters)"/>
+			/// <inheritdoc cref="Constitutive(IParameters)" />
 			public MCFTConstitutive(IParameters parameters) : base(parameters)
 			{
 			}
@@ -45,15 +46,15 @@ namespace andrefmello91.Material.Concrete
 					ec  = Parameters.PlasticStrain;
 
 				var fc = Parameters.Strength;
-				
+
 				// Calculate the maximum concrete compressive stress
 				Pressure
-					f2maxA = ec1 > 0 
-						? -fc / (0.8 - 0.34 * ec1 / ec) 
+					f2maxA = ec1 > 0
+						? -fc / (0.8 - 0.34 * ec1 / ec)
 						: -fc,
-					f2max  = f2maxA.Value < 0 && f2maxA.Value.IsFinite()
+					f2max = f2maxA.Value < 0 && f2maxA.Value.IsFinite()
 						? Max(f2maxA, -fc) * confinementFactor
-						: -fc *confinementFactor;
+						: -fc * confinementFactor;
 
 				// Calculate the principal compressive stress in concrete
 				var n = ec2 / ec;
@@ -74,9 +75,9 @@ namespace andrefmello91.Material.Concrete
 				var fc1 = UncrackedStress(ec1, ec2, theta1, reinforcement);
 
 				// Not cracked
-				return 
-					!Cracked 
-						? fc1 
+				return
+					!Cracked
+						? fc1
 						: CrackedStress(ec1);
 			}
 
@@ -87,6 +88,7 @@ namespace andrefmello91.Material.Concrete
 			private Pressure CrackedStress(double strain) => Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
 
 			#endregion
+
 		}
 	}
 }
