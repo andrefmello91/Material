@@ -1,8 +1,7 @@
 ﻿using System;
 using andrefmello91.Extensions;
 using andrefmello91.Material.Concrete;
-using andrefmello91.OnPlaneComponents.Strain;
-using andrefmello91.OnPlaneComponents.Stress;
+using andrefmello91.OnPlaneComponents;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -111,7 +110,7 @@ namespace andrefmello91.Material.Reinforcement
 					return stresses;
 
 				return
-					stresses.Transform(-DirectionX?.Angle ?? 0);
+					(StressState) stresses.Transform(-DirectionX?.Angle ?? 0);
 			}
 		}
 

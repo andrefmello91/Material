@@ -1,7 +1,6 @@
 ﻿using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
-using andrefmello91.OnPlaneComponents.Strain;
-using andrefmello91.OnPlaneComponents.Stress;
+using andrefmello91.OnPlaneComponents;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
