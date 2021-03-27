@@ -18,7 +18,7 @@ namespace andrefmello91.Material.Concrete
 
 			#region Fields
 
-			private Length? _refLength;
+			private Length _refLength;
 
 			#endregion
 
@@ -91,15 +91,10 @@ namespace andrefmello91.Material.Concrete
 			///     Calculate reference length.
 			/// </summary>
 			/// <inheritdoc cref="TensionStiffening" />
-			private Length ReferenceLength(UniaxialReinforcement? reinforcement)
-			{
-				if (!_refLength.HasValue)
-					_refLength = 0.5 * (reinforcement is null
-						? Length.FromMillimeters(21)
-						: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio);
-
-				return _refLength.Value;
-			}
+			private static Length ReferenceLength(UniaxialReinforcement? reinforcement) =>
+				0.5 * (reinforcement is null
+					? Length.FromMillimeters(21)
+					: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio);
 
 			/// <summary>
 			///     Calculate concrete post-cracking stress associated with tension softening.
@@ -129,7 +124,7 @@ namespace andrefmello91.Material.Concrete
 					return Pressure.Zero;
 
 				// Calculate coefficient for tension stiffening effect
-				var m = reinforcement?.TensionStiffeningCoefficient() ?? 0;
+				var m = TensionStiffeningCoefficient(reinforcement);
 
 				// Calculate concrete postcracking stress associated with tension stiffening
 				var fc1b = Parameters.TensileStrength / (1 + Math.Sqrt(2.2 * m * strain));
@@ -141,6 +136,14 @@ namespace andrefmello91.Material.Concrete
 				return
 					Min(fc1s, fc1b);
 			}
+			
+			/// <summary>
+			///     Calculate tension stiffening coefficient (for DSFM).
+			/// </summary>
+			/// <inheritdoc cref="TensionStiffening"/>
+			private static double TensionStiffeningCoefficient(UniaxialReinforcement? reinforcement) => reinforcement is null
+				? 0
+				: 0.25 * reinforcement.BarDiameter.Millimeters / reinforcement.Ratio;
 
 			#endregion
 

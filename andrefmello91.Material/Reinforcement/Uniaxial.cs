@@ -1,5 +1,6 @@
 ﻿using System;
 using andrefmello91.Extensions;
+using andrefmello91.OnPlaneComponents;
 using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
@@ -19,6 +20,8 @@ namespace andrefmello91.Material.Reinforcement
 		///     The tolerance to consider displacements equal.
 		/// </summary>
 		public static readonly Length Tolerance = Length.FromMillimeters(1E-3);
+		
+		private Lazy<Length> _refLength;
 
 		#endregion
 
@@ -148,11 +151,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="strain">Current strain.</param>
 		public void SetStress(double strain) => Steel.SetStress(strain);
 
-		/// <summary>
-		///     Calculate tension stiffening coefficient (for DSFM).
-		/// </summary>
-		public double TensionStiffeningCoefficient() => 0.25 * BarDiameter.Millimeters / Ratio;
-
+	
 		/// <inheritdoc />
 		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance);
 

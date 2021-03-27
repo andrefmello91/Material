@@ -364,46 +364,6 @@ namespace andrefmello91.Material.Reinforcement
 			DirectionY?.Steel?.SetStress(strainsState.EpsilonY);
 		}
 
-		/// <summary>
-		///     Calculate tension stiffening coefficient (for DSFM).
-		/// </summary>
-		/// <param name="theta1">Principal tensile strain angle, in radians.</param>
-		/// <returns></returns>
-		public double TensionStiffeningCoefficient(double theta1)
-		{
-			if (DirectionX is null && DirectionY is null)
-				return 0;
-
-			// Get reinforcement angles and stresses
-			var (thetaNx, thetaNy) = Angles(theta1);
-
-			double den = 0;
-
-			if (!(DirectionX is null))
-			{
-				double
-					psx   = DirectionX.Ratio,
-					phiX  = DirectionX.BarDiameter.Millimeters,
-					cosNx = thetaNx.Cos(true);
-
-				den += psx / phiX * cosNx;
-			}
-
-			if (!(DirectionY is null))
-			{
-				double
-					psy   = DirectionY.Ratio,
-					phiY  = DirectionY.BarDiameter.Millimeters,
-					cosNy = thetaNy.Cos(true);
-
-				den += psy / phiY * cosNy;
-			}
-
-			// Return m
-			return
-				0.25 / den;
-		}
-
 		/// <inheritdoc />
 		public bool Approaches(WebReinforcement? other, Length tolerance) => !(other is null) && (DirectionX?.Approaches(other.DirectionX, tolerance) ?? false) && (DirectionY?.Approaches(other.DirectionY, tolerance) ?? false);
 
