@@ -94,7 +94,7 @@ namespace andrefmello91.Material.Reinforcement
 		public StrainState Strains { get; private set; }
 
 		/// <summary>
-		///     Get reinforcement <see cref="StressState" />, transformed to horizontal plane, in MPa.
+		///     Get reinforcement <see cref="StressState" />, transformed to horizontal plane.
 		/// </summary>
 		public StressState Stresses
 		{
@@ -109,8 +109,8 @@ namespace andrefmello91.Material.Reinforcement
 				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
 					return stresses;
 
-				return
-					(StressState) stresses.Transform(-DirectionX?.Angle ?? 0);
+				return 
+					stresses.Transform(-DirectionX?.Angle ?? 0).ToStressState();
 			}
 		}
 
