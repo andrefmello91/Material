@@ -10,7 +10,14 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public enum Direction
 	{
+		/// <summary>
+		///		Uniaxial direction.
+		/// </summary>
 		Uniaxial,
+		
+		/// <summary>
+		///		Biaxial direction.
+		/// </summary>
 		Biaxial
 	}
 

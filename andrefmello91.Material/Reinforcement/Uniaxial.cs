@@ -21,8 +21,6 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public static readonly Length Tolerance = Length.FromMillimeters(1E-3);
 		
-		private Lazy<Length> _refLength;
-
 		#endregion
 
 		#region Properties

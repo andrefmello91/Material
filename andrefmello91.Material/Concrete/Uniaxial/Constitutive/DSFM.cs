@@ -18,8 +18,6 @@ namespace andrefmello91.Material.Concrete
 
 			#region Fields
 
-			private Length _refLength;
-
 			#endregion
 
 			#region Properties
