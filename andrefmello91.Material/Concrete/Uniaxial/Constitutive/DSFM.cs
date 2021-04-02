@@ -2,7 +2,7 @@
 using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
 using UnitsNet;
-using static andrefmello91.Extensions.UnitExtensions;
+using static UnitsNet.UnitMath;
 
 #nullable enable
 
