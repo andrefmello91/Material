@@ -83,11 +83,13 @@ namespace andrefmello91.Material.Concrete
 				switch (principalStrains.Case)
 				{
 					// Verify case
+					case PrincipalCase.UniaxialCompression:
 					case PrincipalCase.TensionCompression:
 						fc1 = TensileStress(ec1, ec2, principalStrains.Theta1, referenceLength, reinforcement);
 						fc2 = CompressiveStress(ec2, ec1);
 						break;
 
+					case PrincipalCase.UniaxialTension:
 					case PrincipalCase.PureTension:
 						fc1 = TensileStress(ec1, ec2, principalStrains.Theta1, referenceLength, reinforcement);
 						fc2 = TensileStress(ec2, ec1, principalStrains.Theta1, referenceLength, reinforcement);
