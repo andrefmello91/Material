@@ -21,10 +21,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.4-beta1" />
-        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.0.7-beta1" />
         <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
         <PackageReference Include="UnitsNet" Version="4.87.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)'=='Release'">
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.3" />
+        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.0.6" />
+    </ItemGroup>
+    
+    <ItemGroup Condition="'$(Configuration)'=='Debug'">
+      <ProjectReference Include="..\..\Extensions\andrefmello91.Extensions\andrefmello91.Extensions.csproj" />
+      <ProjectReference Include="..\..\OnPlaneComponents\andrefmello91.OnPlaneComponents\andrefmello91.OnPlaneComponents.csproj" />
     </ItemGroup>
 
 </Project>
