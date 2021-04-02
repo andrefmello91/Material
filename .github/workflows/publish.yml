@@ -19,6 +19,10 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
+    - name: Add source
+      run: dotnet nuget add source https://nuget.pkg.github.com/andrefmello91/index.json --name=default --username=andrefmello91
+    - name: Enable source
+      run: dotnet nuget enable source default
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
