@@ -4,30 +4,33 @@
         <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
-        <PackageId>andrefmello91.Material</PackageId>
-        <Version>1.0.7-beta1</Version>
+        <Version>1.0.7</Version>
         <Authors>andrefmello91</Authors>
-        <PackageDescription>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</PackageDescription>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-        <PackageVersion>1.0.7-beta1</PackageVersion>
         <Description>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</Description>
         <RepositoryUrl>https://github.com/andrefmello91/Material</RepositoryUrl>
         <PackageProjectUrl>https://github.com/andrefmello91/Material</PackageProjectUrl>
-        <PackageReleaseNotes>Updated extensions and onplanecomponents packages.</PackageReleaseNotes>
         <AssemblyName>andrefmello91.Material</AssemblyName>
         <RootNamespace>andrefmello91.Material</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <PackageId>andrefmello91.Material</PackageId>
+        <PackageDescription>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</PackageDescription>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>1.0.7</PackageVersion>
+        <PackageReleaseNotes>Updated extensions and onplanecomponents packages.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
         <PackageReference Include="UnitsNet" Version="4.87.0" />
     </ItemGroup>
-
+    
     <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.3" />
-        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.0.6" />
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.4" />
+        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.0.7" />
     </ItemGroup>
     
     <ItemGroup Condition="'$(Configuration)'=='Debug'">
