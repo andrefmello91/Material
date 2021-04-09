@@ -91,7 +91,7 @@ namespace andrefmello91.Material.Reinforcement
 		///     <paramref name="elasticModule" />.
 		/// </param>
 		public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01, PressureUnit unit = PressureUnit.Megapascal)
-			: this(Pressure.From(yieldStress, unit), Pressure.From(elasticModule, unit), ultimateStrain)
+			: this((Pressure) yieldStress.As(unit), (Pressure) elasticModule.As(unit), ultimateStrain)
 		{
 		}
 
@@ -104,14 +104,14 @@ namespace andrefmello91.Material.Reinforcement
 		public Steel(Pressure yieldStress, Pressure elasticModule, double ultimateStrain = 0.01)
 		{
 			YieldStress    = yieldStress;
-			ElasticModule  = elasticModule.ToUnit(Unit);
-			UltimateStrain = ultimateStrain;
+			ElasticModule  = elasticModule.ToUnit(yieldStress.Unit);
+			UltimateStrain = ultimateStrain.AsFinite();
 		}
 
 		/// <inheritdoc cref="Steel(Pressure, Pressure, Pressure, double, double)" />
 		/// <inheritdoc cref="Steel(double, double, double, PressureUnit)" />
 		public Steel(double yieldStress, double elasticModule, double hardeningModule, double hardeningStrain, double ultimateStrain = 0.01, PressureUnit unit = PressureUnit.Megapascal)
-			: this(Pressure.From(yieldStress, unit), Pressure.From(elasticModule, unit), Pressure.From(hardeningModule, unit), hardeningStrain, ultimateStrain)
+			: this((Pressure) yieldStress.As(unit), (Pressure) elasticModule.As(unit), (Pressure) hardeningModule.As(unit), hardeningStrain, ultimateStrain)
 		{
 		}
 
