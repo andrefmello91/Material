@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using andrefmello91.Extensions;
 using MathNet.Numerics;
 using UnitsNet;
@@ -113,8 +115,8 @@ namespace andrefmello91.Material.Reinforcement
 		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
 		///     <paramref name="width" />.
 		/// </param>
-		public WebReinforcementDirection(double barDiameter, double barSpacing, Steel steel, double width, double angle, LengthUnit unit = LengthUnit.Millimeter)
-			: this(Length.From(barDiameter, unit), Length.From(barSpacing, unit), steel, Length.From(width, unit), angle)
+		public WebReinforcementDirection(double barDiameter, double barSpacing, [NotNull] Steel steel, double width, double angle, LengthUnit unit = LengthUnit.Millimeter)
+			: this((Length) barDiameter.As(unit), (Length) barSpacing.As(unit), steel, (Length) width.As(unit), angle)
 		{
 		}
 
@@ -129,7 +131,7 @@ namespace andrefmello91.Material.Reinforcement
 		///     The angle (in radians) of this <see cref="WebReinforcementDirection" />, related to horizontal axis.
 		///     <para><paramref name="angle" /> is positive if counterclockwise.</para>
 		/// </param>
-		public WebReinforcementDirection(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle)
+		public WebReinforcementDirection(Length barDiameter, Length barSpacing, [NotNull] Steel steel, Length width, double angle)
 		{
 			BarDiameter = barDiameter;
 			BarSpacing  = barSpacing.ToUnit(barDiameter.Unit);
@@ -160,20 +162,20 @@ namespace andrefmello91.Material.Reinforcement
 				? Length.FromMillimeters(21)
 				: Length.FromMillimeters(21) + 0.155 * direction.BarDiameter / direction.Ratio;
 
-		/// <inheritdoc cref="Read(double,double,Material.Reinforcement.Steel?,double,double,UnitsNet.Units.LengthUnit)" />
-		/// <inheritdoc cref="WebReinforcementDirection" />
-		public static WebReinforcementDirection? Read(double barDiameter, double barSpacing, Steel? steel, double width, double angle, LengthUnit unit = LengthUnit.Millimeter) =>
-			Read(Length.From(barDiameter, unit), Length.From(barSpacing, unit), steel, Length.From(width, unit), angle);
+		/// <inheritdoc cref="GetDirection(Length, Length, Reinforcement.Steel?, Length, double)" />
+		/// <inheritdoc cref="WebReinforcementDirection(double, double, Reinforcement.Steel, double, double, LengthUnit)" select="params" />
+		public static WebReinforcementDirection? GetDirection(double barDiameter, double barSpacing, Steel? steel, double width, double angle, LengthUnit unit = LengthUnit.Millimeter) =>
+			GetDirection((Length) barDiameter.As(unit), (Length) barSpacing.As(unit), steel, (Length) width.As(unit), angle);
 
 		/// <summary>
 		///     Get a <see cref="WebReinforcementDirection" />.
 		/// </summary>
-		/// <remarks>
-		///     Returns null if <paramref name="barDiameter" /> or <paramref name="barSpacing" /> are zero, or if
+		/// <returns>
+		///     Null if <paramref name="barDiameter" /> or <paramref name="barSpacing" /> are zero, or if
 		///     <paramref name="steel" /> is null.
-		/// </remarks>
-		/// <inheritdoc cref="WebReinforcementDirection" />
-		public static WebReinforcementDirection? Read(Length barDiameter, Length barSpacing, Steel? steel, Length width, double angle) =>
+		/// </returns>
+		/// <inheritdoc cref="WebReinforcementDirection(Length, Length, Reinforcement.Steel, Length, double)" select="params"/>
+		public static WebReinforcementDirection? GetDirection(Length barDiameter, Length barSpacing, Steel? steel, Length width, double angle) =>
 			steel is null || barDiameter.ApproxZero(Tolerance) || barSpacing.ApproxZero(Tolerance)
 				? null
 				: new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle);
@@ -185,13 +187,16 @@ namespace andrefmello91.Material.Reinforcement
 		public Pressure CalculateStress(double strain) => Ratio * Steel.CalculateStress(strain);
 
 		/// <summary>
-		///     Calculate the crack spacing at this direction, according to Kaklauskas (2019) expression.
+		///     Calculate the crack spacing at this direction.
 		/// </summary>
 		/// <remarks>
-		///     sm = 21 mm + 0.155 <see cref="BarDiameter" /> / <see cref="Ratio" />
+		///		According to Kaklauskas (2019) expression:
+		///		<code>
+		///			sm = 21 mm + 0.155 BarDiameter / Ratio
+		///		</code>
 		/// </remarks>
 		public Length CrackSpacing() => CrackSpacing(this);
-
+		
 		/// <inheritdoc />
 		public override bool Equals(object? other) => other is WebReinforcementDirection reinforcement && Equals(reinforcement);
 

@@ -162,7 +162,7 @@ namespace andrefmello91.Material.Reinforcement
 		///     <paramref name="width" />.
 		/// </param>
 		public WebReinforcement(double barDiameter, double barSpacing, Steel steel, double width, double angleX = 0, LengthUnit unit = LengthUnit.Millimeter)
-			: this(WebReinforcementDirection.Read(barDiameter, barSpacing, steel, width, angleX, unit), WebReinforcementDirection.Read(barDiameter, barSpacing, steel.Clone(), width, angleX + Constants.PiOver2, unit), width)
+			: this(WebReinforcementDirection.GetDirection(barDiameter, barSpacing, steel, width, angleX, unit), WebReinforcementDirection.GetDirection(barDiameter, barSpacing, steel.Clone(), width, angleX + Constants.PiOver2, unit), width)
 		{
 		}
 
@@ -179,14 +179,14 @@ namespace andrefmello91.Material.Reinforcement
 		///     <para><paramref name="angleX" /> is positive if counterclockwise.</para>
 		/// </param>
 		public WebReinforcement(Length barDiameter, Length barSpacing, Steel steel, Length width, double angleX = 0)
-			: this(WebReinforcementDirection.Read(barDiameter, barSpacing, steel, width, angleX), WebReinforcementDirection.Read(barDiameter, barSpacing, steel.Clone(), width, angleX + Constants.PiOver2), width)
+			: this(WebReinforcementDirection.GetDirection(barDiameter, barSpacing, steel, width, angleX), WebReinforcementDirection.GetDirection(barDiameter, barSpacing, steel.Clone(), width, angleX + Constants.PiOver2), width)
 		{
 		}
 
 		/// <inheritdoc cref="WebReinforcement(WebReinforcementDirection, WebReinforcementDirection, Length)" />
 		/// <inheritdoc cref="WebReinforcement(double, double, Steel, double, double, LengthUnit)" />
 		public WebReinforcement(double barDiameterX, double barSpacingX, Steel steelX, double barDiameterY, double barSpacingY, Steel steelY, double width, double angleX = 0, LengthUnit unit = LengthUnit.Millimeter)
-			: this(WebReinforcementDirection.Read(barDiameterX, barSpacingX, steelX, width, angleX, unit), WebReinforcementDirection.Read(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2, unit), Length.From(width, unit))
+			: this(WebReinforcementDirection.GetDirection(barDiameterX, barSpacingX, steelX, width, angleX, unit), WebReinforcementDirection.GetDirection(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2, unit), (Length) width.As(unit))
 		{
 		}
 
@@ -199,14 +199,14 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="barSpacingY">The bar spacing for Y direction.</param>
 		/// <param name="steelY">The steel object for Y direction (not the same <paramref name="steelX" /> object).</param>
 		public WebReinforcement(Length barDiameterX, Length barSpacingX, Steel steelX, Length barDiameterY, Length barSpacingY, Steel steelY, Length width, double angleX = 0)
-			: this(WebReinforcementDirection.Read(barDiameterX, barSpacingX, steelX, width, angleX), WebReinforcementDirection.Read(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2), width)
+			: this(WebReinforcementDirection.GetDirection(barDiameterX, barSpacingX, steelX, width, angleX), WebReinforcementDirection.GetDirection(barDiameterY, barSpacingY, steelY, width, angleX + Constants.PiOver2), width)
 		{
 		}
 
 		/// <inheritdoc cref="WebReinforcement(WebReinforcementDirection, WebReinforcementDirection, Length)" />
 		/// <inheritdoc cref="WebReinforcement(double, double, Steel, double, double, LengthUnit)" />
 		public WebReinforcement(WebReinforcementDirection? directionX, WebReinforcementDirection? directionY, double width, LengthUnit unit = LengthUnit.Millimeter)
-			: this(directionX, directionY, Length.From(width, unit))
+			: this(directionX, directionY, (Length) width.As(unit))
 		{
 		}
 
@@ -247,7 +247,8 @@ namespace andrefmello91.Material.Reinforcement
 		///     <paramref name="width" />.
 		/// </param>
 		/// <inheritdoc cref="DirectionXOnly(Length,Length,Steel,Length,double)" />
-		public static WebReinforcement DirectionXOnly(double barDiameter, double barSpacing, Steel steel, double width, double angleX = 0, LengthUnit unit = LengthUnit.Millimeter) => new(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX, unit), null, width, unit);
+		public static WebReinforcement DirectionXOnly(double barDiameter, double barSpacing, Steel steel, double width, double angleX = 0, LengthUnit unit = LengthUnit.Millimeter) =>
+			new(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX, unit), null, width, unit);
 
 		/// <summary>
 		///     Get a <see cref="WebReinforcement" /> with <see cref="DirectionX" /> only.
@@ -256,14 +257,16 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="barSpacing">The bar spacing for X direction.</param>
 		/// <param name="steel">The steel objects for X direction.</param>
 		/// <inheritdoc cref="WebReinforcement(Length, Length, Steel, Length, double)" />
-		public static WebReinforcement DirectionXOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angleX = 0) => new(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX), null, width);
+		public static WebReinforcement DirectionXOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angleX = 0) =>
+			new(new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angleX), null, width);
 
 		/// <param name="unit">
 		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
 		///     <paramref name="width" />.
 		/// </param>
 		/// <inheritdoc cref="DirectionYOnly(Length,Length,Steel,Length,double)" />
-		public static WebReinforcement DirectionYOnly(double barDiameter, double barSpacing, Steel steel, double width, double angle = Constants.PiOver2, LengthUnit unit = LengthUnit.Millimeter) => new(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle, unit), width, unit);
+		public static WebReinforcement DirectionYOnly(double barDiameter, double barSpacing, Steel steel, double width, double angle = Constants.PiOver2, LengthUnit unit = LengthUnit.Millimeter) =>
+			new(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle, unit), width, unit);
 
 		/// <summary>
 		///     Get a <see cref="WebReinforcement" /> with <see cref="DirectionY" /> only.
@@ -276,7 +279,8 @@ namespace andrefmello91.Material.Reinforcement
 		///     <para><paramref name="angle" /> is positive if counterclockwise.</para>
 		/// </param>
 		/// <inheritdoc cref="WebReinforcement(Length, Length, Steel, Length, double)" />
-		public static WebReinforcement DirectionYOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle = Constants.PiOver2) => new(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), width);
+		public static WebReinforcement DirectionYOnly(Length barDiameter, Length barSpacing, Steel steel, Length width, double angle = Constants.PiOver2) =>
+			new(null, new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle), width);
 
 		/// <summary>
 		///     Calculate angles (in radians) related to crack angle.

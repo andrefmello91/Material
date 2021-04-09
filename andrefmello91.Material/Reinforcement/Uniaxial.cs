@@ -85,7 +85,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="unit">The <see cref="LengthUnit" /> of <paramref name="barDiameter" />.</param>
 		/// <inheritdoc cref="UniaxialReinforcement" />
 		public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0, LengthUnit unit = LengthUnit.Millimeter)
-			: this(numberOfBars, Length.From(barDiameter, unit), steel, Area.From(concreteArea, unit.GetAreaUnit()))
+			: this(numberOfBars, (Length) barDiameter.As(unit), steel, (Area) concreteArea.As(unit.GetAreaUnit()))
 		{
 		}
 
@@ -148,8 +148,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		public void SetStress(double strain) => Steel.SetStress(strain);
-
-	
+		
 		/// <inheritdoc />
 		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance);
 
