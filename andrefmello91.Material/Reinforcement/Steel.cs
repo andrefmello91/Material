@@ -125,8 +125,8 @@ namespace andrefmello91.Material.Reinforcement
 			: this(yieldStress, elasticModule, ultimateStrain)
 		{
 			_considerHardening = true;
-			HardeningModule    = hardeningModule.ToUnit(Unit);
-			HardeningStrain    = hardeningStrain;
+			HardeningModule    = hardeningModule.ToUnit(yieldStress.Unit);
+			HardeningStrain    = hardeningStrain.AsFinite();
 		}
 
 		#endregion
@@ -139,28 +139,34 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="strain">Current strain.</param>
 		public Pressure CalculateStress(double strain)
 		{
-			// Compression yielding
-			if (strain <= -YieldStrain)
-				return -YieldStress;
+			// Correct value
+			strain = strain.AsFinite();
 
-			// Elastic
-			if (strain < YieldStrain)
-				return ElasticModule * strain;
+			return _considerHardening switch
+			{
+				// Failure
+				{ } when strain.Abs() >= UltimateStrain => Pressure.Zero,
 
-			// Tension yielding
-			if (!_considerHardening && strain < UltimateStrain)
-				return YieldStress;
+				// Elastic
+				{ } when strain.IsBetween(-YieldStrain, YieldStrain) => ElasticModule * strain,
 
-			// Tension yielding
-			if (_considerHardening && strain < HardeningStrain)
-				return YieldStress;
+				// Compression yielding
+				{ } when strain.IsBetween(-UltimateStrain, -YieldStrain) => -YieldStress,
 
-			// Tension hardening (if considered)
-			if (_considerHardening && strain < UltimateStrain)
-				return YieldStress + HardeningModule * (strain - HardeningStrain);
+				// Tension yielding with no hardening
+				false when strain.IsBetween(YieldStrain, UltimateStrain) => YieldStress,
+
+				// Tension yielding with hardening
+				true when strain.IsBetween(YieldStrain, HardeningStrain) => YieldStress,
+
+				// Tension hardening (if considered)
+				true when strain.IsBetween(HardeningStrain, UltimateStrain) => YieldStress + HardeningModule * (strain - HardeningStrain),
+
+				// Default
+				_ => Pressure.Zero
+			};
 
 			// Failure
-			return Pressure.Zero;
 		}
 
 		/// <inheritdoc />
@@ -170,7 +176,7 @@ namespace andrefmello91.Material.Reinforcement
 		///     Set steel strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public void SetStrain(double strain) => Strain = strain;
+		public void SetStrain(double strain) => Strain = strain.AsFinite();
 
 		/// <summary>
 		///     Set steel strain and stress.
