@@ -208,7 +208,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// </remarks>
 		/// <param name="other">The other reinforcement object.</param>
 		/// <param name="tolerance">The tolerance to consider values being equal.</param>
-		public virtual bool EqualsDiameterAndSpacing(WebReinforcementDirection? other, Length? tolerance = null) => !(other is null) && BarDiameter.Approx(other.BarDiameter, tolerance ?? Tolerance) && BarSpacing.Approx(other.BarSpacing, tolerance ?? Tolerance);
+		public virtual bool EqualsDiameterAndSpacing(WebReinforcementDirection? other, Length? tolerance = null) => other is not null && BarDiameter.Approx(other.BarDiameter, tolerance ?? Tolerance) && BarSpacing.Approx(other.BarSpacing, tolerance ?? Tolerance);
 
 		/// <summary>
 		///     Set steel strain.
@@ -229,7 +229,7 @@ namespace andrefmello91.Material.Reinforcement
 		public void SetStress(double strain) => Steel.SetStress(strain);
 
 		/// <inheritdoc />
-		public bool Approaches(WebReinforcementDirection? other, Length tolerance) => !(other is null) && EqualsDiameterAndSpacing(other, tolerance);
+		public bool Approaches(WebReinforcementDirection? other, Length tolerance) => other is not null && EqualsDiameterAndSpacing(other, tolerance);
 
 		/// <inheritdoc />
 		public WebReinforcementDirection Clone() => new(BarDiameter, BarSpacing, Steel.Clone(), Width, Angle);

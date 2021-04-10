@@ -102,7 +102,7 @@ namespace andrefmello91.Material.Concrete
 
 		/// <inheritdoc cref="CustomParameters(Pressure, Pressure, Pressure, Length, double, double)" />
 		public CustomParameters(double strength, double tensileStrength, double elasticModule, double aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
-			: this(Pressure.From(strength, strengthUnit), Pressure.From(tensileStrength, strengthUnit), Pressure.From(elasticModule, strengthUnit), Length.From(aggregateDiameter, diameterUnit), plasticStrain, ultimateStrain)
+			: this((Pressure) strength.As(strengthUnit), (Pressure) tensileStrength.As(strengthUnit), (Pressure) elasticModule.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), plasticStrain, ultimateStrain)
 		{
 		}
 
@@ -215,9 +215,9 @@ namespace andrefmello91.Material.Concrete
 
 		#region Operators
 
-		public static bool operator ==(CustomParameters left, IParameters right) => !(right is null) && left.Equals(right);
+		public static bool operator ==(CustomParameters left, IParameters right) => right is not null && left.Equals(right);
 
-		public static bool operator !=(CustomParameters left, IParameters right) => !(right is null) && !left.Equals(right);
+		public static bool operator !=(CustomParameters left, IParameters right) => right is not null && !left.Equals(right);
 
 		#endregion
 

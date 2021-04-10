@@ -175,7 +175,7 @@ namespace andrefmello91.Material.Concrete
 
 				double den = 0;
 
-				if (!(x is null))
+				if (x is not null)
 				{
 					double
 						psx   = x.Ratio,
@@ -185,7 +185,7 @@ namespace andrefmello91.Material.Concrete
 					den += psx / phiX * cosNx;
 				}
 
-				if (!(y is null))
+				if (y is not null)
 				{
 					double
 						psy   = y.Ratio,

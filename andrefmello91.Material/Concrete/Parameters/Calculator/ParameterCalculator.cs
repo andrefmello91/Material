@@ -115,7 +115,7 @@ namespace andrefmello91.Material.Concrete
 					_                      => new DSFM(strength, type)
 				};
 
-			public bool Equals(ParameterCalculator? other) => !(other is null) && Model == other.Model;
+			public bool Equals(ParameterCalculator? other) => other is not null && Model == other.Model;
 
 			/// <summary>
 			///     Calculate and update values for custom parameters.

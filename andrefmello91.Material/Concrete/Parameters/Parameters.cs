@@ -127,7 +127,7 @@ namespace andrefmello91.Material.Concrete
 		/// <param name="strengthUnit">The <see cref="PressureUnit" /> of <paramref name="strength" />.</param>
 		/// <param name="diameterUnit">The <see cref="LengthUnit" /> of <paramref name="aggregateDiameter" />.</param>
 		public Parameters(double strength, double aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
-			: this(Pressure.From(strength, strengthUnit), Length.From(aggregateDiameter, diameterUnit), model, type)
+			: this((Pressure) strength.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), model, type)
 		{
 		}
 

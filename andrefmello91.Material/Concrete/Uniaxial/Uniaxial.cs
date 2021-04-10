@@ -80,10 +80,10 @@ namespace andrefmello91.Material.Concrete
 
 		#endregion
 
-		#region
+		#region Methods
 
 		/// <summary>
-		///     Calculate force (in N) given strain.
+		///     Calculate force given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>

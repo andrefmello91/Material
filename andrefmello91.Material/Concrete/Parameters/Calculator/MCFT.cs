@@ -1,5 +1,6 @@
 ﻿using andrefmello91.Extensions;
 using UnitsNet;
+using UnitsNet.Units;
 
 namespace andrefmello91.Material.Concrete
 {
@@ -41,7 +42,7 @@ namespace andrefmello91.Material.Concrete
 
 			protected override void CalculateCustomParameters()
 			{
-				TensileStrength = Pressure.FromMegapascals(fcr());
+				TensileStrength = (Pressure) fcr().As(PressureUnit.Megapascal);
 				ElasticModule   = Ec();
 				PlasticStrain   = ec;
 				UltimateStrain  = ecu;

@@ -124,7 +124,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		/// <param name="other">The other reinforcement object.</param>
 		/// <param name="tolerance">The tolerance.</param>
-		public bool EqualsNumberAndDiameter(UniaxialReinforcement? other, Length tolerance) => !(other is null) && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
+		public bool EqualsNumberAndDiameter(UniaxialReinforcement? other, Length tolerance) => other is not null && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
 
 		/// <summary>
 		///     Calculate maximum value of tensile strength that can be transmitted across cracks.
@@ -150,7 +150,7 @@ namespace andrefmello91.Material.Reinforcement
 		public void SetStress(double strain) => Steel.SetStress(strain);
 		
 		/// <inheritdoc />
-		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => !(other is null) && EqualsNumberAndDiameter(other, tolerance);
+		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => other is not null && EqualsNumberAndDiameter(other, tolerance);
 
 		/// <inheritdoc />
 		public UniaxialReinforcement Clone() => new(NumberOfBars, BarDiameter, Steel.Clone(), ConcreteArea);

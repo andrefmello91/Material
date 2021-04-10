@@ -3,6 +3,7 @@ using System.Linq;
 using andrefmello91.Extensions;
 using MathNet.Numerics.Interpolation;
 using UnitsNet;
+using UnitsNet.Units;
 
 namespace andrefmello91.Material.Concrete
 {
@@ -56,8 +57,8 @@ namespace andrefmello91.Material.Concrete
 
 			protected override void CalculateCustomParameters()
 			{
-				TensileStrength = Pressure.FromMegapascals(fctm());
-				ElasticModule   = Pressure.FromMegapascals(Eci());
+				TensileStrength = (Pressure) fctm().As(PressureUnit.Megapascal);
+				ElasticModule   = (Pressure) Eci().As(PressureUnit.Megapascal);
 				PlasticStrain   = ec1();
 				UltimateStrain  = ecu();
 			}
@@ -78,14 +79,17 @@ namespace andrefmello91.Material.Concrete
 
 			private double ecu()
 			{
-				// Verify fcm
-				if (Strength.Megapascals < 50)
-					return
-						-0.0035;
+				switch (Strength.Megapascals)
+				{
+					// Verify fcm
+					case < 50:
+						return
+							-0.0035;
 
-				if (Strength.Megapascals >= 90)
-					return
-						-0.003;
+					case >= 90:
+						return
+							-0.003;
+				}
 
 				// Get classes and ultimate strains
 				// Interpolate values

@@ -122,10 +122,10 @@ namespace andrefmello91.Material.Reinforcement
 			get => DirectionX?.Width ?? _width;
 			set
 			{
-				if (!(DirectionX is null))
+				if (DirectionX is not null)
 					DirectionX.Width = value;
 
-				if (!(DirectionY is null))
+				if (DirectionY is not null)
 					DirectionY.Width = value;
 			}
 		}
@@ -133,7 +133,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Returns true if reinforcement <see cref="DirectionX" /> exists.
 		/// </summary>
-		public bool XReinforced => !(DirectionX is null) && DirectionX.BarDiameter > Length.Zero && DirectionX.BarSpacing > Length.Zero;
+		public bool XReinforced => DirectionX is not null && DirectionX.BarDiameter > Length.Zero && DirectionX.BarSpacing > Length.Zero;
 
 		/// <summary>
 		///     Returns true if reinforcement <see cref="DirectionX" /> and <see cref="DirectionY" /> exist.
@@ -143,7 +143,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Returns true if reinforcement <see cref="DirectionY" /> exists.
 		/// </summary>
-		public bool YReinforced => !(DirectionY is null) && DirectionY.BarDiameter > Length.Zero && DirectionY.BarSpacing > Length.Zero;
+		public bool YReinforced => DirectionY is not null && DirectionY.BarDiameter > Length.Zero && DirectionY.BarSpacing > Length.Zero;
 
 		/// <inheritdoc />
 		public LengthUnit Unit
@@ -231,10 +231,10 @@ namespace andrefmello91.Material.Reinforcement
 			DirectionY = directionY;
 			_width     = width;
 
-			if (!(DirectionX is null) && DirectionX.Width != width)
+			if (DirectionX is not null && DirectionX.Width != width)
 				DirectionX.Width = width;
 
-			if (!(DirectionY is null) && DirectionY.Width != width)
+			if (DirectionY is not null && DirectionY.Width != width)
 				DirectionY.Width = width;
 		}
 
@@ -369,7 +369,7 @@ namespace andrefmello91.Material.Reinforcement
 		}
 
 		/// <inheritdoc />
-		public bool Approaches(WebReinforcement? other, Length tolerance) => !(other is null) && (DirectionX?.Approaches(other.DirectionX, tolerance) ?? false) && (DirectionY?.Approaches(other.DirectionY, tolerance) ?? false);
+		public bool Approaches(WebReinforcement? other, Length tolerance) => other is not null && (DirectionX?.Approaches(other.DirectionX, tolerance) ?? false) && (DirectionY?.Approaches(other.DirectionY, tolerance) ?? false);
 
 		/// <inheritdoc />
 		public WebReinforcement Clone() => new(DirectionX?.Clone(), DirectionY?.Clone(), Width);
@@ -406,10 +406,10 @@ namespace andrefmello91.Material.Reinforcement
 			if (Unit == unit)
 				return;
 
-			if (!(DirectionX is null))
+			if (DirectionX is not null)
 				DirectionX.Unit = unit;
 
-			if (!(DirectionY is null))
+			if (DirectionY is not null)
 				DirectionY.Unit = unit;
 
 			_width = _width.ToUnit(unit);

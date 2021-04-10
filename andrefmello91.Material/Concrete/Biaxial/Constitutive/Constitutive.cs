@@ -65,7 +65,7 @@ namespace andrefmello91.Material.Concrete
 			///     Calculate concrete <see cref="PrincipalStressState" /> related to <see cref="PrincipalStrainState" />.
 			///     <para>For <seealso cref="BiaxialConcrete" />.</para>
 			/// </summary>
-			/// <param name="principalStrains">The <see cref="PrincipalStrainState" /> in concrete.</param
+			/// <param name="principalStrains">The <see cref="PrincipalStrainState" /> in concrete.</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
 			public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement? reinforcement, Length? referenceLength = null)
@@ -113,7 +113,7 @@ namespace andrefmello91.Material.Concrete
 					? Parameters.ElasticModule
 					: stress / strain;
 
-			public bool Equals(IConstitutive? other) => !(other is null) && Model == other.Model;
+			public bool Equals(IConstitutive? other) => other is not null && Model == other.Model;
 
 			/// <summary>
 			///     Calculate compressive stress for <see cref="Material.Concrete.BiaxialConcrete" /> case.
