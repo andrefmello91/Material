@@ -42,6 +42,14 @@ namespace andrefmello91.Material.Concrete
 		Length AggregateDiameter { get; set; }
 
 		/// <summary>
+		///		Get/set confinement compressive strength consideration.
+		/// </summary>
+		/// <remarks>
+		///		If set to true, concrete strength is increase in case of biaxial compression.
+		/// </remarks>
+		public bool ConsiderConfinement { get; set; }
+		
+		/// <summary>
 		///     Get concrete cracking strain.
 		/// </summary>
 		double CrackingStrain { get; }

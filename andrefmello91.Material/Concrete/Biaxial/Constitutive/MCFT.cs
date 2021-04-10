@@ -39,6 +39,9 @@ namespace andrefmello91.Material.Concrete
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 			{
+				if (!strain.IsFinite() || strain >= 0)
+					return Pressure.Zero;
+
 				// Get strains
 				double
 					ec1 = transverseStrain,
@@ -66,19 +69,17 @@ namespace andrefmello91.Material.Concrete
 			/// <inheritdoc />
 			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null)
 			{
-				// Get strains
-				double
-					ec1 = strain,
-					ec2 = transverseStrain;
-
+				if (!strain.IsFinite() || strain <= 0)
+					return Pressure.Zero;
+				
 				// Calculate initial uncracked state
-				var fc1 = UncrackedStress(ec1, ec2, theta1, reinforcement);
+				var fc1 = UncrackedStress(strain, transverseStrain, theta1, reinforcement);
 
 				// Not cracked
 				return
 					!Cracked
 						? fc1
-						: CrackedStress(ec1);
+						: CrackedStress(strain);
 			}
 
 			/// <summary>

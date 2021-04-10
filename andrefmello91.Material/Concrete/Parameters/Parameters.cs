@@ -89,6 +89,9 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
+		public bool ConsiderConfinement { get; set; }
+
+		/// <inheritdoc />
 		public Pressure TensileStrength => _calculator.TensileStrength.ToUnit(StressUnit);
 
 		/// <inheritdoc />
@@ -123,11 +126,11 @@ namespace andrefmello91.Material.Concrete
 
 		#region Constructors
 
-		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
+		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
 		/// <param name="strengthUnit">The <see cref="PressureUnit" /> of <paramref name="strength" />.</param>
 		/// <param name="diameterUnit">The <see cref="LengthUnit" /> of <paramref name="aggregateDiameter" />.</param>
-		public Parameters(double strength, double aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
-			: this((Pressure) strength.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), model, type)
+		public Parameters(double strength, double aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
+			: this((Pressure) strength.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), model, type, considerConfinement)
 		{
 		}
 
@@ -138,11 +141,13 @@ namespace andrefmello91.Material.Concrete
 		/// <param name="strength">Concrete compressive strength (positive value).</param>
 		/// <param name="aggregateDiameter">The maximum diameter of concrete aggregate.</param>
 		/// <param name="model">The <see cref="ParameterModel" />.</param>
-		public Parameters(Pressure strength, Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite)
+		/// <param name="considerConfinement">Consider confinement strength of concrete? If set to true, concrete strength is increase in case of biaxial compression.</param>
+		public Parameters(Pressure strength, Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false)
 		{
-			_strength    = strength;
-			_aggDiameter = aggregateDiameter;
-			_calculator  = ParameterCalculator.GetCalculator(strength, model, type);
+			_strength           = strength;
+			_aggDiameter        = aggregateDiameter;
+			_calculator         = ParameterCalculator.GetCalculator(strength, model, type);
+			ConsiderConfinement = considerConfinement;
 		}
 
 		#endregion
@@ -219,7 +224,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Get a <see cref="CustomParameters" /> from this object.
 		/// </summary>
-		public CustomParameters ToCustomParameters() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
+		public CustomParameters ToCustomParameters() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain, ConsiderConfinement);
 
 		/// <remarks>
 		///     <see cref="Strength" /> is compared.

@@ -64,6 +64,9 @@ namespace andrefmello91.Material.Concrete
 			set => _aggDiameter = value.ToUnit(DiameterUnit);
 		}
 
+		/// <inheritdoc />
+		public bool ConsiderConfinement { get; set; }
+
 		public Pressure TensileStrength
 		{
 			get => _tensileStrength;
@@ -100,29 +103,30 @@ namespace andrefmello91.Material.Concrete
 
 		#region Constructors
 
-		/// <inheritdoc cref="CustomParameters(Pressure, Pressure, Pressure, Length, double, double)" />
-		public CustomParameters(double strength, double tensileStrength, double elasticModule, double aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
-			: this((Pressure) strength.As(strengthUnit), (Pressure) tensileStrength.As(strengthUnit), (Pressure) elasticModule.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), plasticStrain, ultimateStrain)
+		/// <inheritdoc cref="CustomParameters(Pressure, Pressure, Pressure, Length, double, double, bool)" />
+		public CustomParameters(double strength, double tensileStrength, double elasticModule, double aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035, bool considerConfinement = false, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
+			: this((Pressure) strength.As(strengthUnit), (Pressure) tensileStrength.As(strengthUnit), (Pressure) elasticModule.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), plasticStrain, ultimateStrain, considerConfinement)
 		{
 		}
 
 		/// <summary>
 		///     Custom parameters constructor.
 		/// </summary>
-		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
+		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
 		/// <param name="tensileStrength">Concrete tensile strength.</param>
 		/// <param name="elasticModule">Concrete initial elastic module.</param>
 		/// <param name="plasticStrain">Concrete plastic strain (positive or negative value).</param>
 		/// <param name="ultimateStrain">Concrete ultimate strain (positive or negative value).</param>
-		public CustomParameters(Pressure strength, Pressure tensileStrength, Pressure elasticModule, Length aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035)
+		public CustomParameters(Pressure strength, Pressure tensileStrength, Pressure elasticModule, Length aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035, bool considerConfinement = false)
 		{
-			_strength        = strength.Abs();
-			_tensileStrength = tensileStrength;
-			_elasticModule   = elasticModule;
-			_plasticStrain   = -plasticStrain.Abs();
-			_ultimateStrain  = -ultimateStrain.Abs();
-			_aggDiameter     = aggregateDiameter;
-			Type             = AggregateType.Quartzite;
+			_strength           = strength.Abs();
+			_tensileStrength    = tensileStrength;
+			_elasticModule      = elasticModule;
+			_plasticStrain      = -plasticStrain.Abs();
+			_ultimateStrain     = -ultimateStrain.Abs();
+			_aggDiameter        = aggregateDiameter;
+			Type                = AggregateType.Quartzite;
+			ConsiderConfinement = considerConfinement;
 		}
 
 		#endregion
@@ -174,8 +178,9 @@ namespace andrefmello91.Material.Concrete
 		///     Get a <see cref="Parameters" /> from this object.
 		/// </summary>
 		/// <param name="model">The required <see cref="ParameterModel" />. Not <see cref="ParameterModel.Custom" />.</param>
-		/// <param name="type">The <see cref="AggregateType" />.</param>
-		public Parameters ToParameters(ParameterModel model, AggregateType type = AggregateType.Quartzite) => new(Strength, AggregateDiameter, model, type);
+		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
+		public Parameters ToParameters(ParameterModel model, AggregateType type = AggregateType.Quartzite) =>
+			new(Strength, AggregateDiameter, model, type, ConsiderConfinement);
 
 		/// <remarks>
 		///     <see cref="Strength" /> is compared.

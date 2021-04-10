@@ -75,8 +75,8 @@ namespace andrefmello91.Material.Concrete
 
 				// Get strains
 				double
-					ec1 = principalStrains.Epsilon1,
-					ec2 = principalStrains.Epsilon2;
+					ec1 = principalStrains.Epsilon1.AsFinite(),
+					ec2 = principalStrains.Epsilon2.AsFinite();
 
 				Pressure fc1, fc2;
 
@@ -95,8 +95,16 @@ namespace andrefmello91.Material.Concrete
 						fc2 = TensileStress(ec2, ec1, principalStrains.Theta1, referenceLength, reinforcement);
 						break;
 
-					default:
+					case PrincipalCase.PureCompression when !Parameters.ConsiderConfinement:
+						fc1 = CompressiveStress(ec1, ec2);
+						fc2 = CompressiveStress(ec2, ec1);
+						break;
+					
+					case PrincipalCase.PureCompression when Parameters.ConsiderConfinement:
 						return ConfinementStresses(principalStrains);
+
+					default:
+						return PrincipalStressState.Zero;
 				}
 
 				return
