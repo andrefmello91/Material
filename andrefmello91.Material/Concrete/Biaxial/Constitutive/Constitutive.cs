@@ -42,7 +42,7 @@ namespace andrefmello91.Material.Concrete
 			/// <summary>
 			///     Base class for concrete behavior
 			/// </summary>
-			/// <inheritdoc cref="Read" />
+			/// <inheritdoc cref="From" />
 			protected Constitutive(IParameters parameters) => Parameters = parameters;
 
 			#endregion
@@ -54,7 +54,7 @@ namespace andrefmello91.Material.Concrete
 			/// </summary>
 			/// <param name="constitutiveModel">The <see cref="ConstitutiveModel" /> for concrete.</param>
 			/// <param name="parameters">Concrete <see cref="IParameters" />.</param>
-			public static Constitutive Read(ConstitutiveModel constitutiveModel, IParameters parameters) =>
+			public static Constitutive From(ConstitutiveModel constitutiveModel, IParameters parameters) =>
 				constitutiveModel switch
 				{
 					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),

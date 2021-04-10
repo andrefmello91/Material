@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using andrefmello91.Extensions;
 using andrefmello91.OnPlaneComponents;
 using MathNet.Numerics;
@@ -84,7 +85,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="concreteArea">The concrete area, in <see cref="AreaUnit" /> compatible to <paramref name="unit" />.</param>
 		/// <param name="unit">The <see cref="LengthUnit" /> of <paramref name="barDiameter" />.</param>
 		/// <inheritdoc cref="UniaxialReinforcement" />
-		public UniaxialReinforcement(int numberOfBars, double barDiameter, Steel steel, double concreteArea = 0, LengthUnit unit = LengthUnit.Millimeter)
+		public UniaxialReinforcement(int numberOfBars, double barDiameter, [NotNull] Steel steel, double concreteArea = 0, LengthUnit unit = LengthUnit.Millimeter)
 			: this(numberOfBars, (Length) barDiameter.As(unit), steel, (Area) concreteArea.As(unit.GetAreaUnit()))
 		{
 		}
@@ -96,7 +97,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="barDiameter">The bar diameter.</param>
 		/// <param name="steel">The steel object.</param>
 		/// <param name="concreteArea">The concrete area.</param>
-		public UniaxialReinforcement(int numberOfBars, Length barDiameter, Steel steel, Area concreteArea)
+		public UniaxialReinforcement(int numberOfBars, Length barDiameter, [NotNull] Steel steel, Area concreteArea)
 		{
 			NumberOfBars = numberOfBars;
 			BarDiameter  = barDiameter;

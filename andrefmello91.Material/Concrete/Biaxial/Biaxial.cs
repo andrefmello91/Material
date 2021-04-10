@@ -152,7 +152,7 @@ namespace andrefmello91.Material.Concrete
 		/// <inheritdoc />
 		public BiaxialConcrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
 			: base(parameters, model) =>
-			_constitutive = Constitutive.Read(model, parameters);
+			_constitutive = Constitutive.From(model, parameters);
 
 		#endregion
 

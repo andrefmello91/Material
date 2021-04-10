@@ -65,7 +65,7 @@ namespace andrefmello91.Material.Concrete
 		/// <param name="parameters">Concrete parameters object (<see cref="Material.Concrete.IParameters" />).</param>
 		/// <param name="model">Concrete constitutive object (<see cref="ConstitutiveModel" />).</param>
 		/// <param name="concreteArea">The concrete area (only for uniaxial case).</param>
-		public static Concrete ReadConcrete(Direction direction, IParameters parameters, Area? concreteArea = null, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
+		public static Concrete From(Direction direction, IParameters parameters, Area? concreteArea = null, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
 			direction switch
 			{
 				Direction.Uniaxial => new UniaxialConcrete(parameters, concreteArea ?? Area.Zero, model),
