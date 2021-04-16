@@ -111,8 +111,7 @@ namespace andrefmello91.Material.Concrete
 				{
 					ParameterModel.MC2010  => new MC2010(strength, type),
 					ParameterModel.NBR6118 => new NBR6118(strength, type),
-					ParameterModel.MCFT    => new MCFT(strength, type),
-					_                      => new DSFM(strength, type)
+					_                      => new Default(strength, type)
 				};
 
 			public bool Equals(ParameterCalculator? other) => other is not null && Model == other.Model;

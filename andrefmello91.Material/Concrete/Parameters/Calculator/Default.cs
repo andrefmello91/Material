@@ -10,7 +10,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Parameters calculated according to Modified Compression Field Theory.
 		/// </summary>
-		private class DSFM : ParameterCalculator
+		private class Default : ParameterCalculator
 		{
 
 			#region Fields
@@ -23,7 +23,7 @@ namespace andrefmello91.Material.Concrete
 
 			#region Properties
 
-			public override ParameterModel Model => ParameterModel.MCFT;
+			public override ParameterModel Model => ParameterModel.Default;
 
 			#endregion
 
@@ -33,12 +33,8 @@ namespace andrefmello91.Material.Concrete
 			///     Parameter calculator based on Classic DSFM formulation.
 			/// </summary>
 			/// <inheritdoc />
-			public DSFM(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength, type)
+			public Default(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength, type)
 			{
-				TensileStrength = Pressure.FromMegapascals(fcr());
-				ElasticModule   = Ec();
-				PlasticStrain   = ec;
-				UltimateStrain  = ecu;
 			}
 
 			#endregion
@@ -47,16 +43,16 @@ namespace andrefmello91.Material.Concrete
 
 			protected override void CalculateCustomParameters()
 			{
-				TensileStrength = (Pressure) fcr().As(PressureUnit.Megapascal);
-				ElasticModule   = Ec();
+				TensileStrength = fcr(Strength);
+				ElasticModule   = Ec(Strength);
 				PlasticStrain   = ec;
 				UltimateStrain  = ecu;
 			}
 
-			private Pressure Ec() => -2 * Strength / ec;
+			private static Pressure Ec(Pressure strength) => -2 * strength / ec;
 
-			private double fcr() => 0.65 * Math.Pow(Strength.Megapascals, 0.33);
-
+			private static Pressure fcr(Pressure strength) => (Pressure) (0.65 * Math.Pow(strength.Megapascals, 1D / 3)).As(PressureUnit.Megapascal);
+			
 			#endregion
 
 		}

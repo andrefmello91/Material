@@ -129,7 +129,7 @@ namespace andrefmello91.Material.Concrete
 		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
 		/// <param name="strengthUnit">The <see cref="PressureUnit" /> of <paramref name="strength" />.</param>
 		/// <param name="diameterUnit">The <see cref="LengthUnit" /> of <paramref name="aggregateDiameter" />.</param>
-		public Parameters(double strength, double aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
+		public Parameters(double strength, double aggregateDiameter, ParameterModel model = ParameterModel.Default, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
 			: this((Pressure) strength.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), model, type, considerConfinement)
 		{
 		}
@@ -142,7 +142,7 @@ namespace andrefmello91.Material.Concrete
 		/// <param name="aggregateDiameter">The maximum diameter of concrete aggregate.</param>
 		/// <param name="model">The <see cref="ParameterModel" />.</param>
 		/// <param name="considerConfinement">Consider confinement strength of concrete? If set to true, concrete strength is increase in case of biaxial compression.</param>
-		public Parameters(Pressure strength, Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false)
+		public Parameters(Pressure strength, Length aggregateDiameter, ParameterModel model = ParameterModel.Default, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false)
 		{
 			_strength           = strength;
 			_aggDiameter        = aggregateDiameter;

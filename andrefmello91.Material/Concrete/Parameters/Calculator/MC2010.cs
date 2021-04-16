@@ -20,7 +20,7 @@ namespace andrefmello91.Material.Concrete
 			/// <summary>
 			///     Array of high strength concrete classes, C50 to C90 (MC2010).
 			/// </summary>
-			private readonly double[] _classes =
+			private static readonly double[] Classes =
 			{
 				50, 55, 60, 70, 80, 90
 			};
@@ -28,7 +28,7 @@ namespace andrefmello91.Material.Concrete
 			/// <summary>
 			///     Array of ultimate strains for each concrete class, C50 to C90 (MC2010).
 			/// </summary>
-			private readonly double[] _ultimateStrain =
+			private static readonly double[] ClassesUltStrains =
 			{
 				-0.0034, -0.0034, -0.0033, -0.0032, -0.0031, -0.003
 			};
@@ -57,29 +57,29 @@ namespace andrefmello91.Material.Concrete
 
 			protected override void CalculateCustomParameters()
 			{
-				TensileStrength = (Pressure) fctm().As(PressureUnit.Megapascal);
-				ElasticModule   = (Pressure) Eci().As(PressureUnit.Megapascal);
-				PlasticStrain   = ec1();
-				UltimateStrain  = ecu();
+				TensileStrength = fctm(Strength);
+				ElasticModule   = Eci(Strength, Type);
+				PlasticStrain   = ec1(Strength);
+				UltimateStrain  = ecu(Strength);
 			}
 
-			private double AlphaE() =>
-				Type switch
+			private static double AlphaE(AggregateType type) =>
+				type switch
 				{
 					AggregateType.Basalt    => 1.2,
 					AggregateType.Quartzite => 1,
 					_                       => 0.9
 				};
 
-			private double ec1() => -1.6 / 1000 * (0.1 * Strength.Megapascals).Pow(0.25);
+			private static double ec1(Pressure strength) => -1.6 / 1000 * (0.1 * strength.Megapascals).Pow(0.25);
 
-			private Pressure Ec1() => Strength / ec1();
+			private static Pressure Ec1(Pressure strength) => strength / ec1(strength);
 
-			private double Eci() => 21500 * AlphaE() * (0.1 * Strength.Megapascals).Pow(1.0 / 3);
+			private static Pressure Eci(Pressure strength, AggregateType type) => Pressure.From(21500, PressureUnit.Megapascal) * AlphaE(type) * (0.1 * strength.Megapascals).Pow(1.0 / 3);
 
-			private double ecu()
+			private static double ecu(Pressure strength)
 			{
-				switch (Strength.Megapascals)
+				switch (strength.Megapascals)
 				{
 					// Verify fcm
 					case < 50:
@@ -93,22 +93,26 @@ namespace andrefmello91.Material.Concrete
 
 				// Get classes and ultimate strains
 				// Interpolate values
-				if (!_classes.Contains(Strength.Megapascals))
+				if (!Classes.Contains(strength.Megapascals))
 					return
-						UltimateStrainSpline().Interpolate(Strength.Megapascals);
+						UltimateStrainSpline().Interpolate(strength.Megapascals);
 
-				var i = Array.IndexOf(_classes, Strength.Megapascals);
+				var i = Array.IndexOf(Classes, strength.Megapascals);
 
 				return
-					_ultimateStrain[i];
+					ClassesUltStrains[i];
 			}
 
-			private double fctm() => Strength.Megapascals <= 50 ? 0.3 * Strength.Megapascals.Pow(2.0 / 3) : 2.12 * Math.Log(1 + 0.1 * Strength.Megapascals);
+			private static Pressure fctm(Pressure strength) =>
+				strength.Megapascals <= 50
+					? Pressure.From(0.3, PressureUnit.Megapascal) * strength.Megapascals.Pow(2.0 / 3)
+					: Pressure.From(2.12, PressureUnit.Megapascal) * Math.Log(1 + 0.1 * strength.Megapascals);
 
 			/// <summary>
 			///     Interpolation for ultimate strains.
 			/// </summary>
-			private CubicSpline UltimateStrainSpline() => CubicSpline.InterpolateAkimaSorted(_classes, _ultimateStrain);
+			private static CubicSpline UltimateStrainSpline() =>
+				CubicSpline.InterpolateAkimaSorted(Classes, ClassesUltStrains);
 
 			#endregion
 

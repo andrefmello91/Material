@@ -10,10 +10,9 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public enum ParameterModel
 	{
+		Default,
 		NBR6118,
 		MC2010,
-		MCFT,
-		DSFM,
 		Custom
 	}
 
