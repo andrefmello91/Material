@@ -28,6 +28,15 @@ namespace andrefmello91.Material.Concrete
 		#region Properties
 
 		/// <summary>
+		///		Get/set Cs coefficient for concrete softening.
+		/// </summary>
+		public double Cs
+		{
+			get => _constitutive.Cs;
+			set => _constitutive.Cs = value;
+		}
+		
+		/// <summary>
 		///     Get/set crack slip consideration.
 		/// </summary>
 		public bool ConsiderCrackSlip

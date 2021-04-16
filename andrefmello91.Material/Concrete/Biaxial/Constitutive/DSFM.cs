@@ -115,9 +115,7 @@ namespace andrefmello91.Material.Concrete
 					return 1;
 
 				// Calculate Cd and Cs
-				double
-					Cd = 0.35 * (r - 0.28).Pow(0.8),
-					Cs = ConsiderCrackSlip ? 0.55 : 1;
+				var Cd = 0.35 * (r - 0.28).Pow(0.8);
 
 				return
 					Math.Min(1.0 / (1 + Cs * Cd), 1);

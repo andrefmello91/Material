@@ -32,6 +32,9 @@ namespace andrefmello91.Material.Concrete
 
 			public bool Cracked { get; set; }
 
+			/// <inheritdoc cref="BiaxialConcrete.Cs"/>
+			public double Cs { get; set; } = 0.55;
+			
 			public abstract ConstitutiveModel Model { get; }
 
 			#endregion
