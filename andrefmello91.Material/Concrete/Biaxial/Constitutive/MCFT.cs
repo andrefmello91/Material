@@ -1,4 +1,5 @@
 ﻿using System;
+using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
 using MathNet.Numerics;
 using UnitsNet;
@@ -39,7 +40,7 @@ namespace andrefmello91.Material.Concrete
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 			{
-				if (!strain.IsFinite() || strain >= 0)
+				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain >= 0)
 					return Pressure.Zero;
 
 				// Get strains
@@ -63,7 +64,7 @@ namespace andrefmello91.Material.Concrete
 				var n = ec2 / ec;
 
 				return
-					f2max * (2 * n - n * n);
+					f2max * (2 * n - n * n).AsFinite();
 			}
 
 			/// <inheritdoc />
