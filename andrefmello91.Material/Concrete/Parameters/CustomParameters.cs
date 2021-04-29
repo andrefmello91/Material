@@ -30,24 +30,28 @@ namespace andrefmello91.Material.Concrete
 			set => DiameterUnit = value;
 		}
 
+		/// <inheritdoc />
 		public PressureUnit StressUnit
 		{
 			get => Strength.Unit;
 			set => ChangeUnit(value);
 		}
 
+		/// <inheritdoc />
 		public LengthUnit DiameterUnit
 		{
 			get => AggregateDiameter.Unit;
 			set => ChangeUnit(value);
 		}
 
+		/// <inheritdoc />
 		public Pressure Strength
 		{
 			get => _strength;
 			set => _strength = value.ToUnit(StressUnit);
 		}
 
+		/// <inheritdoc />
 		public ParameterModel Model
 		{
 			get => ParameterModel.Custom;
@@ -56,8 +60,10 @@ namespace andrefmello91.Material.Concrete
 			}
 		}
 
+		/// <inheritdoc />
 		public AggregateType Type { get; set; }
 
+		/// <inheritdoc />
 		public Length AggregateDiameter
 		{
 			get => _aggDiameter;
@@ -67,36 +73,44 @@ namespace andrefmello91.Material.Concrete
 		/// <inheritdoc />
 		public bool ConsiderConfinement { get; set; }
 
+		/// <inheritdoc />
 		public Pressure TensileStrength
 		{
 			get => _tensileStrength;
 			set => _tensileStrength = value.ToUnit(StressUnit);
 		}
 
+		/// <inheritdoc />
 		public Pressure ElasticModule
 		{
 			get => _elasticModule;
 			set => _elasticModule = value.ToUnit(StressUnit);
 		}
 
+		/// <inheritdoc />
 		public Pressure SecantModule => Strength / PlasticStrain;
 
+		/// <inheritdoc />
 		public double PlasticStrain
 		{
 			get => _plasticStrain;
 			set => _plasticStrain = -value.Abs();
 		}
 
+		/// <inheritdoc />
 		public double UltimateStrain
 		{
 			get => _ultimateStrain;
 			set => _ultimateStrain = -value.Abs();
 		}
 
+		/// <inheritdoc />
 		public double CrackingStrain => TensileStrength / ElasticModule;
 
+		/// <inheritdoc />
 		public Pressure TransverseModule => (ElasticModule / 2.4).ToUnit(StressUnit);
 
+		/// <inheritdoc />
 		public ForcePerLength FractureParameter => ForcePerLength.FromNewtonsPerMillimeter(0.075);
 
 		#endregion
@@ -145,6 +159,7 @@ namespace andrefmello91.Material.Concrete
 			_aggDiameter = _aggDiameter.ToUnit(unit);
 		}
 
+		/// <inheritdoc />
 		public IParameters Convert(LengthUnit unit) => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter.ToUnit(unit), PlasticStrain, UltimateStrain);
 
 		/// <summary>
@@ -161,6 +176,7 @@ namespace andrefmello91.Material.Concrete
 			_elasticModule   = _elasticModule.ToUnit(unit);
 		}
 
+		/// <inheritdoc />
 		public IParameters Convert(PressureUnit unit) => new CustomParameters(Strength.ToUnit(unit), TensileStrength.ToUnit(unit), ElasticModule.ToUnit(unit), AggregateDiameter, PlasticStrain, UltimateStrain);
 
 		/// <summary>
@@ -170,8 +186,10 @@ namespace andrefmello91.Material.Concrete
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
 		public CustomParameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new(Strength.ToUnit(stressUnit), TensileStrength.ToUnit(stressUnit), ElasticModule.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), PlasticStrain, UltimateStrain);
 
+		/// <inheritdoc />
 		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 
+		/// <inheritdoc />
 		public CustomParameters Clone() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
 
 		/// <summary>
@@ -193,8 +211,10 @@ namespace andrefmello91.Material.Concrete
 					? 1
 					: -1;
 
+		/// <inheritdoc />
 		public bool Equals(IParameters? other) => Approaches(other, Parameters.Tolerance);
 
+		/// <inheritdoc />
 		public override string ToString()
 		{
 			char
@@ -212,17 +232,19 @@ namespace andrefmello91.Material.Concrete
 		}
 
 
+		/// <inheritdoc />
 		public override bool Equals(object? obj) => obj is CustomParameters other && Equals(other);
 
+		/// <inheritdoc />
 		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
 
 		#endregion
 
 		#region Operators
 
-		public static bool operator ==(CustomParameters left, IParameters right) => right is not null && left.Equals(right);
+		public static bool operator ==(CustomParameters left, IParameters right) => left.Equals(right);
 
-		public static bool operator !=(CustomParameters left, IParameters right) => right is not null && !left.Equals(right);
+		public static bool operator !=(CustomParameters left, IParameters right) => !left.Equals(right);
 
 		#endregion
 
