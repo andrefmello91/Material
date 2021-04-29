@@ -8,7 +8,7 @@ namespace andrefmello91.Material.Concrete
 	/// <summary>
 	///     Concrete parameters struct.
 	/// </summary>
-	public partial struct Parameters : IParameters, ICloneable<Parameters>
+	public struct Parameters : IParameters, ICloneable<Parameters>
 	{
 
 		#region Fields
@@ -157,26 +157,30 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Get concrete class C20 (fc = 20 MPa).
 		/// </summary>
-		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C20(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(20), aggregateDiameter, model, type);
+		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
+		public static Parameters C20(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) => 
+			new(Pressure.FromMegapascals(20), aggregateDiameter, model, type, considerConfinement);
 
 		/// <summary>
 		///     Get concrete class C30 (fc = 30 MPa).
 		/// </summary>
-		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C30(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(30), aggregateDiameter, model, type);
+		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
+		public static Parameters C30(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) => 
+			new(Pressure.FromMegapascals(30), aggregateDiameter, model, type, considerConfinement);
 
 		/// <summary>
 		///     Get concrete class C40 (fc = 40 MPa).
 		/// </summary>
-		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C40(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(40), aggregateDiameter, model, type);
+		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
+		public static Parameters C40(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) =>
+			new(Pressure.FromMegapascals(40), aggregateDiameter, model, type, considerConfinement);
 
 		/// <summary>
 		///     Get concrete class C50 (fc = 40 MPa).
 		/// </summary>
-		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType)" />
-		public static Parameters C50(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite) => new(Pressure.FromMegapascals(50), aggregateDiameter, model, type);
+		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
+		public static Parameters C50(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) =>
+			new(Pressure.FromMegapascals(50), aggregateDiameter, model, type, considerConfinement);
 
 		/// <summary>
 		///     Change <see cref="AggregateDiameter" /> unit.
