@@ -106,16 +106,6 @@ namespace andrefmello91.Material.Concrete
 		public void SetStrain(double strain) => Strain = strain;
 
 		/// <summary>
-		///     Set concrete stress (in MPa) given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		/// <param name="reinforcement">
-		///     The <see cref="UniaxialReinforcement" /> (only for
-		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
-		/// </param>
-		public void SetStress(double strain, UniaxialReinforcement? reinforcement = null) => Stress = CalculateStress(strain, reinforcement);
-
-		/// <summary>
 		///     Set concrete strain and calculate stress, in MPa.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
@@ -129,8 +119,24 @@ namespace andrefmello91.Material.Concrete
 			SetStress(strain, reinforcement);
 		}
 
+		/// <summary>
+		///     Set concrete stress (in MPa) given strain.
+		/// </summary>
+		/// <param name="strain">Current strain.</param>
+		/// <param name="reinforcement">
+		///     The <see cref="UniaxialReinforcement" /> (only for
+		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
+		/// </param>
+		public void SetStress(double strain, UniaxialReinforcement? reinforcement = null) => Stress = CalculateStress(strain, reinforcement);
+
+		#region Interface Implementations
+
 		/// <inheritdoc />
 		public UniaxialConcrete Clone() => new(Parameters, Area, Model);
+
+		#endregion
+
+		#region Object override
 
 		/// <inheritdoc />
 		public override bool Equals(Concrete? other) => other is UniaxialConcrete && base.Equals(other);
@@ -140,6 +146,8 @@ namespace andrefmello91.Material.Concrete
 
 		/// <inheritdoc />
 		public override int GetHashCode() => Parameters.GetHashCode();
+
+		#endregion
 
 		#endregion
 

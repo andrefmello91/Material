@@ -24,11 +24,15 @@ namespace andrefmello91.Material.Concrete
 
 			#region Properties
 
+			#region Interface Implementations
+
 			public bool ConsiderCrackSlip { get; protected set; }
 
 			public bool Cracked { get; set; }
 
 			public abstract ConstitutiveModel Model { get; }
+
+			#endregion
 
 			#endregion
 
@@ -70,7 +74,7 @@ namespace andrefmello91.Material.Concrete
 			{
 				// Correct value
 				strain = strain.AsFinite();
-				
+
 				return strain.ApproxZero()
 					? Pressure.Zero
 					: strain > 0
@@ -87,8 +91,6 @@ namespace andrefmello91.Material.Concrete
 				stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9
 					? Parameters.ElasticModule
 					: stress / strain;
-
-			public bool Equals(IConstitutive? other) => Model == other?.Model;
 
 			/// <summary>
 			///     Calculate compressive stress for <see cref="UniaxialConcrete" /> case.
@@ -113,7 +115,17 @@ namespace andrefmello91.Material.Concrete
 					Cracked = true;
 			}
 
+			#region Interface Implementations
+
+			public bool Equals(IConstitutive? other) => Model == other?.Model;
+
+			#endregion
+
+			#region Object override
+
 			public override string ToString() => $"{Model}";
+
+			#endregion
 
 			#endregion
 

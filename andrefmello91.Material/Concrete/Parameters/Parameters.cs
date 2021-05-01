@@ -141,7 +141,10 @@ namespace andrefmello91.Material.Concrete
 		/// <param name="strength">Concrete compressive strength (positive value).</param>
 		/// <param name="aggregateDiameter">The maximum diameter of concrete aggregate.</param>
 		/// <param name="model">The <see cref="ParameterModel" />.</param>
-		/// <param name="considerConfinement">Consider confinement strength of concrete? If set to true, concrete strength is increase in case of biaxial compression.</param>
+		/// <param name="considerConfinement">
+		///     Consider confinement strength of concrete? If set to true, concrete strength is
+		///     increase in case of biaxial compression.
+		/// </param>
 		public Parameters(Pressure strength, Length aggregateDiameter, ParameterModel model = ParameterModel.Default, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false)
 		{
 			_strength           = strength;
@@ -158,14 +161,14 @@ namespace andrefmello91.Material.Concrete
 		///     Get concrete class C20 (fc = 20 MPa).
 		/// </summary>
 		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
-		public static Parameters C20(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) => 
+		public static Parameters C20(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) =>
 			new(Pressure.FromMegapascals(20), aggregateDiameter, model, type, considerConfinement);
 
 		/// <summary>
 		///     Get concrete class C30 (fc = 30 MPa).
 		/// </summary>
 		/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
-		public static Parameters C30(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) => 
+		public static Parameters C30(Length aggregateDiameter, ParameterModel model = ParameterModel.MC2010, AggregateType type = AggregateType.Quartzite, bool considerConfinement = false) =>
 			new(Pressure.FromMegapascals(30), aggregateDiameter, model, type, considerConfinement);
 
 		/// <summary>
@@ -205,19 +208,19 @@ namespace andrefmello91.Material.Concrete
 
 			_strength = _strength.ToUnit(unit);
 		}
-		
+
 		/// <summary>
 		///     Create a clone of this object with converted units.
 		/// </summary>
 		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
 		public Parameters Convert(PressureUnit? stressUnit = null, LengthUnit? lengthUnit = null) =>
-			new(stressUnit.HasValue ? Strength.ToUnit(stressUnit.Value) : Strength, lengthUnit.HasValue? AggregateDiameter.ToUnit(lengthUnit.Value) : AggregateDiameter, Model, Type);
+			new(stressUnit.HasValue ? Strength.ToUnit(stressUnit.Value) : Strength, lengthUnit.HasValue ? AggregateDiameter.ToUnit(lengthUnit.Value) : AggregateDiameter, Model, Type);
 
 		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(lengthUnit: unit);
-		
+
 		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
-		
+
 		/// <inheritdoc />
 		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 

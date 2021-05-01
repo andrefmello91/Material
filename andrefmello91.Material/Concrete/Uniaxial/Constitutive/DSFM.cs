@@ -16,10 +16,6 @@ namespace andrefmello91.Material.Concrete
 		private class DSFMConstitutive : Constitutive
 		{
 
-			#region Fields
-
-			#endregion
-
 			#region Properties
 
 			public override ConstitutiveModel Model { get; } = ConstitutiveModel.DSFM;
@@ -38,6 +34,23 @@ namespace andrefmello91.Material.Concrete
 			#endregion
 
 			#region Methods
+
+			/// <summary>
+			///     Calculate reference length.
+			/// </summary>
+			/// <inheritdoc cref="TensionStiffening" />
+			private static Length ReferenceLength(UniaxialReinforcement? reinforcement) =>
+				0.5 * (reinforcement is null
+					? Length.FromMillimeters(21)
+					: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio);
+
+			/// <summary>
+			///     Calculate tension stiffening coefficient (for DSFM).
+			/// </summary>
+			/// <inheritdoc cref="TensionStiffening" />
+			private static double TensionStiffeningCoefficient(UniaxialReinforcement? reinforcement) => reinforcement is null
+				? 0
+				: 0.25 * reinforcement.BarDiameter.Millimeters / reinforcement.Ratio;
 
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain)
@@ -86,15 +99,6 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <summary>
-			///     Calculate reference length.
-			/// </summary>
-			/// <inheritdoc cref="TensionStiffening" />
-			private static Length ReferenceLength(UniaxialReinforcement? reinforcement) =>
-				0.5 * (reinforcement is null
-					? Length.FromMillimeters(21)
-					: Length.FromMillimeters(21) + 0.155 * reinforcement.BarDiameter / reinforcement.Ratio);
-
-			/// <summary>
 			///     Calculate concrete post-cracking stress associated with tension softening.
 			/// </summary>
 			/// <inheritdoc cref="TensionStiffening" />
@@ -134,14 +138,6 @@ namespace andrefmello91.Material.Concrete
 				return
 					Min(fc1s, fc1b);
 			}
-			
-			/// <summary>
-			///     Calculate tension stiffening coefficient (for DSFM).
-			/// </summary>
-			/// <inheritdoc cref="TensionStiffening"/>
-			private static double TensionStiffeningCoefficient(UniaxialReinforcement? reinforcement) => reinforcement is null
-				? 0
-				: 0.25 * reinforcement.BarDiameter.Millimeters / reinforcement.Ratio;
 
 			#endregion
 

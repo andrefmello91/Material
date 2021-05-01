@@ -72,6 +72,8 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Pressure YieldStress { get; private set; }
 
+		#region Interface Implementations
+
 		/// <summary>
 		///     Get the <see cref="PressureUnit" /> that this was constructed with.
 		/// </summary>
@@ -80,6 +82,8 @@ namespace andrefmello91.Material.Reinforcement
 			get => YieldStress.Unit;
 			set => ChangeUnit(value);
 		}
+
+		#endregion
 
 		#endregion
 
@@ -169,8 +173,11 @@ namespace andrefmello91.Material.Reinforcement
 			// Failure
 		}
 
-		/// <inheritdoc />
-		public override bool Equals(object? other) => other is Steel steel && Equals(steel);
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
+		public Steel Convert(PressureUnit unit) =>
+			!_considerHardening
+				? new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), UltimateStrain)
+				: new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), HardeningModule.ToUnit(unit), HardeningStrain, UltimateStrain);
 
 		/// <summary>
 		///     Set steel strain.
@@ -194,6 +201,8 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="strain">Current strain.</param>
 		public void SetStress(double strain) => Stress = CalculateStress(strain);
 
+		#region Interface Implementations
+
 		/// <inheritdoc />
 		public bool Approaches(Steel? other, Pressure tolerance)
 		{
@@ -207,23 +216,6 @@ namespace andrefmello91.Material.Reinforcement
 
 			return basic && HardeningModule.Approx(other.HardeningModule, tolerance) && HardeningStrain.Approx(other.HardeningStrain);
 		}
-
-		/// <inheritdoc />
-		public Steel Clone() => !_considerHardening
-			? new Steel(YieldStress, ElasticModule, UltimateStrain)
-			: new Steel(YieldStress, ElasticModule, HardeningModule, HardeningStrain, UltimateStrain);
-
-
-		/// <inheritdoc />
-		public int CompareTo(Steel? other) =>
-			other is null || YieldStress > other.YieldStress || YieldStress.Approx(other.YieldStress, Tolerance) && ElasticModule > other.ElasticModule
-				? 1
-				: YieldStress.Approx(other.YieldStress, Tolerance) && ElasticModule.Approx(other.ElasticModule, Tolerance)
-					? 0
-					: -1;
-
-		/// <inheritdoc />
-		public virtual bool Equals(Steel? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc />
 		public void ChangeUnit(PressureUnit unit)
@@ -241,14 +233,32 @@ namespace andrefmello91.Material.Reinforcement
 			HardeningModule = HardeningModule.ToUnit(unit);
 		}
 
-		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
-		public Steel Convert(PressureUnit unit) =>
-			!_considerHardening
-				? new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), UltimateStrain)
-				: new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), HardeningModule.ToUnit(unit), HardeningStrain, UltimateStrain);
+		/// <inheritdoc />
+		public Steel Clone() => !_considerHardening
+			? new Steel(YieldStress, ElasticModule, UltimateStrain)
+			: new Steel(YieldStress, ElasticModule, HardeningModule, HardeningStrain, UltimateStrain);
+
+
+		/// <inheritdoc />
+		public int CompareTo(Steel? other) =>
+			other is null || YieldStress > other.YieldStress || YieldStress.Approx(other.YieldStress, Tolerance) && ElasticModule > other.ElasticModule
+				? 1
+				: YieldStress.Approx(other.YieldStress, Tolerance) && ElasticModule.Approx(other.ElasticModule, Tolerance)
+					? 0
+					: -1;
 
 		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
-		
+
+		/// <inheritdoc />
+		public virtual bool Equals(Steel? other) => Approaches(other, Tolerance);
+
+		#endregion
+
+		#region Object override
+
+		/// <inheritdoc />
+		public override bool Equals(object? other) => other is Steel steel && Equals(steel);
+
 		/// <inheritdoc />
 		public override int GetHashCode() => (int) ElasticModule.Gigapascals * (int) YieldStress.Megapascals;
 
@@ -271,6 +281,8 @@ namespace andrefmello91.Material.Reinforcement
 
 			return msg;
 		}
+
+		#endregion
 
 		#endregion
 

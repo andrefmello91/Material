@@ -178,11 +178,11 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
-		public CustomParameters Convert(PressureUnit? stressUnit = null, LengthUnit? lengthUnit = null) => 
+		public CustomParameters Convert(PressureUnit? stressUnit = null, LengthUnit? lengthUnit = null) =>
 			new(Strength.ToUnit(stressUnit ?? StressUnit), TensileStrength.ToUnit(stressUnit ?? StressUnit), ElasticModule.ToUnit(stressUnit ?? StressUnit), AggregateDiameter.ToUnit(lengthUnit ?? DiameterUnit), PlasticStrain, UltimateStrain);
 
 		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(lengthUnit: unit);
-		
+
 		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
 		/// <inheritdoc />

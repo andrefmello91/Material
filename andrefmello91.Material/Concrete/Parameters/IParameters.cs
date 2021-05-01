@@ -11,24 +11,24 @@ namespace andrefmello91.Material.Concrete
 	public enum ParameterModel
 	{
 		/// <summary>
-		///		Default parameter model.
+		///     Default parameter model.
 		/// </summary>
 		Default,
-		
+
 		/// <summary>
-		///		Model based in brazilian standard (NBR6118:2014) formulation.
+		///     Model based in brazilian standard (NBR6118:2014) formulation.
 		/// </summary>
 		NBR6118,
-		
+
 		/// <summary>
-		///		Model based in FIB Model Code 2010 formulation.
+		///     Model based in FIB Model Code 2010 formulation.
 		/// </summary>
 		MC2010,
-		
+
 		/// <summary>
-		///		Custom parameter model.
+		///     Custom parameter model.
 		/// </summary>
-		/// <seealso cref="CustomParameters"/>
+		/// <seealso cref="CustomParameters" />
 		Custom
 	}
 
@@ -57,13 +57,13 @@ namespace andrefmello91.Material.Concrete
 		Length AggregateDiameter { get; set; }
 
 		/// <summary>
-		///		Get/set confinement compressive strength consideration.
+		///     Get/set confinement compressive strength consideration.
 		/// </summary>
 		/// <remarks>
-		///		If set to true, concrete strength is increase in case of biaxial compression.
+		///     If set to true, concrete strength is increase in case of biaxial compression.
 		/// </remarks>
 		public bool ConsiderConfinement { get; set; }
-		
+
 		/// <summary>
 		///     Get concrete cracking strain.
 		/// </summary>

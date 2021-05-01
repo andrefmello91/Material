@@ -28,15 +28,6 @@ namespace andrefmello91.Material.Concrete
 		#region Properties
 
 		/// <summary>
-		///		Get/set Cs coefficient for concrete softening.
-		/// </summary>
-		public double Cs
-		{
-			get => _constitutive.Cs;
-			set => _constitutive.Cs = value;
-		}
-		
-		/// <summary>
 		///     Get/set crack slip consideration.
 		/// </summary>
 		public bool ConsiderCrackSlip
@@ -49,6 +40,15 @@ namespace andrefmello91.Material.Concrete
 		///     Returns true if concrete is cracked.
 		/// </summary>
 		public bool Cracked => _constitutive.Cracked;
+
+		/// <summary>
+		///     Get/set Cs coefficient for concrete softening.
+		/// </summary>
+		public double Cs
+		{
+			get => _constitutive.Cs;
+			set => _constitutive.Cs = value;
+		}
 
 
 		/// <summary>
@@ -186,12 +186,6 @@ namespace andrefmello91.Material.Concrete
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
-		/// <inheritdoc />
-		public override bool Equals(Concrete? other) => other is BiaxialConcrete && base.Equals(other);
-
-		/// <inheritdoc />
-		public override bool Equals(object? obj) => obj is BiaxialConcrete concrete && Equals(concrete);
-
 		/// <summary>
 		///     Set tensile stress.
 		/// </summary>
@@ -207,11 +201,25 @@ namespace andrefmello91.Material.Concrete
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 
+		#region Interface Implementations
+
 		/// <inheritdoc />
 		public BiaxialConcrete Clone() => new(Parameters, Model);
 
+		#endregion
+
+		#region Object override
+
+		/// <inheritdoc />
+		public override bool Equals(Concrete? other) => other is BiaxialConcrete && base.Equals(other);
+
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is BiaxialConcrete concrete && Equals(concrete);
+
 		/// <inheritdoc />
 		public override int GetHashCode() => Parameters.GetHashCode();
+
+		#endregion
 
 		#endregion
 

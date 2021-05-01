@@ -112,12 +112,16 @@ namespace andrefmello91.Material.Concrete
 				_                      => new Default(strength, type)
 			};
 
-		public bool Equals(ParameterCalculator? other) => other is not null && Model == other.Model;
-
 		/// <summary>
 		///     Calculate and update values for custom parameters.
 		/// </summary>
 		protected abstract void CalculateCustomParameters();
+
+		#region Interface Implementations
+
+		public bool Equals(ParameterCalculator? other) => other is not null && Model == other.Model;
+
+		#endregion
 
 		#endregion
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using andrefmello91.Extensions;
-using andrefmello91.OnPlaneComponents;
 using MathNet.Numerics;
 using UnitsNet;
 using UnitsNet.Units;
@@ -21,7 +20,7 @@ namespace andrefmello91.Material.Reinforcement
 		///     The tolerance to consider displacements equal.
 		/// </summary>
 		public static readonly Length Tolerance = Length.FromMillimeters(1E-3);
-		
+
 		#endregion
 
 		#region Properties
@@ -71,12 +70,16 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Force YieldForce => Area * Steel.YieldStress;
 
+		#region Interface Implementations
+
 		/// <inheritdoc />
 		public LengthUnit Unit
 		{
 			get => BarDiameter.Unit;
 			set => ChangeUnit(value);
 		}
+
+		#endregion
 
 		#endregion
 
@@ -116,8 +119,8 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="strain">Current strain.</param>
 		public Force CalculateForce(double strain) => Area * Steel.CalculateStress(strain);
 
-		/// <inheritdoc />
-		public override bool Equals(object? other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
+		public UniaxialReinforcement Convert(LengthUnit unit) => new(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), ConcreteArea.ToUnit(unit.GetAreaUnit()));
 
 		/// <summary>
 		///     Compare two reinforcement objects.
@@ -149,9 +152,26 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		public void SetStress(double strain) => Steel.SetStress(strain);
-		
+
+		/// <summary>
+		///     Calculated reinforcement area.
+		/// </summary>
+		private Area CalculateArea() => 0.25 * NumberOfBars * Constants.Pi * BarDiameter * BarDiameter;
+
+		#region Interface Implementations
+
 		/// <inheritdoc />
 		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => other is not null && EqualsNumberAndDiameter(other, tolerance);
+
+		/// <inheritdoc />
+		public void ChangeUnit(LengthUnit unit)
+		{
+			if (Unit == unit)
+				return;
+
+			BarDiameter = BarDiameter.ToUnit(unit);
+			Area        = Area.ToUnit(unit.GetAreaUnit());
+		}
 
 		/// <inheritdoc />
 		public UniaxialReinforcement Clone() => new(NumberOfBars, BarDiameter, Steel.Clone(), ConcreteArea);
@@ -164,6 +184,8 @@ namespace andrefmello91.Material.Reinforcement
 					? 0
 					: -1;
 
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
+
 		/// <summary>
 		///     Compare two reinforcement objects.
 		///     <para>Returns true if parameters are equal.</para>
@@ -171,25 +193,12 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="other">The other reinforcement object.</param>
 		public virtual bool Equals(UniaxialReinforcement? other) => Approaches(other, Tolerance);
 
+		#endregion
+
+		#region Object override
+
 		/// <inheritdoc />
-		public void ChangeUnit(LengthUnit unit)
-		{
-			if (Unit == unit)
-				return;
-
-			BarDiameter = BarDiameter.ToUnit(unit);
-			Area        = Area.ToUnit(unit.GetAreaUnit());
-		}
-
-		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
-		public UniaxialReinforcement Convert(LengthUnit unit) => new(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), ConcreteArea.ToUnit(unit.GetAreaUnit()));
-
-		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
-
-		/// <summary>
-		///     Calculated reinforcement area.
-		/// </summary>
-		private Area CalculateArea() => 0.25 * NumberOfBars * Constants.Pi * BarDiameter * BarDiameter;
+		public override bool Equals(object? other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
 
 		/// <inheritdoc />
 		public override int GetHashCode() => (int) BarDiameter.Millimeters.Pow(NumberOfBars);
@@ -203,6 +212,8 @@ namespace andrefmello91.Material.Reinforcement
 				$"Reinforcement: {NumberOfBars} {phi} {BarDiameter} ({Area})\n\n"
 				+ Steel;
 		}
+
+		#endregion
 
 		#endregion
 

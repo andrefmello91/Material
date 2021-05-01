@@ -37,6 +37,48 @@ namespace andrefmello91.Material.Concrete
 
 			#region Methods
 
+			/// <summary>
+			///     Calculate tension stiffening coefficient (for DSFM).
+			/// </summary>
+			/// <inheritdoc cref="TensionStiffening" />
+			private static double TensionStiffeningCoefficient(WebReinforcement? reinforcement, double theta1)
+			{
+				var x = reinforcement?.DirectionX;
+				var y = reinforcement?.DirectionY;
+
+				if (reinforcement is null || x is null && y is null)
+					return 0;
+
+				// Get reinforcement angles and stresses
+				var (thetaNx, thetaNy) = reinforcement.Angles(theta1);
+
+				double den = 0;
+
+				if (x is not null)
+				{
+					double
+						psx   = x.Ratio,
+						phiX  = x.BarDiameter.Millimeters,
+						cosNx = thetaNx.Cos(true);
+
+					den += psx / phiX * cosNx;
+				}
+
+				if (y is not null)
+				{
+					double
+						psy   = y.Ratio,
+						phiY  = y.BarDiameter.Millimeters,
+						cosNy = thetaNy.Cos(true);
+
+					den += psy / phiY * cosNy;
+				}
+
+				// Return m
+				return
+					0.25 / den;
+			}
+
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
 			{
@@ -162,47 +204,6 @@ namespace andrefmello91.Material.Concrete
 					Min(fc1b, fc1s);
 			}
 
-			/// <summary>
-			///     Calculate tension stiffening coefficient (for DSFM).
-			/// </summary>
-			/// <inheritdoc cref="TensionStiffening"/>
-			private static double TensionStiffeningCoefficient(WebReinforcement? reinforcement, double theta1)
-			{
-				var x = reinforcement?.DirectionX;
-				var y = reinforcement?.DirectionY;
-				
-				if (reinforcement is null || x is null && y is null)
-					return 0;
-
-				// Get reinforcement angles and stresses
-				var (thetaNx, thetaNy) = reinforcement.Angles(theta1);
-
-				double den = 0;
-
-				if (x is not null)
-				{
-					double
-						psx   = x.Ratio,
-						phiX  = x.BarDiameter.Millimeters,
-						cosNx = thetaNx.Cos(true);
-
-					den += psx / phiX * cosNx;
-				}
-
-				if (y is not null)
-				{
-					double
-						psy   = y.Ratio,
-						phiY  = y.BarDiameter.Millimeters,
-						cosNy = thetaNy.Cos(true);
-
-					den += psy / phiY * cosNy;
-				}
-
-				// Return m
-				return
-					0.25 / den;
-			}
 			#endregion
 
 		}

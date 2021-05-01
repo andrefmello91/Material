@@ -34,14 +34,6 @@ namespace andrefmello91.Material.Concrete
 
 		#region Methods
 
-		protected override void CalculateCustomParameters()
-		{
-			TensileStrength = fctm(Strength);
-			ElasticModule   = Eci(Strength, Type);
-			PlasticStrain   = ec2(Strength);
-			UltimateStrain  = ecu(Strength);
-		}
-
 		private static double AlphaE(AggregateType type) =>
 			type switch
 			{
@@ -67,6 +59,14 @@ namespace andrefmello91.Material.Concrete
 			strength.Megapascals <= 50
 				? -0.0035
 				: -0.0026 - 0.035 * (0.01 * (90 - strength.Megapascals)).Pow(4);
+
+		protected override void CalculateCustomParameters()
+		{
+			TensileStrength = fctm(Strength);
+			ElasticModule   = Eci(Strength, Type);
+			PlasticStrain   = ec2(Strength);
+			UltimateStrain  = ecu(Strength);
+		}
 
 		private Pressure fctm(Pressure strength) =>
 			strength.Megapascals <= 50

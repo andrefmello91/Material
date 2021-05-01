@@ -39,6 +39,10 @@ namespace andrefmello91.Material.Concrete
 
 		#region Methods
 
+		private static Pressure Ec(Pressure strength) => -2 * strength / ec;
+
+		private static Pressure fcr(Pressure strength) => (Pressure) (0.65 * Math.Pow(strength.Megapascals, 1D / 3)).As(PressureUnit.Megapascal);
+
 		protected override void CalculateCustomParameters()
 		{
 			TensileStrength = fcr(Strength);
@@ -47,10 +51,6 @@ namespace andrefmello91.Material.Concrete
 			UltimateStrain  = ecu;
 		}
 
-		private static Pressure Ec(Pressure strength) => -2 * strength / ec;
-
-		private static Pressure fcr(Pressure strength) => (Pressure) (0.65 * Math.Pow(strength.Megapascals, 1D / 3)).As(PressureUnit.Megapascal);
-			
 		#endregion
 
 	}

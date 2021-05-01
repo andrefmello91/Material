@@ -28,14 +28,18 @@ namespace andrefmello91.Material.Concrete
 
 			#region Properties
 
+			/// <inheritdoc cref="BiaxialConcrete.Cs" />
+			public double Cs { get; set; } = 0.55;
+
+			#region Interface Implementations
+
 			public bool ConsiderCrackSlip { get; set; }
 
 			public bool Cracked { get; set; }
 
-			/// <inheritdoc cref="BiaxialConcrete.Cs"/>
-			public double Cs { get; set; } = 0.55;
-			
 			public abstract ConstitutiveModel Model { get; }
+
+			#endregion
 
 			#endregion
 
@@ -102,7 +106,7 @@ namespace andrefmello91.Material.Concrete
 						fc1 = CompressiveStress(ec1, ec2);
 						fc2 = CompressiveStress(ec2, ec1);
 						break;
-					
+
 					case PrincipalCase.PureCompression when Parameters.ConsiderConfinement:
 						return ConfinementStresses(principalStrains);
 
@@ -123,8 +127,6 @@ namespace andrefmello91.Material.Concrete
 				stress.Abs() <= Material.Concrete.Parameters.Tolerance || strain.Abs() <= 1E-9
 					? Parameters.ElasticModule
 					: stress / strain;
-
-			public bool Equals(IConstitutive? other) => other is not null && Model == other.Model;
 
 			/// <summary>
 			///     Calculate compressive stress for <see cref="Material.Concrete.BiaxialConcrete" /> case.
@@ -274,7 +276,17 @@ namespace andrefmello91.Material.Concrete
 					Cracked = true;
 			}
 
+			#region Interface Implementations
+
+			public bool Equals(IConstitutive? other) => other is not null && Model == other.Model;
+
+			#endregion
+
+			#region Object override
+
 			public override string ToString() => $"{Model}";
+
+			#endregion
 
 			#endregion
 

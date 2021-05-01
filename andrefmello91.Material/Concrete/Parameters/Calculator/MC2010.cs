@@ -53,14 +53,6 @@ namespace andrefmello91.Material.Concrete
 
 		#region Methods
 
-		protected override void CalculateCustomParameters()
-		{
-			TensileStrength = fctm(Strength);
-			ElasticModule   = Eci(Strength, Type);
-			PlasticStrain   = ec1(Strength);
-			UltimateStrain  = ecu(Strength);
-		}
-
 		private static double AlphaE(AggregateType type) =>
 			type switch
 			{
@@ -111,6 +103,14 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private static CubicSpline UltimateStrainSpline() =>
 			CubicSpline.InterpolateAkimaSorted(Classes, ClassesUltStrains);
+
+		protected override void CalculateCustomParameters()
+		{
+			TensileStrength = fctm(Strength);
+			ElasticModule   = Eci(Strength, Type);
+			PlasticStrain   = ec1(Strength);
+			UltimateStrain  = ecu(Strength);
+		}
 
 		#endregion
 

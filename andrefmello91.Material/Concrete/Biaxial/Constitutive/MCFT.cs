@@ -72,7 +72,7 @@ namespace andrefmello91.Material.Concrete
 			{
 				if (!strain.IsFinite() || strain <= 0)
 					return Pressure.Zero;
-				
+
 				// Calculate initial uncracked state
 				var fc1 = UncrackedStress(strain, transverseStrain, theta1, reinforcement);
 

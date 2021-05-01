@@ -1,6 +1,5 @@
 ﻿using System;
 using andrefmello91.Extensions;
-using UnitsNet;
 #nullable enable
 
 namespace andrefmello91.Material.Concrete
@@ -11,12 +10,12 @@ namespace andrefmello91.Material.Concrete
 	public enum Direction
 	{
 		/// <summary>
-		///		Uniaxial direction.
+		///     Uniaxial direction.
 		/// </summary>
 		Uniaxial,
-		
+
 		/// <summary>
-		///		Biaxial direction.
+		///     Biaxial direction.
 		/// </summary>
 		Biaxial
 	}
@@ -58,14 +57,20 @@ namespace andrefmello91.Material.Concrete
 
 		#region Methods
 
-		/// <inheritdoc />
-		public override bool Equals(object? obj) => obj is Concrete concrete && Equals(concrete);
+		#region Interface Implementations
 
 		/// <inheritdoc />
 		public int CompareTo(Concrete? other) => Parameters.CompareTo(other?.Parameters);
 
 		/// <inheritdoc />
 		public virtual bool Equals(Concrete? other) => Model == other?.Model && Parameters == other?.Parameters;
+
+		#endregion
+
+		#region Object override
+
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is Concrete concrete && Equals(concrete);
 
 		/// <inheritdoc />
 		public override int GetHashCode() => Parameters.GetHashCode();
@@ -74,6 +79,8 @@ namespace andrefmello91.Material.Concrete
 
 		/// <inheritdoc />
 		public override string ToString() => Parameters.ToString()!;
+
+		#endregion
 
 		#endregion
 

@@ -109,7 +109,7 @@ namespace andrefmello91.Material.Reinforcement
 				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
 					return stresses;
 
-				return 
+				return
 					stresses.Transform(-DirectionX?.Angle ?? 0).ToStressState();
 			}
 		}
@@ -145,12 +145,16 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public bool YReinforced => DirectionY is not null && DirectionY.BarDiameter > Length.Zero && DirectionY.BarSpacing > Length.Zero;
 
+		#region Interface Implementations
+
 		/// <inheritdoc />
 		public LengthUnit Unit
 		{
 			get => DirectionX?.Unit ?? DirectionY?.Unit ?? Width.Unit;
 			set => ChangeUnit(value);
 		}
+
+		#endregion
 
 		#endregion
 
@@ -310,8 +314,8 @@ namespace andrefmello91.Material.Reinforcement
 			SetStrainsAndStresses(StrainState.Transform(Strains, DirectionX?.Angle ?? 0));
 		}
 
-		/// <inheritdoc />
-		public override bool Equals(object? other) => other is WebReinforcement reinforcement && Equals(reinforcement);
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
+		public WebReinforcement Convert(LengthUnit unit) => new(DirectionX?.Convert(unit), DirectionY?.Convert(unit), _width.ToUnit(unit));
 
 		/// <summary>
 		///     Calculate maximum value of principal tensile strength (fc1) that can be transmitted across cracks.
@@ -368,8 +372,25 @@ namespace andrefmello91.Material.Reinforcement
 			DirectionY?.Steel?.SetStress(strainsState.EpsilonY);
 		}
 
+		#region Interface Implementations
+
 		/// <inheritdoc />
 		public bool Approaches(WebReinforcement? other, Length tolerance) => other is not null && (DirectionX?.Approaches(other.DirectionX, tolerance) ?? false) && (DirectionY?.Approaches(other.DirectionY, tolerance) ?? false);
+
+		/// <inheritdoc />
+		public void ChangeUnit(LengthUnit unit)
+		{
+			if (Unit == unit)
+				return;
+
+			if (DirectionX is not null)
+				DirectionX.Unit = unit;
+
+			if (DirectionY is not null)
+				DirectionY.Unit = unit;
+
+			_width = _width.ToUnit(unit);
+		}
 
 		/// <inheritdoc />
 		public WebReinforcement Clone() => new(DirectionX?.Clone(), DirectionY?.Clone(), Width);
@@ -393,6 +414,8 @@ namespace andrefmello91.Material.Reinforcement
 			};
 		}
 
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
+
 		/// <summary>
 		///     Compare two reinforcement objects.
 		///     <para>Returns true if parameters are equal.</para>
@@ -400,25 +423,12 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="other">The other reinforcement object.</param>
 		public virtual bool Equals(WebReinforcement? other) => Approaches(other, Tolerance);
 
+		#endregion
+
+		#region Object override
+
 		/// <inheritdoc />
-		public void ChangeUnit(LengthUnit unit)
-		{
-			if (Unit == unit)
-				return;
-
-			if (DirectionX is not null)
-				DirectionX.Unit = unit;
-
-			if (DirectionY is not null)
-				DirectionY.Unit = unit;
-
-			_width = _width.ToUnit(unit);
-		}
-
-		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
-		public WebReinforcement Convert(LengthUnit unit) => new(DirectionX?.Convert(unit), DirectionY?.Convert(unit), _width.ToUnit(unit));
-
-		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
+		public override bool Equals(object? other) => other is WebReinforcement reinforcement && Equals(reinforcement);
 
 		/// <inheritdoc />
 		public override int GetHashCode() => DirectionX?.GetHashCode() ?? 1 * DirectionY?.GetHashCode() ?? 1 * (int) Width.Millimeters;
@@ -429,6 +439,8 @@ namespace andrefmello91.Material.Reinforcement
 			$"{DirectionX?.ToString() ?? "null"}\n\n" +
 			"Reinforcement (y):\n" +
 			$"{DirectionY?.ToString() ?? "null"}";
+
+		#endregion
 
 		#endregion
 
