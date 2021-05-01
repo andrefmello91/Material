@@ -14,7 +14,7 @@ namespace andrefmello91.Material.Reinforcement
 	/// <summary>
 	///     Reinforcement direction class for web reinforcement.
 	/// </summary>
-	public class WebReinforcementDirection : IUnitConvertible<WebReinforcementDirection, LengthUnit>, IApproachable<WebReinforcementDirection, Length>, IEquatable<WebReinforcementDirection>, IComparable<WebReinforcementDirection>, ICloneable<WebReinforcementDirection>
+	public class WebReinforcementDirection : IUnitConvertible<LengthUnit>, IApproachable<WebReinforcementDirection, Length>, IEquatable<WebReinforcementDirection>, IComparable<WebReinforcementDirection>, ICloneable<WebReinforcementDirection>
 	{
 
 		#region Fields
@@ -260,8 +260,10 @@ namespace andrefmello91.Material.Reinforcement
 			_width      = _width.ToUnit(unit);
 		}
 
-		/// <inheritdoc />
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public WebReinforcementDirection Convert(LengthUnit unit) => new(BarDiameter.ToUnit(unit), BarSpacing.ToUnit(unit), Steel.Clone(), Width.ToUnit(unit), Angle);
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		/// <inheritdoc />
 		public override int GetHashCode() => (int) BarDiameter.Millimeters.Pow(BarSpacing.Millimeters);

@@ -30,13 +30,13 @@ namespace andrefmello91.Material.Concrete
 
 		#region Properties
 
-		PressureUnit IUnitConvertible<IParameters, PressureUnit>.Unit
+		PressureUnit IUnitConvertible<PressureUnit>.Unit
 		{
 			get => StressUnit;
 			set => StressUnit = value;
 		}
 
-		LengthUnit IUnitConvertible<IParameters, LengthUnit>.Unit
+		LengthUnit IUnitConvertible<LengthUnit>.Unit
 		{
 			get => DiameterUnit;
 			set => DiameterUnit = value;
@@ -194,9 +194,6 @@ namespace andrefmello91.Material.Concrete
 			_aggDiameter = _aggDiameter.ToUnit(unit);
 		}
 
-		/// <inheritdoc />
-		public IParameters Convert(LengthUnit unit) => new Parameters(Strength, AggregateDiameter.ToUnit(unit), Model, Type);
-
 		/// <summary>
 		///     Change <see cref="Strength" /> unit.
 		/// </summary>
@@ -208,17 +205,19 @@ namespace andrefmello91.Material.Concrete
 
 			_strength = _strength.ToUnit(unit);
 		}
-
-		/// <inheritdoc />
-		public IParameters Convert(PressureUnit unit) => new Parameters(Strength.ToUnit(unit), AggregateDiameter, Model, Type);
-
+		
 		/// <summary>
 		///     Create a clone of this object with converted units.
 		/// </summary>
 		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
-		public Parameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new(Strength.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), Model, Type);
+		public Parameters Convert(PressureUnit? stressUnit = null, LengthUnit? lengthUnit = null) =>
+			new(stressUnit.HasValue ? Strength.ToUnit(stressUnit.Value) : Strength, lengthUnit.HasValue? AggregateDiameter.ToUnit(lengthUnit.Value) : AggregateDiameter, Model, Type);
 
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(lengthUnit: unit);
+		
+		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
+		
 		/// <inheritdoc />
 		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 

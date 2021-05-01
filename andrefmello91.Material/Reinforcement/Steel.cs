@@ -8,7 +8,7 @@ namespace andrefmello91.Material.Reinforcement
 	/// <summary>
 	///     Steel class.
 	/// </summary>
-	public class Steel : IUnitConvertible<Steel, PressureUnit>, IApproachable<Steel, Pressure>, IEquatable<Steel>, IComparable<Steel>, ICloneable<Steel>
+	public class Steel : IUnitConvertible<PressureUnit>, IApproachable<Steel, Pressure>, IEquatable<Steel>, IComparable<Steel>, ICloneable<Steel>
 	{
 
 		#region Fields
@@ -241,12 +241,14 @@ namespace andrefmello91.Material.Reinforcement
 			HardeningModule = HardeningModule.ToUnit(unit);
 		}
 
-		/// <inheritdoc />
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public Steel Convert(PressureUnit unit) =>
 			!_considerHardening
 				? new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), UltimateStrain)
 				: new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), HardeningModule.ToUnit(unit), HardeningStrain, UltimateStrain);
 
+		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
+		
 		/// <inheritdoc />
 		public override int GetHashCode() => (int) ElasticModule.Gigapascals * (int) YieldStress.Megapascals;
 

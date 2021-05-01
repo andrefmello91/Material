@@ -16,7 +16,7 @@ namespace andrefmello91.Material.Reinforcement
 	/// <summary>
 	///     Web reinforcement class.
 	/// </summary>
-	public class WebReinforcement : IUnitConvertible<WebReinforcement, LengthUnit>, IApproachable<WebReinforcement, Length>, IComparable<WebReinforcement>, IEquatable<WebReinforcement>, ICloneable<WebReinforcement>
+	public class WebReinforcement : IUnitConvertible<LengthUnit>, IApproachable<WebReinforcement, Length>, IComparable<WebReinforcement>, IEquatable<WebReinforcement>, ICloneable<WebReinforcement>
 	{
 
 		#region Fields
@@ -415,8 +415,10 @@ namespace andrefmello91.Material.Reinforcement
 			_width = _width.ToUnit(unit);
 		}
 
-		/// <inheritdoc />
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public WebReinforcement Convert(LengthUnit unit) => new(DirectionX?.Convert(unit), DirectionY?.Convert(unit), _width.ToUnit(unit));
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		/// <inheritdoc />
 		public override int GetHashCode() => DirectionX?.GetHashCode() ?? 1 * DirectionY?.GetHashCode() ?? 1 * (int) Width.Millimeters;

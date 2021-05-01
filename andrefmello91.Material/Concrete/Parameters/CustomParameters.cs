@@ -18,13 +18,13 @@ namespace andrefmello91.Material.Concrete
 
 		#region Properties
 
-		PressureUnit IUnitConvertible<IParameters, PressureUnit>.Unit
+		PressureUnit IUnitConvertible<PressureUnit>.Unit
 		{
 			get => StressUnit;
 			set => StressUnit = value;
 		}
 
-		LengthUnit IUnitConvertible<IParameters, LengthUnit>.Unit
+		LengthUnit IUnitConvertible<LengthUnit>.Unit
 		{
 			get => DiameterUnit;
 			set => DiameterUnit = value;
@@ -159,9 +159,6 @@ namespace andrefmello91.Material.Concrete
 			_aggDiameter = _aggDiameter.ToUnit(unit);
 		}
 
-		/// <inheritdoc />
-		public IParameters Convert(LengthUnit unit) => new CustomParameters(Strength, TensileStrength, ElasticModule, AggregateDiameter.ToUnit(unit), PlasticStrain, UltimateStrain);
-
 		/// <summary>
 		///     Change <see cref="Strength" /> unit.
 		/// </summary>
@@ -176,15 +173,17 @@ namespace andrefmello91.Material.Concrete
 			_elasticModule   = _elasticModule.ToUnit(unit);
 		}
 
-		/// <inheritdoc />
-		public IParameters Convert(PressureUnit unit) => new CustomParameters(Strength.ToUnit(unit), TensileStrength.ToUnit(unit), ElasticModule.ToUnit(unit), AggregateDiameter, PlasticStrain, UltimateStrain);
-
 		/// <summary>
 		///     Create a clone of this object with converted units.
 		/// </summary>
 		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
 		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
-		public CustomParameters Convert(PressureUnit stressUnit, LengthUnit lengthUnit) => new(Strength.ToUnit(stressUnit), TensileStrength.ToUnit(stressUnit), ElasticModule.ToUnit(stressUnit), AggregateDiameter.ToUnit(lengthUnit), PlasticStrain, UltimateStrain);
+		public CustomParameters Convert(PressureUnit? stressUnit = null, LengthUnit? lengthUnit = null) => 
+			new(Strength.ToUnit(stressUnit ?? StressUnit), TensileStrength.ToUnit(stressUnit ?? StressUnit), ElasticModule.ToUnit(stressUnit ?? StressUnit), AggregateDiameter.ToUnit(lengthUnit ?? DiameterUnit), PlasticStrain, UltimateStrain);
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(lengthUnit: unit);
+		
+		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
 		/// <inheritdoc />
 		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);

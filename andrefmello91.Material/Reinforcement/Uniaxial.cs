@@ -12,7 +12,7 @@ namespace andrefmello91.Material.Reinforcement
 	/// <summary>
 	///     Uniaxial reinforcement class.
 	/// </summary>
-	public class UniaxialReinforcement : IUnitConvertible<UniaxialReinforcement, LengthUnit>, IApproachable<UniaxialReinforcement, Length>, IEquatable<UniaxialReinforcement>, IComparable<UniaxialReinforcement>, ICloneable<UniaxialReinforcement>
+	public class UniaxialReinforcement : IUnitConvertible<LengthUnit>, IApproachable<UniaxialReinforcement, Length>, IEquatable<UniaxialReinforcement>, IComparable<UniaxialReinforcement>, ICloneable<UniaxialReinforcement>
 	{
 
 		#region Fields
@@ -181,8 +181,10 @@ namespace andrefmello91.Material.Reinforcement
 			Area        = Area.ToUnit(unit.GetAreaUnit());
 		}
 
-		/// <inheritdoc />
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public UniaxialReinforcement Convert(LengthUnit unit) => new(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), ConcreteArea.ToUnit(unit.GetAreaUnit()));
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		/// <summary>
 		///     Calculated reinforcement area.
