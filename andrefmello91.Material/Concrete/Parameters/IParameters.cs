@@ -10,9 +10,25 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	public enum ParameterModel
 	{
+		/// <summary>
+		///		Default parameter model.
+		/// </summary>
 		Default,
+		
+		/// <summary>
+		///		Model based in brazilian standard (NBR6118:2014) formulation.
+		/// </summary>
 		NBR6118,
+		
+		/// <summary>
+		///		Model based in FIB Model Code 2010 formulation.
+		/// </summary>
 		MC2010,
+		
+		/// <summary>
+		///		Custom parameter model.
+		/// </summary>
+		/// <seealso cref="CustomParameters"/>
 		Custom
 	}
 
