@@ -4,7 +4,7 @@
         <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
-        <Version>1.0.9</Version>
+        <Version>1.1.0</Version>
         <Authors>andrefmello91</Authors>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
@@ -19,17 +19,17 @@
         <PackageId>andrefmello91.Material</PackageId>
         <PackageDescription>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</PackageDescription>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageReleaseNotes>Merged DSFM and MCFT parameters as default.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updated extensions package.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
-        <PackageReference Include="UnitsNet" Version="4.89.0" />
+        <PackageReference Include="UnitsNet" Version="4.89.1" />
     </ItemGroup>
     
     <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.6" />
-        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.0.9" />
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.7" />
+        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.1.0" />
     </ItemGroup>
     
     <ItemGroup Condition="'$(Configuration)'=='Debug'">
