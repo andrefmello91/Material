@@ -8,11 +8,6 @@ namespace andrefmello91.Material.Concrete
 	public enum ConstitutiveModel
 	{
 		/// <summary>
-		///     Elastic constitutive model.
-		/// </summary>
-		Linear,
-
-		/// <summary>
 		///     Modified Compression Field constitutive model.
 		/// </summary>
 		MCFT,
