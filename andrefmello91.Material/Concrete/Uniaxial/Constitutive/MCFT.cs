@@ -1,6 +1,8 @@
 ﻿using System;
+using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
 using UnitsNet;
+using UnitsNet.Units;
 #nullable enable
 
 namespace andrefmello91.Material.Concrete
@@ -43,7 +45,7 @@ namespace andrefmello91.Material.Concrete
 					f  = -fc * (2 * n - n * n);
 
 				return
-					Pressure.FromMegapascals(f);
+					(Pressure) f.As(PressureUnit.Megapascal);
 			}
 
 			/// <inheritdoc />

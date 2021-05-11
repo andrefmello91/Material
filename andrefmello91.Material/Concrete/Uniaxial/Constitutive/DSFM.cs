@@ -69,7 +69,7 @@ namespace andrefmello91.Material.Concrete
 						? 1
 						: 0.67 - fp.Megapascals / 62,
 					n      = 0.8 - fp.Megapascals / 17,
-					ec2_ep = ec2 / ep;
+					ec2_ep = (ec2 / ep).AsFinite();
 
 				// Calculate the principal compressive stress in concrete
 				return
