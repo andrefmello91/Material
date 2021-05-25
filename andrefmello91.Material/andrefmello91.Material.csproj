@@ -19,17 +19,17 @@
         <PackageId>andrefmello91.Material</PackageId>
         <PackageDescription>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</PackageDescription>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageReleaseNotes>Updated extensions package.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updated packages.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
-        <PackageReference Include="UnitsNet" Version="4.89.1" />
+        <PackageReference Include="UnitsNet" Version="4.92.1" />
     </ItemGroup>
     
     <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.7" />
-        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.1.0" />
+        <PackageReference Include="andrefmello91.Extensions" Version="1.0.8" />
+        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.1.1" />
     </ItemGroup>
     
     <ItemGroup Condition="'$(Configuration)'=='Debug'">
