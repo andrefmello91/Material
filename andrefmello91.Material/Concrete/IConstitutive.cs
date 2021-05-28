@@ -15,12 +15,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Disturbed Stress Field constitutive model.
 		/// </summary>
-		DSFM,
-		
-		/// <summary>
-		///     Softened Membrane Model constitutive model.
-		/// </summary>
-		SMM,
+		DSFM
 	}
 
 	/// <summary>
