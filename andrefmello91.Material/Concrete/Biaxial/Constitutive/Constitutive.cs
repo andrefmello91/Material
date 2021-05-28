@@ -69,13 +69,21 @@ namespace andrefmello91.Material.Concrete
 				};
 
 			/// <summary>
+			///     Calculate concrete <see cref="PrincipalStressState" /> related to a <see cref="StrainState" />.
+			/// </summary>
+			/// <param name="strains">The <see cref="StrainState" /> in concrete.</param>
+			/// <inheritdoc cref="CalculateStresses(PrincipalStrainState,WebReinforcement,Length?)"/>
+			public virtual PrincipalStressState CalculateStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null) =>
+				CalculateStresses(PrincipalStrainState.FromStrain(strains), reinforcement, referenceLength);
+			
+			/// <summary>
 			///     Calculate concrete <see cref="PrincipalStressState" /> related to <see cref="PrincipalStrainState" />.
 			///     <para>For <seealso cref="BiaxialConcrete" />.</para>
 			/// </summary>
 			/// <param name="principalStrains">The <see cref="PrincipalStrainState" /> in concrete.</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-			public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement? reinforcement, Length? referenceLength = null)
+			public virtual PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement? reinforcement, Length? referenceLength = null)
 			{
 				if (principalStrains.IsZero)
 					return PrincipalStressState.Zero;
@@ -118,6 +126,7 @@ namespace andrefmello91.Material.Concrete
 					new PrincipalStressState(fc1, fc2, principalStrains.Theta1);
 			}
 
+			
 			/// <summary>
 			///     Calculate current secant module.
 			/// </summary>
