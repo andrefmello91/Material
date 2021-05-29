@@ -16,15 +16,6 @@ namespace andrefmello91.Material.Concrete
 	public partial class BiaxialConcrete : Concrete, ICloneable<BiaxialConcrete>
 	{
 
-		#region Fields
-
-		/// <summary>
-		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
-		/// </summary>
-		private readonly Constitutive _constitutive;
-
-		#endregion
-
 		#region Properties
 
 		/// <summary>
@@ -32,22 +23,27 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		public bool ConsiderCrackSlip
 		{
-			get => _constitutive.ConsiderCrackSlip;
-			set => _constitutive.ConsiderCrackSlip = value;
+			get => ConstitutiveEquations.ConsiderCrackSlip;
+			set => ConstitutiveEquations.ConsiderCrackSlip = value;
 		}
+
+		/// <summary>
+		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
+		/// </summary>
+		protected Constitutive ConstitutiveEquations { get; }
 
 		/// <summary>
 		///     Returns true if concrete is cracked.
 		/// </summary>
-		public bool Cracked => _constitutive.Cracked;
+		public bool Cracked => ConstitutiveEquations.Cracked;
 
 		/// <summary>
 		///     Get/set Cs coefficient for concrete softening.
 		/// </summary>
 		public double Cs
 		{
-			get => _constitutive.Cs;
-			set => _constitutive.Cs = value;
+			get => ConstitutiveEquations.Cs;
+			set => ConstitutiveEquations.Cs = value;
 		}
 
 
@@ -81,12 +77,12 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Get/set concrete <see cref="PrincipalStrainState" />.
 		/// </summary>
-		public PrincipalStrainState PrincipalStrains { get; private set; }
+		public PrincipalStrainState PrincipalStrains { get; protected set; }
 
 		/// <summary>
 		///     Get/set concrete <see cref="PrincipalStressState" />.
 		/// </summary>
-		public PrincipalStressState PrincipalStresses { get; private set; }
+		public PrincipalStressState PrincipalStresses { get; protected set; }
 
 		/// <summary>
 		///     Get concrete stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal" />.
@@ -118,12 +114,12 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Get/set concrete <see cref="StrainState" />.
 		/// </summary>
-		public StrainState Strains { get; private set; }
+		public StrainState Strains { get; protected set; }
 
 		/// <summary>
 		///     Get/set concrete <see cref="StressState" />.
 		/// </summary>
-		public StressState Stresses { get; private set; }
+		public StressState Stresses { get; protected set; }
 
 		/// <summary>
 		///     Calculate current secant module of concrete.
@@ -143,8 +139,8 @@ namespace andrefmello91.Material.Concrete
 
 				// Calculate modules
 				Pressure
-					Ec1 = _constitutive.SecantModule(fc1, ec1),
-					Ec2 = _constitutive.SecantModule(fc2, ec2);
+					Ec1 = ConstitutiveEquations.SecantModule(fc1, ec1),
+					Ec2 = ConstitutiveEquations.SecantModule(fc2, ec2);
 
 				return
 					(Ec1, Ec2);
@@ -156,24 +152,32 @@ namespace andrefmello91.Material.Concrete
 		#region Constructors
 
 		/// <summary>
-		///     Concrete for membrane calculations.
+		///     Create a concrete object for membrane calculations.
 		/// </summary>
 		/// <inheritdoc />
-		public BiaxialConcrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+		protected BiaxialConcrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
 			: base(parameters, model) =>
-			_constitutive = Constitutive.From(model, parameters);
+			ConstitutiveEquations = Constitutive.From(model, parameters);
 
 		#endregion
 
 		#region Methods
 
+		/// <inheritdoc cref="BiaxialConcrete(IParameters, ConstitutiveModel)"/>
+		public static BiaxialConcrete From(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
+			model switch
+			{
+				ConstitutiveModel.SMM => new SMMConcrete(parameters),
+				_                     => new BiaxialConcrete(parameters, model)
+			};
+		
 		/// <summary>
 		///     Set concrete <see cref="StressState" /> given <see cref="StrainState" />
 		/// </summary>
 		/// <param name="strains">Current <see cref="StrainState" /> in concrete.</param>
 		/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 		/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-		public void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
+		public virtual void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Get strains
 			Strains = strains.Clone();
@@ -182,7 +186,7 @@ namespace andrefmello91.Material.Concrete
 			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
 
 			// Get stresses from constitutive model
-			PrincipalStresses = _constitutive.CalculateStresses(PrincipalStrains, reinforcement, referenceLength);
+			PrincipalStresses = ConstitutiveEquations.CalculateStresses(PrincipalStrains, reinforcement, referenceLength);
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 

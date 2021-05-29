@@ -15,7 +15,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     SMM constitutive class.
 		/// </summary>
-		private class SMMConstitutive : Constitutive
+		protected class SMMConstitutive : Constitutive
 		{
 
 			/// <summary>
@@ -84,18 +84,46 @@ namespace andrefmello91.Material.Concrete
 				var fc1 = UncrackedStress(strain, transverseStrain, theta1, reinforcement);
 
 				// Not cracked
-				return
-					!Cracked
-						? fc1
-						: CrackedStress(strain);
+				return !Cracked
+					? fc1
+					: CrackedStress(strain);
 			}
 
 			/// <summary>
 			///     Calculate tensile stress for cracked concrete.
 			/// </summary>
 			/// <param name="strain">Current tensile strain.</param>
-			private Pressure CrackedStress(double strain) => Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
+			private Pressure CrackedStress(double strain) => Parameters.TensileStrength * (Parameters.CrackingStrain / strain).Pow(0.4);
 
+			/// <summary>
+			///		Calculate the Poisson coefficients for SMM.
+			/// </summary>
+			/// <param name="reinforcement">The reinforcement.</param>
+			/// <param name="cracked">The cracked state of concrete. True if cracked.</param>
+			public static (double v12, double v21) PoissonCoefficients(WebReinforcement? reinforcement, bool cracked)
+			{
+				var v21 = cracked
+					? 0
+					: 0.2;
+
+				if (reinforcement is null)
+					return (0.2, v21);
+
+				var strains = reinforcement.Strains;
+				
+				var esf     = Math.Max(strains.EpsilonX, strains.EpsilonY);
+				
+				var ey = strains.EpsilonX >= strains.EpsilonY
+					? reinforcement.DirectionX?.Steel.YieldStrain
+					: reinforcement.DirectionY?.Steel.YieldStrain;
+
+				var v12 = esf <= 0 || !ey.HasValue
+					? 0.2
+					: 0.2 + 850 * esf;
+
+				return (v12, v21);
+			}
+			
 			/// <summary>
 			///		Calculate the tensile strain function for the softening parameter.
 			/// </summary>

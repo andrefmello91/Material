@@ -14,7 +14,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Base class for concrete constitutive model.
 		/// </summary>
-		private abstract class Constitutive : IConstitutive
+		protected abstract class Constitutive : IConstitutive
 		{
 
 			#region Fields
@@ -64,8 +64,9 @@ namespace andrefmello91.Material.Concrete
 			public static Constitutive From(ConstitutiveModel constitutiveModel, IParameters parameters) =>
 				constitutiveModel switch
 				{
-					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
-					_                      => new MCFTConstitutive(parameters)
+					Material.Concrete.ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
+					Material.Concrete.ConstitutiveModel.MCFT => new MCFTConstitutive(parameters),
+					_                                        => new SMMConstitutive(parameters)
 				};
 
 			/// <summary>

@@ -14,7 +14,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     DSFM constitutive class.
 		/// </summary>
-		private class DSFMConstitutive : Constitutive
+		protected class DSFMConstitutive : Constitutive
 		{
 
 			#region Properties

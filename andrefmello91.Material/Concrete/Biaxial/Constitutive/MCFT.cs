@@ -14,12 +14,12 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     MCFT constitutive class.
 		/// </summary>
-		private class MCFTConstitutive : Constitutive
+		protected class MCFTConstitutive : Constitutive
 		{
 
 			#region Properties
 
-			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
+			public override ConstitutiveModel Model { get; } = Material.Concrete.ConstitutiveModel.MCFT;
 
 			#endregion
 
