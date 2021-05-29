@@ -64,18 +64,10 @@ namespace andrefmello91.Material.Concrete
 			public static Constitutive From(ConstitutiveModel constitutiveModel, IParameters parameters) =>
 				constitutiveModel switch
 				{
-					Material.Concrete.ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
-					Material.Concrete.ConstitutiveModel.MCFT => new MCFTConstitutive(parameters),
-					_                                        => new SMMConstitutive(parameters)
+					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
+					ConstitutiveModel.MCFT => new MCFTConstitutive(parameters),
+					_                      => new SMMConstitutive(parameters)
 				};
-
-			/// <summary>
-			///     Calculate concrete <see cref="PrincipalStressState" /> related to a <see cref="StrainState" />.
-			/// </summary>
-			/// <param name="strains">The <see cref="StrainState" /> in concrete.</param>
-			/// <inheritdoc cref="CalculateStresses(PrincipalStrainState,WebReinforcement,Length?)"/>
-			public virtual PrincipalStressState CalculateStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null) =>
-				CalculateStresses(PrincipalStrainState.FromStrain(strains), reinforcement, referenceLength);
 			
 			/// <summary>
 			///     Calculate concrete <see cref="PrincipalStressState" /> related to <see cref="PrincipalStrainState" />.
@@ -84,7 +76,7 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="principalStrains">The <see cref="PrincipalStrainState" /> in concrete.</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-			public virtual PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement? reinforcement, Length? referenceLength = null)
+			public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement? reinforcement, Length? referenceLength = null)
 			{
 				if (principalStrains.IsZero)
 					return PrincipalStressState.Zero;
@@ -197,10 +189,11 @@ namespace andrefmello91.Material.Concrete
 			///     Calculate confinement strength factor according to Kupfer et. al. (1969).
 			/// </summary>
 			/// <param name="transverseStress">The stress acting on the transverse direction of the analyzed direction.</param>
-			private double ConfinementFactor(Pressure transverseStress)
+			/// <param name="concreteStrength">Concrete compressive strenght.</param>
+			internal static double ConfinementFactor(Pressure transverseStress, Pressure concreteStrength)
 			{
 				// Get absolute value
-				var fcn_fc = (transverseStress / Parameters.Strength).Abs();
+				var fcn_fc = (transverseStress / concreteStrength).Abs();
 
 				var c = 1 + 0.92 * fcn_fc - 0.76 * fcn_fc * fcn_fc;
 
@@ -235,8 +228,8 @@ namespace andrefmello91.Material.Concrete
 				{
 					// Calculate confinement factors
 					double
-						betaL1 = ConfinementFactor(fc2),
-						betaL2 = ConfinementFactor(fc1);
+						betaL1 = ConfinementFactor(fc2, Parameters.Strength),
+						betaL2 = ConfinementFactor(fc1, Parameters.Strength);
 
 					// Calculate iteration stresses
 					Pressure

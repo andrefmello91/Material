@@ -1,5 +1,7 @@
-﻿using andrefmello91.Material.Reinforcement;
+﻿using andrefmello91.Extensions;
+using andrefmello91.Material.Reinforcement;
 using andrefmello91.OnPlaneComponents;
+using MathNet.Numerics;
 using UnitsNet;
 
 namespace andrefmello91.Material.Concrete
@@ -9,6 +11,11 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	internal class SMMConcrete : BiaxialConcrete
 	{
+		/// <summary>
+		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
+		/// </summary>
+		private new SMMConstitutive ConstitutiveEquations => (SMMConstitutive) base.ConstitutiveEquations;
+
 		/// <summary>
 		///		The smeared strain state in the average principal strain direction.
 		/// </summary>
@@ -30,16 +37,23 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		private StressState SmearedStresses{ get; set; }
 		
+	
 		/// <inheritdoc />
 		internal SMMConcrete(IParameters parameters)
 			: base(parameters, ConstitutiveModel.SMM)
 		{
+			SmearedStrains  = AffectedSmearedStrains = new StrainState(0, 0, 0, Constants.PiOver4);
+			SmearedStresses = new StressState(0, 0, 0, Constants.PiOver4);
 		}
 
 		/// <inheritdoc />
 		public override void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
-			
+			// Update strains
+			var theta              = SmearedStrains.ThetaX;
+			SmearedStrains         = strains.Transform(theta);
+			AffectedSmearedStrains = CalculatePoissonEffect(SmearedStrains, reinforcement, Cracked);
+			PrincipalStrains       = SmearedStrains.ToPrincipal();
 		}
 
 		/// <summary>
@@ -65,23 +79,12 @@ namespace andrefmello91.Material.Concrete
 
 			return new StrainState(e1, e2, smearedStrains.GammaXY);
 		}
-
+		
 		/// <summary>
-		///		Calculate the smeared shear stress in concrete.
+		///		Calculate the deviation angle for a strain state.
 		/// </summary>
-		/// <param name="smearedStrains">The smeared strain state in the average principal strain direction. Not affected by Poisson effect.</param>
-		/// <param name="smearedStresses">The smeared stress state in the average principal strain direction, calculated from constitutive model.</param>
-		/// <returns></returns>
-		private static Pressure SmearedShearStress(StrainState smearedStrains, StressState smearedStresses)
-		{
-			var s1  = smearedStresses.SigmaX;
-			var s2  = smearedStresses.SigmaY;
-			var e1  = smearedStrains.EpsilonX;
-			var e2  = smearedStrains.EpsilonY;
-			var yxy = smearedStrains.GammaXY;
+		/// <param name="strains">The strain state for the principal direction of concrete.</param>
+		private static double DeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan();
 
-			return
-				yxy * (s1 - s2) / (2 * (e1 - e2));
-		}
 	}
 }

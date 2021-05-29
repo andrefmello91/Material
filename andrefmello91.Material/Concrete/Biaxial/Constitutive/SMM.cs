@@ -44,35 +44,109 @@ namespace andrefmello91.Material.Concrete
 
 			#region Methods
 
-			/// <inheritdoc />
-			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
+			/// <inheritdoc cref="Constitutive.CalculateStresses"/>
+			/// <inheritdoc cref="ConfinementStresses"/>
+			public StressState CalculateStresses(StrainState affectedStrains, WebReinforcement? reinforcement, double deviationAngle)
 			{
-				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain >= 0)
-					return Pressure.Zero;
+				if (affectedStrains.IsZero)
+					return StressState.Zero;
 
 				// Get strains
 				double
-					ec1 = transverseStrain,
-					ec2 = strain,
-					ec  = Parameters.PlasticStrain;
+					ec1 = affectedStrains.EpsilonX.AsFinite(),
+					ec2 = affectedStrains.EpsilonY.AsFinite(),
+					yxy = affectedStrains.GammaXY.AsFinite();
 
-				var fc = Parameters.Strength;
+				// Get the case
+				var pCase = new PrincipalStrainState(ec1, ec2).Case;
+				
+				Pressure fc1, fc2;
 
-				// Calculate the maximum concrete compressive stress
+				switch (pCase)
+				{
+					// Verify case
+					case PrincipalCase.UniaxialCompression:
+					case PrincipalCase.TensionCompression:
+						fc1 = TensileStress(ec1, ec2, affectedStrains.ThetaX, reinforcement: reinforcement);
+						fc2 = CompressiveStress(ec2, ec1, deviationAngle, 1);
+						break;
+
+					case PrincipalCase.UniaxialTension:
+					case PrincipalCase.PureTension:
+						fc1 = TensileStress(ec1, ec2, affectedStrains.ThetaX, reinforcement: reinforcement);
+						fc2 = TensileStress(ec2, ec1, affectedStrains.ThetaX, reinforcement: reinforcement);
+						break;
+
+					case PrincipalCase.PureCompression when !Parameters.ConsiderConfinement:
+						fc1 = CompressiveStress(ec1, ec2, deviationAngle, 1);
+						fc2 = CompressiveStress(ec2, ec1, deviationAngle, 1);
+						break;
+
+					case PrincipalCase.PureCompression when Parameters.ConsiderConfinement:
+						var conf = ConfinementStresses(affectedStrains, deviationAngle);
+						fc1 = conf.SigmaX;
+						fc2 = conf.SigmaY;
+						break;
+
+					default:
+						return StressState.Zero;
+				}
+
+				// Calculate shear stress
+				var tau = 0.5 * yxy * (fc1 - fc2) / (ec1 - ec2);
+				
+				return
+					new StressState(fc1, fc2, tau, affectedStrains.ThetaX);
+			}
+
+			/// <summary>
+			///     Calculate confinement <see cref="PrincipalStressState" />.
+			/// </summary>
+			/// <param name="affectedStrains">The smeared strains in concrete, affected by Poisson effect, at the direction of average principal strains.</param>
+			/// <param name="deviationAngle">The deviation angle between applied principal stresses and concrete principal stresses.</param>
+			private StressState ConfinementStresses(StrainState affectedStrains, double deviationAngle)
+			{
+				// Get strains
+				double
+					ec1 = affectedStrains.EpsilonX,
+					ec2 = affectedStrains.EpsilonY;
+
+				// Calculate initial stresses
 				Pressure
-					f2maxA = ec1 > 0
-						? -fc / (0.8 - 0.34 * ec1 / ec)
-						: -fc,
-					f2max = f2maxA.Value < 0 && f2maxA.Value.IsFinite()
-						? Max(f2maxA, -fc) * confinementFactor
-						: -fc * confinementFactor;
+					fc1 = CompressiveStress(ec1, ec2, deviationAngle, 1),
+					fc2 = CompressiveStress(ec2, ec1, deviationAngle, 1);
 
-				// Calculate the principal compressive stress in concrete
-				var n = ec2 / ec;
+				var tol = Pressure.FromMegapascals(0.01);
+
+				// Iterate to find stresses (maximum 20 iterations)
+				for (var it = 1; it <= 20; it++)
+				{
+					// Calculate confinement factors
+					double
+						betaL1 = ConfinementFactor(fc2, Parameters.Strength),
+						betaL2 = ConfinementFactor(fc1, Parameters.Strength);
+
+					// Calculate iteration stresses
+					Pressure
+						fc1It = CompressiveStress(ec1, ec2, deviationAngle, betaL1),
+						fc2It = CompressiveStress(ec2, ec1, deviationAngle, betaL2);
+
+					// Verify tolerances
+
+					if ((fc1 - fc1It).Abs() <= tol && (fc2 - fc2It).Abs() <= tol)
+						break;
+
+					// Update stresses
+					fc1 = fc1It;
+					fc2 = fc2It;
+				}
 
 				return
-					f2max * (2 * n - n * n).AsFinite();
+					new StressState(fc1, fc2, Pressure.Zero, affectedStrains.ThetaX);
 			}
+			/// <inheritdoc />
+			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1) =>
+				throw new NotImplementedException();
 
 			/// <inheritdoc />
 			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null)
@@ -141,30 +215,22 @@ namespace andrefmello91.Material.Concrete
 			/// </summary>
 			/// <param name="deviationAngle">The deviation angle between applied principal stresses and concrete principal stresses.</param>
 			private static double DeviationFunction(double deviationAngle) => 1D - deviationAngle.Abs() / 0.418879;
-
-			/// <summary>
-			///		Calculate the deviation angle for a strain state.
-			/// </summary>
-			/// <param name="strains">The strain state for the principal direction of concrete.</param>
-			private static double DeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan();
-
-			private Pressure CompressiveStress(StrainState strainState)
+			
+			///  <summary>
+			/// 		Calculate compressive stress.
+			///  </summary>
+			///  <inheritdoc cref="CompressiveStress(double,double,double)"/>
+			private Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle, double confinementFactor = 1)
 			{
-				var ec1 = Math.Max(strainState.EpsilonX, strainState.EpsilonY);
-				var ec2 = Math.Min(strainState.EpsilonX, strainState.EpsilonY);
-				
-				// Calculate beta
-				var beta = DeviationAngle(strainState);
-				
 				// Calculate softening coefficient
-				var soft = TensileStrainFunction(ec1) * _strengthFunction * DeviationFunction(beta);
+				var soft = TensileStrainFunction(transverseStrain) * _strengthFunction * DeviationFunction(deviationAngle);
 				
 				// Calculate peak stress and strain
 				var fp = -soft * Parameters.Strength;
 				var ep =  soft * Parameters.PlasticStrain;
 
 				// Calculate strain ratio:
-				var e2_ep = ec2 / ep;
+				var e2_ep = strain / ep;
 
 				return 
 					(e2_ep <= 1) switch
@@ -172,13 +238,30 @@ namespace andrefmello91.Material.Concrete
 						{ } when e2_ep < 0 => Pressure.Zero,
 
 						// Pre-peak
-						true => fp * (2 * e2_ep - e2_ep * e2_ep),
+						true => fp * (2 * e2_ep - e2_ep * e2_ep) * confinementFactor,
 						
 						// Post-peak
-						_    => fp * (1D - ((e2_ep - 1D) / (4D / soft - 1D)).Pow(2))
+						_    => fp * (1D - ((e2_ep - 1D) / (4D / soft - 1D)).Pow(2)) * confinementFactor
 					};
 			}
 			
+			/// <summary>
+			///		Calculate the smeared shear stress in concrete.
+			/// </summary>
+			/// <param name="smearedStrains">The smeared strain state in the average principal strain direction. Not affected by Poisson effect.</param>
+			/// <param name="smearedStresses">The smeared stress state in the average principal strain direction, calculated from constitutive model.</param>
+			private static Pressure SmearedShearStress(StrainState smearedStrains, StressState smearedStresses)
+			{
+				var s1  = smearedStresses.SigmaX;
+				var s2  = smearedStresses.SigmaY;
+				var e1  = smearedStrains.EpsilonX;
+				var e2  = smearedStrains.EpsilonY;
+				var yxy = smearedStrains.GammaXY;
+
+				return
+					yxy * (s1 - s2) / (2 * (e1 - e2));
+			}
+
 			#endregion
 
 		}
