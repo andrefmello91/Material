@@ -245,23 +245,6 @@ namespace andrefmello91.Material.Concrete
 					};
 			}
 			
-			/// <summary>
-			///		Calculate the smeared shear stress in concrete.
-			/// </summary>
-			/// <param name="smearedStrains">The smeared strain state in the average principal strain direction. Not affected by Poisson effect.</param>
-			/// <param name="smearedStresses">The smeared stress state in the average principal strain direction, calculated from constitutive model.</param>
-			private static Pressure SmearedShearStress(StrainState smearedStrains, StressState smearedStresses)
-			{
-				var s1  = smearedStresses.SigmaX;
-				var s2  = smearedStresses.SigmaY;
-				var e1  = smearedStrains.EpsilonX;
-				var e2  = smearedStrains.EpsilonY;
-				var yxy = smearedStrains.GammaXY;
-
-				return
-					yxy * (s1 - s2) / (2 * (e1 - e2));
-			}
-
 			#endregion
 
 		}

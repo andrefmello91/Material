@@ -11,49 +11,41 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	internal class SMMConcrete : BiaxialConcrete
 	{
+		private double _devAngle;
+		
 		/// <summary>
 		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
 		/// </summary>
 		private new SMMConstitutive ConstitutiveEquations => (SMMConstitutive) base.ConstitutiveEquations;
 
 		/// <summary>
-		///		The smeared strain state in the average principal strain direction.
+		///		The strain state in the average principal strain direction, not affected by Poisson effect.
 		/// </summary>
-		/// <remarks>
-		///		Not affected by Poisson effect.
-		/// </remarks>
-		private StrainState SmearedStrains { get; set; }
+		private StrainState NotAffectedStrains { get; set; }
 		
-		/// <summary>
-		///		The smeared strain state in the average principal strain direction.
-		/// </summary>
-		/// <remarks>
-		///		Affected by Poisson effect.
-		/// </remarks>
-		private StrainState AffectedSmearedStrains { get; set; }
-		
-		/// <summary>
-		///		The smeared stress state in the average principal strain direction.
-		/// </summary>
-		private StressState SmearedStresses{ get; set; }
-		
-	
 		/// <inheritdoc />
 		internal SMMConcrete(IParameters parameters)
 			: base(parameters, ConstitutiveModel.SMM)
 		{
-			SmearedStrains  = AffectedSmearedStrains = new StrainState(0, 0, 0, Constants.PiOver4);
-			SmearedStresses = new StressState(0, 0, 0, Constants.PiOver4);
+			Strains  = NotAffectedStrains = new StrainState(0, 0, 0, Constants.PiOver4);
+			Stresses = new StressState(0, 0, 0, Constants.PiOver4);
 		}
 
 		/// <inheritdoc />
 		public override void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Update strains
-			var theta              = SmearedStrains.ThetaX;
-			SmearedStrains         = strains.Transform(theta);
-			AffectedSmearedStrains = CalculatePoissonEffect(SmearedStrains, reinforcement, Cracked);
-			PrincipalStrains       = SmearedStrains.ToPrincipal();
+			var theta          = PrincipalStresses.Theta1 + _devAngle;
+			Strains            = strains.Transform(theta);
+			NotAffectedStrains = CalculatePoissonEffect(Strains, reinforcement, Cracked);
+			PrincipalStrains   = Strains.ToPrincipal();
+			
+			// Calculate deviation angle
+			_devAngle = DeviationAngle(Strains);
+			
+			// Calculate stresses
+			Stresses          = ConstitutiveEquations.CalculateStresses(NotAffectedStrains, reinforcement, _devAngle);
+			PrincipalStresses = Stresses.ToPrincipal();
 		}
 
 		/// <summary>
@@ -61,6 +53,9 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		/// <param name="smearedStrains">The smeared strain state.</param>
 		/// <inheritdoc cref="BiaxialConcrete.SMMConstitutive.PoissonCoefficients"/>
+		/// <returns>
+		///		The <see cref="StrainState"/> without Poisson effect.
+		/// </returns>
 		private static StrainState CalculatePoissonEffect(StrainState smearedStrains, WebReinforcement? reinforcement, bool cracked)
 		{
 			// Get initial strains
@@ -77,7 +72,7 @@ namespace andrefmello91.Material.Concrete
 			var e1 = v1 * e1i + v2 * e2i;
 			var e2 = v2 * e1i + v1 * e2i;
 
-			return new StrainState(e1, e2, smearedStrains.GammaXY);
+			return new StrainState(e1, e2, smearedStrains.GammaXY, smearedStrains.ThetaX);
 		}
 		
 		/// <summary>
