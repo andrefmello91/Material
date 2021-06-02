@@ -35,7 +35,7 @@ namespace andrefmello91.Material.Concrete
 		public override void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Update strains
-			var theta          = PrincipalStresses.Theta1 + _devAngle;
+			var theta          = strains.ToPrincipal().Theta1 + _devAngle;
 			Strains            = strains.Transform(theta);
 			NotAffectedStrains = CalculatePoissonEffect(Strains, reinforcement, Cracked);
 			PrincipalStrains   = Strains.ToPrincipal();
@@ -44,7 +44,7 @@ namespace andrefmello91.Material.Concrete
 			_devAngle = DeviationAngle(Strains);
 			
 			// Calculate stresses
-			Stresses          = ConstitutiveEquations.CalculateStresses(NotAffectedStrains, reinforcement, _devAngle);
+			Stresses          = ConstitutiveEquations.CalculateStresses(NotAffectedStrains, reinforcement, deviationAngle: _devAngle);
 			PrincipalStresses = Stresses.ToPrincipal();
 		}
 

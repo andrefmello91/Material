@@ -183,10 +183,10 @@ namespace andrefmello91.Material.Concrete
 			Strains = strains.Clone();
 
 			// Calculate principal strains
-			PrincipalStrains = PrincipalStrainState.FromStrain(Strains);
+			PrincipalStrains = Strains.ToPrincipal();
 
 			// Get stresses from constitutive model
-			PrincipalStresses = ConstitutiveEquations.CalculateStresses(PrincipalStrains, reinforcement, referenceLength);
+			PrincipalStresses = ConstitutiveEquations.CalculateStresses(PrincipalStrains, reinforcement, referenceLength).ToPrincipal();
 			Stresses          = StressState.FromPrincipal(PrincipalStresses);
 		}
 

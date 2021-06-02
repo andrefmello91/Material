@@ -38,7 +38,7 @@ namespace andrefmello91.Material.Concrete
 			#region Methods
 
 			/// <inheritdoc />
-			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
+			protected override Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1)
 			{
 				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain >= 0)
 					return Pressure.Zero;

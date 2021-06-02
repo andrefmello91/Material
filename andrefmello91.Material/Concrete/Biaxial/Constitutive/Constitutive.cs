@@ -73,52 +73,119 @@ namespace andrefmello91.Material.Concrete
 			///     Calculate concrete <see cref="PrincipalStressState" /> related to <see cref="PrincipalStrainState" />.
 			///     <para>For <seealso cref="BiaxialConcrete" />.</para>
 			/// </summary>
-			/// <param name="principalStrains">The <see cref="PrincipalStrainState" /> in concrete.</param>
+			/// <param name="strainsAtAvgPrincipal">The strain state in concrete, at the average principal strain direction of the membrane element.
+			///	<remarks>
+			///		The direction X must be the tensile (or largest) strain and Y the compressive (or smaller) one.
+			/// </remarks>
+			/// </param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
-			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-			public PrincipalStressState CalculateStresses(PrincipalStrainState principalStrains, WebReinforcement? reinforcement, Length? referenceLength = null)
+			/// <param name="referenceLength">The reference length (only for <see cref="ConstitutiveModel.DSFM" />).</param>
+			/// <param name="deviationAngle">The deviation angle between applied principal stresses and concrete principal stresses (only for <see cref="ConstitutiveModel.SMM"/>).</param>
+			/// <returns>
+			///		The <see cref="StressState"/> at the direction of <paramref name="strainsAtAvgPrincipal"/>.
+			/// </returns>
+			public StressState CalculateStresses(IState<double> strainsAtAvgPrincipal, WebReinforcement? reinforcement, Length? referenceLength = null, double deviationAngle = 0)
 			{
-				if (principalStrains.IsZero)
-					return PrincipalStressState.Zero;
+				if (strainsAtAvgPrincipal.IsZero)
+					return new StressState(0, 0, 0, strainsAtAvgPrincipal.ThetaX);
 
 				// Get strains
 				double
-					ec1 = principalStrains.Epsilon1.AsFinite(),
-					ec2 = principalStrains.Epsilon2.AsFinite();
+					ec1 = strainsAtAvgPrincipal.X.AsFinite(),
+					ec2 = strainsAtAvgPrincipal.Y.AsFinite(),
+					yxy = strainsAtAvgPrincipal.XY.AsFinite();
+
+				// Get the case
+				var pCase = strainsAtAvgPrincipal is IPrincipalState<double> pState
+					? pState.Case 
+					: new PrincipalStrainState(ec1, ec2).Case;
 
 				Pressure fc1, fc2;
 
-				switch (principalStrains.Case)
+				switch (pCase)
 				{
 					// Verify case
 					case PrincipalCase.UniaxialCompression:
 					case PrincipalCase.TensionCompression:
-						fc1 = TensileStress(ec1, ec2, principalStrains.Theta1, referenceLength, reinforcement);
-						fc2 = CompressiveStress(ec2, ec1);
+						fc1 = TensileStress(ec1, ec2, strainsAtAvgPrincipal.ThetaX, referenceLength, reinforcement);
+						fc2 = CompressiveStress(ec2, ec1, deviationAngle);
 						break;
 
 					case PrincipalCase.UniaxialTension:
 					case PrincipalCase.PureTension:
-						fc1 = TensileStress(ec1, ec2, principalStrains.Theta1, referenceLength, reinforcement);
-						fc2 = TensileStress(ec2, ec1, principalStrains.Theta1, referenceLength, reinforcement);
+						fc1 = TensileStress(ec1, ec2, strainsAtAvgPrincipal.ThetaX, referenceLength, reinforcement);
+						fc2 = TensileStress(ec2, ec1, strainsAtAvgPrincipal.ThetaX, referenceLength, reinforcement);
 						break;
 
 					case PrincipalCase.PureCompression when !Parameters.ConsiderConfinement:
-						fc1 = CompressiveStress(ec1, ec2);
-						fc2 = CompressiveStress(ec2, ec1);
+						fc1 = CompressiveStress(ec1, ec2, deviationAngle);
+						fc2 = CompressiveStress(ec2, ec1, deviationAngle);
 						break;
 
 					case PrincipalCase.PureCompression when Parameters.ConsiderConfinement:
-						return ConfinementStresses(principalStrains);
+						var conf = ConfinementStresses(strainsAtAvgPrincipal, deviationAngle);
+						fc1 = conf.SigmaX;
+						fc2 = conf.SigmaY;
+						break;
 
 					default:
-						return PrincipalStressState.Zero;
+						return new StressState(0, 0, 0, strainsAtAvgPrincipal.ThetaX);
+				}
+
+				// Calculate shear stress (for SMM)
+				var tau = Model is ConstitutiveModel.SMM
+					? 0.5 * yxy * (fc1 - fc2) / (ec1 - ec2)
+					: Pressure.Zero;
+
+				return
+					new StressState(fc1, fc2, tau, strainsAtAvgPrincipal.ThetaX);
+			}
+
+			/// <summary>
+			///     Calculate confinement <see cref="PrincipalStressState" />.
+			/// </summary>
+			/// <param name="strainsAtAvgPrincipal">The smeared strains in concrete, affected by Poisson effect, at the direction of average principal strains.</param>
+			/// <param name="deviationAngle">The deviation angle between applied principal stresses and concrete principal stresses.</param>
+			private StressState ConfinementStresses(IState<double> strainsAtAvgPrincipal, double deviationAngle)
+			{
+				// Get strains
+				double
+					ec1 = strainsAtAvgPrincipal.X,
+					ec2 = strainsAtAvgPrincipal.Y;
+
+				// Calculate initial stresses
+				Pressure
+					fc1 = CompressiveStress(ec1, ec2, deviationAngle),
+					fc2 = CompressiveStress(ec2, ec1, deviationAngle);
+
+				var tol = Pressure.FromMegapascals(0.01);
+
+				// Iterate to find stresses (maximum 20 iterations)
+				for (var it = 1; it <= 20; it++)
+				{
+					// Calculate confinement factors
+					double
+						betaL1 = ConfinementFactor(fc2, Parameters.Strength),
+						betaL2 = ConfinementFactor(fc1, Parameters.Strength);
+
+					// Calculate iteration stresses
+					Pressure
+						fc1It = CompressiveStress(ec1, ec2, deviationAngle, betaL1),
+						fc2It = CompressiveStress(ec2, ec1, deviationAngle, betaL2);
+
+					// Verify tolerances
+
+					if ((fc1 - fc1It).Abs() <= tol && (fc2 - fc2It).Abs() <= tol)
+						break;
+
+					// Update stresses
+					fc1 = fc1It;
+					fc2 = fc2It;
 				}
 
 				return
-					new PrincipalStressState(fc1, fc2, principalStrains.Theta1);
+					new StressState(fc1, fc2, Pressure.Zero, strainsAtAvgPrincipal.ThetaX);
 			}
-
 			
 			/// <summary>
 			///     Calculate current secant module.
@@ -135,12 +202,13 @@ namespace andrefmello91.Material.Concrete
 			/// </summary>
 			/// <param name="strain">The compressive strain (negative) to calculate stress.</param>
 			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
+			/// <param name="deviationAngle">The deviation angle between applied principal stresses and concrete principal stresses (only for <see cref="ConstitutiveModel.SMM"/>).</param>
 			/// <param name="confinementFactor">
 			///     The confinement factor for pure compression case.
 			///     <para>See: <seealso cref="ConfinementFactor" /></para>
 			/// </param>
 			/// <returns>Compressive stress in MPa</returns>
-			protected abstract Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1);
+			protected abstract Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1);
 
 			/// <summary>
 			///     Calculate tensile stress for <see cref="Material.Concrete.BiaxialConcrete" /> case.
