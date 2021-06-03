@@ -89,6 +89,10 @@ namespace andrefmello91.Material.Concrete
 				if (strainsAtAvgPrincipal.IsZero)
 					return new StressState(0, 0, 0, strainsAtAvgPrincipal.ThetaX);
 
+				// Rotate is necessary
+				if (strainsAtAvgPrincipal.X < strainsAtAvgPrincipal.Y)
+					strainsAtAvgPrincipal = strainsAtAvgPrincipal.Transform(Constants.PiOver2);
+
 				// Get strains
 				double
 					ec1 = strainsAtAvgPrincipal.X.AsFinite(),
@@ -107,14 +111,14 @@ namespace andrefmello91.Material.Concrete
 					// Verify case
 					case PrincipalCase.UniaxialCompression:
 					case PrincipalCase.TensionCompression:
-						fc1 = TensileStress(ec1, ec2, strainsAtAvgPrincipal.ThetaX, referenceLength, reinforcement);
+						fc1 = TensileStress(ec1, ec2, strainsAtAvgPrincipal.ThetaX, reinforcement, referenceLength);
 						fc2 = CompressiveStress(ec2, ec1, deviationAngle);
 						break;
 
 					case PrincipalCase.UniaxialTension:
 					case PrincipalCase.PureTension:
-						fc1 = TensileStress(ec1, ec2, strainsAtAvgPrincipal.ThetaX, referenceLength, reinforcement);
-						fc2 = TensileStress(ec2, ec1, strainsAtAvgPrincipal.ThetaX, referenceLength, reinforcement);
+						fc1 = TensileStress(ec1, ec2, strainsAtAvgPrincipal.ThetaX, reinforcement, referenceLength);
+						fc2 = TensileStress(ec2, ec1, strainsAtAvgPrincipal.ThetaX, reinforcement, referenceLength);
 						break;
 
 					case PrincipalCase.PureCompression when !Parameters.ConsiderConfinement:
@@ -216,18 +220,36 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="strain">The tensile strain to calculate stress.</param>
 			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
 			/// <param name="theta1">The angle of <paramref name="strain" /> related to horizontal axis, in radians.</param>
+			/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
+			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
+			private Pressure TensileStress(double strain, double transverseStrain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null)
+			{
+				if (!strain.IsFinite() || strain <= 0)
+					return Pressure.Zero;
+
+				// Calculate initial uncracked state
+				var fc1 = UncrackedStress(strain, transverseStrain);
+
+				return !Cracked
+					? fc1
+					: CrackedStress(strain, theta1, reinforcement, referenceLength);
+			}
+
+			/// <summary>
+			///     Calculate tensile stress for cracked concrete.
+			/// </summary>
+			/// <param name="strain">Current tensile strain.</param>
+			/// <param name="theta1">The angle of <paramref name="strain" /> related to horizontal axis, in radians.</param>
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
 			/// <param name="reinforcement">The <see cref="WebReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-			protected abstract Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null);
-
+			protected abstract Pressure CrackedStress(double strain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null);
+			
 			/// <summary>
 			///     Calculate <see cref="Material.Concrete.BiaxialConcrete" /> tensile stress for uncracked state.
 			/// </summary>
 			/// <param name="strain">The compressive strain (negative) to calculate stress.</param>
 			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
-			/// <param name="theta1">The angle of <paramref name="strain" /> related to horizontal axis, in radians.</param>
-			/// <param name="reinforcement">The <see cref="WebReinforcement" /> object.</param>
-			protected Pressure UncrackedStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, WebReinforcement? reinforcement = null)
+			private Pressure UncrackedStress(double strain, double transverseStrain)
 			{
 				if (Cracked)
 					return Pressure.Zero;
@@ -243,14 +265,7 @@ namespace andrefmello91.Material.Concrete
 				// Verify if fc1 cracks concrete
 				VerifyCrackedState(fc1, ec2);
 
-				if (reinforcement is null)
-					return fc1;
-
-				// Check maximum stress that can be transmitted by reinforcement
-				var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
-
-				return
-					Min(fc1, fc1s);
+				return fc1;
 			}
 
 			/// <summary>
