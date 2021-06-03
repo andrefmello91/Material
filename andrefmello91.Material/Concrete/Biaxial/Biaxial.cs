@@ -187,7 +187,7 @@ namespace andrefmello91.Material.Concrete
 
 			// Get stresses from constitutive model
 			PrincipalStresses = ConstitutiveEquations.CalculateStresses(PrincipalStrains, reinforcement, referenceLength).ToPrincipal();
-			Stresses          = StressState.FromPrincipal(PrincipalStresses);
+			Stresses          = PrincipalStresses.ToHorizontal();
 		}
 
 		/// <summary>
