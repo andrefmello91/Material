@@ -46,8 +46,34 @@ namespace andrefmello91.Material.Concrete
 			// Calculate stresses
 			Stresses          = ConstitutiveEquations.CalculateStresses(NotAffectedStrains, reinforcement, deviationAngle: _devAngle);
 			PrincipalStresses = Stresses.ToPrincipal();
+			
+			// Update stresses
+			UpdateStresses(reinforcement);
 		}
 
+		/// <summary>
+		///		Update the stress state based in equilibrium on crack.
+		/// </summary>
+		private void UpdateStresses(WebReinforcement? reinforcement)
+		{
+			if (reinforcement is null)
+				return;
+			
+			// Check the maximum value of fc1 that can be transmitted across cracks
+			var fc1s = reinforcement.MaximumPrincipalTensileStress(PrincipalStresses.Theta1);
+
+			if (fc1s >= PrincipalStresses.Sigma1)
+				return;
+
+			// Recalculate stresses
+			var pStresses     = PrincipalStresses.Clone();
+			PrincipalStresses = new PrincipalStressState(fc1s, pStresses.Sigma2, pStresses.Theta1);
+			Stresses          = PrincipalStresses.Transform(_devAngle);
+			
+			return;
+		}
+		
+		
 		/// <summary>
 		///		Calculate the strain state affected by Poisson ratios.
 		/// </summary>

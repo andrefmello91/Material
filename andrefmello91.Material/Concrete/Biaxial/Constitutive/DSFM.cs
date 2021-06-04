@@ -125,7 +125,6 @@ namespace andrefmello91.Material.Concrete
 				// Return maximum
 				return
 					Max(fc1a, fc1b);
-
 			}
 
 			/// <summary>
