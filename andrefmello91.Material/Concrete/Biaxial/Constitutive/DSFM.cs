@@ -14,7 +14,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     DSFM constitutive class.
 		/// </summary>
-		private class DSFMConstitutive : Constitutive
+		protected class DSFMConstitutive : Constitutive
 		{
 
 			#region Properties
@@ -80,7 +80,7 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <inheritdoc />
-			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
+			protected override Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1)
 			{
 				if (!strain.IsFinite() || strain >= 0)
 					return Pressure.Zero;
@@ -114,29 +114,13 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null)
+			protected override Pressure CrackedStress(double strain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null)
 			{
-				if (!strain.IsFinite() || strain <= 0)
-					return Pressure.Zero;
-
-				// Get strains
-				double
-					ec1 = strain,
-					ec2 = transverseStrain;
-
-				// Calculate initial uncracked state
-				var fc1 = UncrackedStress(ec1, ec2, theta1, reinforcement);
-
-				// Not cracked
-				if (!Cracked)
-					return fc1;
-
-				// Cracked
 				// Calculate concrete post-cracking stress associated with tension softening
-				var fc1a = TensionSoftening(ec1, referenceLength!.Value);
+				var fc1a = TensionSoftening(strain, referenceLength!.Value);
 
 				// Calculate concrete post-cracking stress associated with tension stiffening.
-				var fc1b = TensionStiffening(ec1, theta1, reinforcement);
+				var fc1b = TensionStiffening(strain, theta1, reinforcement);
 
 				// Return maximum
 				return
@@ -196,8 +180,11 @@ namespace andrefmello91.Material.Concrete
 				// Calculate concrete postcracking stress associated with tension stiffening
 				var fc1b = Parameters.TensileStrength / (1 + (2.2 * m * strain).Sqrt());
 
+				if (reinforcement is null)
+					return fc1b;
+				
 				// Check the maximum value of fc1 that can be transmitted across cracks
-				var fc1s = reinforcement?.MaximumPrincipalTensileStress(theta1) ?? Pressure.Zero;
+				var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
 
 				// Return minimum
 				return

@@ -14,12 +14,12 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     MCFT constitutive class.
 		/// </summary>
-		private class MCFTConstitutive : Constitutive
+		protected class MCFTConstitutive : Constitutive
 		{
 
 			#region Properties
 
-			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
+			public override ConstitutiveModel Model { get; } = Material.Concrete.ConstitutiveModel.MCFT;
 
 			#endregion
 
@@ -38,7 +38,7 @@ namespace andrefmello91.Material.Concrete
 			#region Methods
 
 			/// <inheritdoc />
-			protected override Pressure CompressiveStress(double strain, double transverseStrain, double confinementFactor = 1)
+			protected override Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1)
 			{
 				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain >= 0)
 					return Pressure.Zero;
@@ -68,26 +68,8 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, double transverseStrain, double theta1 = Constants.PiOver4, Length? referenceLength = null, WebReinforcement? reinforcement = null)
-			{
-				if (!strain.IsFinite() || strain <= 0)
-					return Pressure.Zero;
-
-				// Calculate initial uncracked state
-				var fc1 = UncrackedStress(strain, transverseStrain, theta1, reinforcement);
-
-				// Not cracked
-				return
-					!Cracked
-						? fc1
-						: CrackedStress(strain);
-			}
-
-			/// <summary>
-			///     Calculate tensile stress for cracked concrete.
-			/// </summary>
-			/// <param name="strain">Current tensile strain.</param>
-			private Pressure CrackedStress(double strain) => Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
+			protected override Pressure CrackedStress(double strain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null) =>
+				Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
 
 			#endregion
 

@@ -110,7 +110,7 @@ namespace andrefmello91.Material.Reinforcement
 					return stresses;
 
 				return
-					stresses.Transform(-DirectionX?.Angle ?? 0).ToStressState();
+					stresses.Transform(-DirectionX?.Angle ?? 0);
 			}
 		}
 
