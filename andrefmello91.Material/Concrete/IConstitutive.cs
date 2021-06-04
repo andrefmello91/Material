@@ -20,7 +20,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Softened Membrane Model constitutive model.
 		/// </summary>
-		SMM,
+		SMM
 	}
 
 	/// <summary>
