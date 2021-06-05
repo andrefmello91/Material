@@ -11,23 +11,21 @@ namespace andrefmello91.Material.Concrete
 	/// </summary>
 	internal class SMMConcrete : BiaxialConcrete
 	{
-		private double _devAngle;
-		
 		/// <summary>
 		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
 		/// </summary>
 		private new SMMConstitutive ConstitutiveEquations => (SMMConstitutive) base.ConstitutiveEquations;
 
-		/// <summary>
-		///		The strain state in the average principal strain direction, not affected by Poisson effect.
-		/// </summary>
-		private StrainState NotAffectedStrains { get; set; }
+		// /// <summary>
+		// ///		The strain state in the average principal strain direction, not affected by Poisson effect.
+		// /// </summary>
+		// private StrainState NotAffectedStrains { get; set; }
 		
 		/// <inheritdoc />
 		internal SMMConcrete(IParameters parameters)
 			: base(parameters, ConstitutiveModel.SMM)
 		{
-			Strains  = NotAffectedStrains = new StrainState(0, 0, 0, Constants.PiOver4);
+			Strains  = new StrainState(0, 0, 0, Constants.PiOver4);
 			Stresses = new StressState(0, 0, 0, Constants.PiOver4);
 		}
 
@@ -35,20 +33,19 @@ namespace andrefmello91.Material.Concrete
 		public override void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Update strains
-			var theta          = strains.ToPrincipal().Theta1 + _devAngle;
-			Strains            = strains.Transform(theta);
-			NotAffectedStrains = CalculatePoissonEffect(Strains, reinforcement, Cracked);
+			// var theta          = strains.ToPrincipal().Theta1 + DeviationAngle;
+			Strains            = strains;
 			PrincipalStrains   = Strains.ToPrincipal();
 			
 			// Calculate deviation angle
-			_devAngle = DeviationAngle(Strains);
+			DeviationAngle = CalculateDeviationAngle(Strains);
 			
 			// Calculate stresses
-			Stresses          = ConstitutiveEquations.CalculateStresses(NotAffectedStrains, reinforcement, deviationAngle: _devAngle);
+			Stresses          = ConstitutiveEquations.CalculateStresses(Strains, reinforcement, deviationAngle: DeviationAngle);
 			PrincipalStresses = Stresses.ToPrincipal();
 			
 			// Update stresses
-			UpdateStresses(reinforcement);
+			// UpdateStresses(reinforcement);
 		}
 
 		/// <summary>
@@ -68,7 +65,7 @@ namespace andrefmello91.Material.Concrete
 			// Recalculate stresses
 			var pStresses     = PrincipalStresses.Clone();
 			PrincipalStresses = new PrincipalStressState(fc1s, pStresses.Sigma2, pStresses.Theta1);
-			Stresses          = PrincipalStresses.Transform(_devAngle);
+			Stresses          = PrincipalStresses.Transform(DeviationAngle);
 			
 			return;
 		}
@@ -82,7 +79,7 @@ namespace andrefmello91.Material.Concrete
 		/// <returns>
 		///		The <see cref="StrainState"/> without Poisson effect.
 		/// </returns>
-		private static StrainState CalculatePoissonEffect(StrainState smearedStrains, WebReinforcement? reinforcement, bool cracked)
+		private static StrainState RemovePoissonEffect(StrainState smearedStrains, WebReinforcement? reinforcement, bool cracked)
 		{
 			// Get initial strains
 			var e1i = smearedStrains.EpsilonX;
@@ -105,7 +102,7 @@ namespace andrefmello91.Material.Concrete
 		///		Calculate the deviation angle for a strain state.
 		/// </summary>
 		/// <param name="strains">The strain state for the principal direction of concrete.</param>
-		private static double DeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan();
+		private static double CalculateDeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan();
 
 	}
 }

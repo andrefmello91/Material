@@ -46,7 +46,11 @@ namespace andrefmello91.Material.Concrete
 			set => ConstitutiveEquations.Cs = value;
 		}
 
-
+		/// <summary>
+		///		Get the deviation angle between <see cref="Strains"/> and <see cref="PrincipalStrains"/>.
+		/// </summary>
+		public double DeviationAngle { get; protected set; }
+		
 		/// <summary>
 		///     Get concrete initial stiffness <see cref="Matrix" />.
 		/// </summary>
