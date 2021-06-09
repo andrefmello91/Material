@@ -49,35 +49,6 @@ namespace andrefmello91.Material.Concrete
 				Parameters.TensileStrength * (Parameters.CrackingStrain / strain).Pow(0.4);
 
 			/// <summary>
-			///		Calculate the Poisson coefficients for SMM.
-			/// </summary>
-			/// <param name="reinforcement">The reinforcement.</param>
-			/// <param name="cracked">The cracked state of concrete. True if cracked.</param>
-			public static (double v12, double v21) PoissonCoefficients(WebReinforcement? reinforcement, bool cracked)
-			{
-				var v21 = cracked
-					? 0
-					: 0.2;
-
-				if (reinforcement is null)
-					return (0.2, v21);
-
-				var strains = reinforcement.Strains;
-				
-				var esf     = Math.Max(strains.EpsilonX, strains.EpsilonY);
-				
-				var ey = strains.EpsilonX >= strains.EpsilonY
-					? reinforcement.DirectionX?.Steel.YieldStrain
-					: reinforcement.DirectionY?.Steel.YieldStrain;
-
-				var v12 = esf <= 0 || !ey.HasValue
-					? 0.2
-					: 0.2 + 850 * esf;
-
-				return (v12, v21);
-			}
-			
-			/// <summary>
 			///		Calculate the tensile strain function for the softening parameter.
 			/// </summary>
 			/// <param name="epsilon1">The average principal tensile strain, not considering Poisson effect.</param>
