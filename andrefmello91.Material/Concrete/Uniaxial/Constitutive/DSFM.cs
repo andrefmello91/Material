@@ -77,14 +77,8 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null)
+			protected override Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null)
 			{
-				// Check if concrete is cracked
-				if (strain <= Parameters.CrackingStrain) // Not cracked
-					return
-						Parameters.ElasticModule * strain;
-
-				// Cracked
 				// Calculate concrete post-cracking stress associated with tension softening
 				var fc1a = TensionSoftening(strain, reinforcement);
 

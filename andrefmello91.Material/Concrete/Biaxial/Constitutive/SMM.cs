@@ -66,10 +66,7 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="deviationAngle">The deviation angle between applied principal stresses and concrete principal stresses.</param>
 			private static double DeviationFunction(double deviationAngle) => 1D - deviationAngle.Abs() / 0.418879;
 			
-			///  <summary>
-			/// 		Calculate compressive stress.
-			///  </summary>
-			///  <inheritdoc cref="CompressiveStress(double,double,double)"/>
+			///  <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1)
 			{
 				// Calculate softening coefficient

@@ -54,11 +54,12 @@ namespace andrefmello91.Material.Concrete
 			/// </summary>
 			/// <param name="constitutiveModel">The <see cref="ConstitutiveModel" /> for concrete.</param>
 			/// <param name="parameters">Concrete <see cref="Parameters" />.</param>
-			public static Constitutive Read(ConstitutiveModel constitutiveModel, IParameters parameters) =>
+			public static Constitutive From(ConstitutiveModel constitutiveModel, IParameters parameters) =>
 				constitutiveModel switch
 				{
 					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),
-					_                      => new MCFTConstitutive(parameters)
+					ConstitutiveModel.MCFT => new MCFTConstitutive(parameters),
+					_                      => new SMMConstitutive(parameters)
 				};
 
 			/// <summary>
@@ -103,12 +104,34 @@ namespace andrefmello91.Material.Concrete
 			/// </summary>
 			/// <param name="strain">Tensile strain in concrete.</param>
 			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
-			protected abstract Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null);
+			protected Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null)
+			{
+				if (strain.ApproxZero(1E-9))
+					return Pressure.Zero;
+				
+				VerifyCrackedState(strain);
 
+				return Cracked
+					? CrackedStress(strain, reinforcement)
+					: UncrackedStress(strain);
+			}
+
+			/// <summary>
+			///		Calculate the tensile strain for uncracked state.
+			/// </summary>
+			/// <param name="strain">Tensile strain in concrete.</param>
+			protected Pressure UncrackedStress(double strain) => Parameters.ElasticModule * strain;
+
+			/// <summary>
+			///		Calculate the tensile strain for cracked state.
+			/// </summary>
+			/// <inheritdoc cref="TensileStress"/>
+			protected abstract Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null);
+			
 			/// <summary>
 			///     Check if concrete is cracked for <see cref="UniaxialConcrete" /> case and set cracked property.
 			/// </summary>
-			/// <param name="strain">Current strain</param>
+			/// <param name="strain">Current strain.</param>
 			protected void VerifyCrackedState(double strain)
 			{
 				if (!Cracked && strain >= Parameters.CrackingStrain)

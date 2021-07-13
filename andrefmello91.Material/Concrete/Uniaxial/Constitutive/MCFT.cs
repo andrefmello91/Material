@@ -49,16 +49,8 @@ namespace andrefmello91.Material.Concrete
 			}
 
 			/// <inheritdoc />
-			protected override Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null) =>
-				strain <= Parameters.CrackingStrain
-					? strain * Parameters.ElasticModule
-					: CrackedStress(strain);
-
-			/// <summary>
-			///     Calculate tensile stress, for cracked concrete.
-			/// </summary>
-			/// <param name="strain">Current tensile strain.</param>
-			private Pressure CrackedStress(double strain) => Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
+			protected override Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null) =>
+				Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
 
 			#endregion
 

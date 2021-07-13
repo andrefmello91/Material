@@ -75,7 +75,7 @@ namespace andrefmello91.Material.Concrete
 			: base(parameters, model)
 		{
 			Area          = concreteArea;
-			_constitutive = Constitutive.Read(model, parameters);
+			_constitutive = Constitutive.From(model, parameters);
 		}
 
 		#endregion
