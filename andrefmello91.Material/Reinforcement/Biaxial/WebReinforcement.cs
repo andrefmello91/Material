@@ -42,15 +42,18 @@ namespace andrefmello91.Material.Reinforcement
 		///     Get initial <see cref="WebReinforcement" /> stiffness <see cref="Matrix" />.
 		/// </summary>
 		/// <inheritdoc cref="BiaxialConcrete.InitialStiffness" />
-		public Matrix<double> InitialStiffness
+		public MaterialMatrix InitialStiffness
 		{
 			get
 			{
 				// Steel matrix
-				var Ds = Matrix<double>.Build.Dense(3, 3);
+				var Ds = MaterialMatrix.Zero();
 
-				Ds[0, 0] = DirectionX?.InitialStiffness.Megapascals ?? 0;
-				Ds[1, 1] = DirectionY?.InitialStiffness.Megapascals ?? 0;
+				if (DirectionX is not null)
+					Ds[0, 0] = DirectionX.InitialStiffness;
+				
+				if (DirectionY is not null)
+					Ds[1, 1] = DirectionY.InitialStiffness;
 
 				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
 					return Ds;
@@ -59,7 +62,7 @@ namespace andrefmello91.Material.Reinforcement
 				var t = StrainRelations.TransformationMatrix(DirectionX?.Angle ?? DirectionY?.Angle - Constants.PiOver2 ?? 0);
 
 				return
-					t.Transpose() * Ds * t;
+					(MaterialMatrix) Ds.Transform(t);
 			}
 		}
 
@@ -67,15 +70,18 @@ namespace andrefmello91.Material.Reinforcement
 		///     Get current <see cref="WebReinforcement" /> stiffness <see cref="Matrix" /> with elements in
 		///     <see cref="PressureUnit.Megapascal" />.
 		/// </summary>
-		public Matrix<double> Stiffness
+		public MaterialMatrix Stiffness
 		{
 			get
 			{
 				// Steel matrix
-				var Ds = Matrix<double>.Build.Dense(3, 3);
+				var Ds = MaterialMatrix.Zero();
 
-				Ds[0, 0] = DirectionX?.Stiffness.Megapascals ?? 0;
-				Ds[1, 1] = DirectionY?.Stiffness.Megapascals ?? 0;
+				if (DirectionX is not null)
+					Ds[0, 0] = DirectionX.Stiffness;
+				
+				if (DirectionY is not null)
+					Ds[1, 1] = DirectionY.Stiffness;
 
 				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
 					return Ds;
@@ -84,7 +90,7 @@ namespace andrefmello91.Material.Reinforcement
 				var t = StrainRelations.TransformationMatrix(DirectionX?.Angle ?? DirectionY?.Angle - Constants.PiOver2 ?? 0);
 
 				return
-					t.Transpose() * Ds * t;
+					(MaterialMatrix) Ds.Transform(t);
 			}
 		}
 
