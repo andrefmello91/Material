@@ -57,24 +57,24 @@ namespace andrefmello91.Material.Concrete
 		/// <remarks>
 		///     Elements are expressed in <see cref="PressureUnit.Megapascal" />.
 		/// </remarks>
-		public Matrix<double> InitialStiffness
+		public MaterialMatrix InitialStiffness
 		{
 			get
 			{
-				var Ec = Parameters.ElasticModule.Megapascals;
+				var Ec = Parameters.ElasticModule;
 
 				// Concrete matrix
-				var Dc1 = Matrix<double>.Build.Dense(3, 3);
+				var Dc1 = MaterialMatrix.Zero(Constants.PiOver4, Ec.Unit);
 				Dc1[0, 0] = Ec;
 				Dc1[1, 1] = Ec;
 				Dc1[2, 2] = 0.5 * Ec;
 
 				// Get transformation matrix
-				var T = StrainRelations.TransformationMatrix(Constants.PiOver4);
+				// var t = StrainRelations.TransformationMatrix(Constants.PiOver4);
 
 				// Calculate Dc
 				return
-					T.Transpose() * Dc1 * T;
+					Dc1.ToHorizontal();
 			}
 		}
 
@@ -91,27 +91,31 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Get concrete stiffness <see cref="Matrix" />, with elements in <see cref="PressureUnit.Megapascal" />.
 		/// </summary>
-		public Matrix<double> Stiffness
+		public MaterialMatrix Stiffness
 		{
 			get
 			{
-				var Ecs = SecantModule;
-				var (Ec1, Ec2) = (Ecs.Ec1.Megapascals, Ecs.Ec2.Megapascals);
+				var (Ec1, Ec2) = (SecantModule.Ec1.Megapascals, SecantModule.Ec2.Megapascals);
 
 				var Gc = Ec1 * Ec2 / (Ec1 + Ec2);
 
 				// Concrete matrix
-				var Dc1 = Matrix<double>.Build.Dense(3, 3);
-				Dc1[0, 0] = Ec1;
-				Dc1[1, 1] = Ec2;
-				Dc1[2, 2] = Gc;
+				var array = new double[3, 3];
+				array[0, 0] = Ec1;
+				array[1, 1] = Ec2;
+				array[2, 2] = Gc;
+
+				var Dc1 = new MaterialMatrix(array, PrincipalStrains.Theta1)
+				{
+					Unit = Parameters.StressUnit
+				};
 
 				// Get transformation matrix
-				var T = PrincipalStrains.TransformationMatrix;
+				// var t = PrincipalStrains.TransformationMatrix;
 
 				// Calculate Dc
 				return
-					T.Transpose() * Dc1 * T;
+					Dc1.ToHorizontal();
 			}
 		}
 
