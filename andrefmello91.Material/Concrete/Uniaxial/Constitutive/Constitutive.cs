@@ -106,7 +106,7 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="reinforcement">The <see cref="UniaxialReinforcement" /> (only for <see cref="DSFMConstitutive" />).</param>
 			protected Pressure TensileStress(double strain, UniaxialReinforcement? reinforcement = null)
 			{
-				if (strain.ApproxZero(1E-9))
+				if (strain.ApproxZero())
 					return Pressure.Zero;
 				
 				VerifyCrackedState(strain);
