@@ -30,7 +30,7 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
-		public override void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
+		public override void Calculate(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Update strains
 			// var theta          = strains.ToPrincipal().Theta1 + DeviationAngle;

@@ -313,10 +313,7 @@ namespace andrefmello91.Material.Reinforcement
 				(thetaNx, thetaNy);
 		}
 
-		/// <summary>
-		///     Calculate current <see cref="StressState" />, in MPa.
-		/// </summary>
-		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
+		/// <inheritdoc />
 		public void Calculate(StrainState strainsState)
 		{
 			// Set strains

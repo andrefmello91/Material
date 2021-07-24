@@ -119,6 +119,9 @@ namespace andrefmello91.Material.Concrete
 			}
 		}
 
+		/// <inheritdoc />
+		void IBiaxialMaterial.Calculate(StrainState strainState) => Calculate(strainState, null);
+
 		/// <summary>
 		///     Get/set concrete <see cref="StrainState" />.
 		/// </summary>
@@ -179,13 +182,15 @@ namespace andrefmello91.Material.Concrete
 				_                     => new BiaxialConcrete(parameters, model)
 			};
 		
+		
+		
 		/// <summary>
 		///     Set concrete <see cref="StressState" /> given <see cref="StrainState" />
 		/// </summary>
 		/// <param name="strains">Current <see cref="StrainState" /> in concrete.</param>
 		/// <param name="reinforcement">The <see cref="WebReinforcement" />.</param>
 		/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
-		public virtual void CalculatePrincipalStresses(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
+		public virtual void Calculate(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Get strains
 			Strains = strains.Clone();

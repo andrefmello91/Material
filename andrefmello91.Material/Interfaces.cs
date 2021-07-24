@@ -64,5 +64,11 @@ namespace andrefmello91.Material
 		///		The stiffness of this material.
 		/// </summary>
 		MaterialMatrix Stiffness { get; }
+
+		/// <summary>
+		///		Update strains and calculate stresses.
+		/// </summary>
+		/// <param name="strainState">The current strain state.</param>
+		void Calculate(StrainState strainState);
 	}
 }
