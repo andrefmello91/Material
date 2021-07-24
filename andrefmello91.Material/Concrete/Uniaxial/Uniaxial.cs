@@ -65,8 +65,8 @@ namespace andrefmello91.Material.Concrete
 		///     Concrete for uniaxial calculations.
 		/// </summary>
 		/// <param name="concreteArea">The concrete cross-section area.</param>
-		/// <inheritdoc cref="Concrete(IParameters, ConstitutiveModel)" />
-		public UniaxialConcrete(IParameters parameters, Area concreteArea, ConstitutiveModel model = ConstitutiveModel.MCFT)
+		/// <inheritdoc cref="Concrete(IConcreteParameters, ConstitutiveModel)" />
+		public UniaxialConcrete(IConcreteParameters parameters, Area concreteArea, ConstitutiveModel model = ConstitutiveModel.MCFT)
 			: base(parameters, model)
 		{
 			Area          = concreteArea;

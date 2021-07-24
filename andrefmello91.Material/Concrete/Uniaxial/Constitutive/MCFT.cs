@@ -27,7 +27,7 @@ namespace andrefmello91.Material.Concrete
 			///     MCFT constitutive object.
 			/// </summary>
 			/// <inheritdoc cref="Concrete" />
-			public MCFTConstitutive(IParameters parameters) : base(parameters)
+			public MCFTConstitutive(IConcreteParameters parameters) : base(parameters)
 			{
 			}
 

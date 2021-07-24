@@ -28,7 +28,7 @@ namespace andrefmello91.Material.Concrete
 			///     MCFT constitutive object.
 			/// </summary>
 			/// <inheritdoc cref="Concrete" />
-			public SMMConstitutive(IParameters parameters) : base(parameters)
+			public SMMConstitutive(IConcreteParameters parameters) : base(parameters)
 			{
 				_strengthFunction = StrengthFunction(Parameters.Strength);
 			}

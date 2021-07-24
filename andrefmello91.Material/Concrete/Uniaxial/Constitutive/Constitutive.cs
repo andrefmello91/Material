@@ -17,9 +17,9 @@ namespace andrefmello91.Material.Concrete
 			#region Fields
 
 			/// <summary>
-			///     Concrete <see cref="IParameters" />.
+			///     Concrete <see cref="IConcreteParameters" />.
 			/// </summary>
-			protected readonly IParameters Parameters;
+			protected readonly IConcreteParameters Parameters;
 
 			#endregion
 
@@ -42,7 +42,7 @@ namespace andrefmello91.Material.Concrete
 			///     Base class for concrete behavior
 			/// </summary>
 			/// <param name="parameters">Concrete parameters object.</param>
-			protected Constitutive(IParameters parameters) => Parameters = parameters;
+			protected Constitutive(IConcreteParameters parameters) => Parameters = parameters;
 
 			#endregion
 
@@ -53,7 +53,7 @@ namespace andrefmello91.Material.Concrete
 			/// </summary>
 			/// <param name="constitutiveModel">The <see cref="ConstitutiveModel" /> for concrete.</param>
 			/// <param name="parameters">Concrete <see cref="Parameters" />.</param>
-			public static Constitutive From(ConstitutiveModel constitutiveModel, IParameters parameters) =>
+			public static Constitutive From(ConstitutiveModel constitutiveModel, IConcreteParameters parameters) =>
 				constitutiveModel switch
 				{
 					ConstitutiveModel.DSFM => new DSFMConstitutive(parameters),

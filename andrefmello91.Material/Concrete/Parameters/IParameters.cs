@@ -46,7 +46,7 @@ namespace andrefmello91.Material.Concrete
 	/// <summary>
 	///     Interface for concrete parameters.
 	/// </summary>
-	public interface IParameters : IUnitConvertible<PressureUnit>, IUnitConvertible<LengthUnit>, IApproachable<IParameters, Pressure>, IEquatable<IParameters>, IComparable<IParameters>
+	public interface IConcreteParameters : IMaterialParameters, IUnitConvertible<LengthUnit>, IApproachable<IConcreteParameters, Pressure>, IEquatable<IConcreteParameters>, IComparable<IConcreteParameters>
 	{
 
 		#region Properties
@@ -75,11 +75,6 @@ namespace andrefmello91.Material.Concrete
 		LengthUnit DiameterUnit { get; set; }
 
 		/// <summary>
-		///     Get initial elastic module.
-		/// </summary>
-		Pressure ElasticModule { get; }
-
-		/// <summary>
 		///     Get fracture parameter.
 		/// </summary>
 		ForcePerLength FractureParameter { get; }
@@ -88,11 +83,6 @@ namespace andrefmello91.Material.Concrete
 		///     Get the <see cref="ParameterModel" />.
 		/// </summary>
 		ParameterModel Model { get; set; }
-
-		/// <summary>
-		///     Get concrete plastic (peak) strain (negative value).
-		/// </summary>
-		double PlasticStrain { get; }
 
 		/// <summary>
 		///     Get secant module.
@@ -110,11 +100,6 @@ namespace andrefmello91.Material.Concrete
 		PressureUnit StressUnit { get; set; }
 
 		/// <summary>
-		///     Get tensile strength.
-		/// </summary>
-		Pressure TensileStrength { get; }
-
-		/// <summary>
 		///     Get transverse (shear) module.
 		/// </summary>
 		Pressure TransverseModule { get; }
@@ -123,11 +108,6 @@ namespace andrefmello91.Material.Concrete
 		///     Get the aggregate type.
 		/// </summary>
 		public AggregateType Type { get; set; }
-
-		/// <summary>
-		///     Get concrete ultimate strain (negative value).
-		/// </summary>
-		double UltimateStrain { get; }
 
 		#endregion
 

@@ -55,9 +55,9 @@ namespace andrefmello91.Material.Concrete
 		public ConstitutiveModel Model { get; }
 
 		/// <summary>
-		///     Get concrete <see cref="Material.Concrete.IParameters" />.
+		///     Get concrete <see cref="IConcreteParameters" />.
 		/// </summary>
-		public IParameters Parameters { get; }
+		public IConcreteParameters Parameters { get; }
 
 		#endregion
 
@@ -66,9 +66,9 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Base concrete object.
 		/// </summary>
-		/// <param name="parameters">Concrete <see cref="IParameters" /> object.</param>
+		/// <param name="parameters">Concrete <see cref="IConcreteParameters" /> object.</param>
 		/// <param name="model">The <see cref="ConstitutiveModel" />.</param>
-		protected Concrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+		protected Concrete(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
 		{
 			Parameters = parameters;
 			Model      = model;

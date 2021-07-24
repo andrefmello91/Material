@@ -51,7 +51,7 @@ namespace andrefmello91.Material
 		/// <param name="concreteParameters">The parameters of concrete.</param>
 		/// <param name="concreteArea">The area of concrete cross section.</param>
 		/// <param name="concreteModel">The constitutive model of concrete.</param>
-		public RCCrossSection(IParameters concreteParameters, Area concreteArea, ConstitutiveModel concreteModel, UniaxialReinforcement? reinforcement)
+		public RCCrossSection(IConcreteParameters concreteParameters, Area concreteArea, ConstitutiveModel concreteModel, UniaxialReinforcement? reinforcement)
 			: this (new UniaxialConcrete(concreteParameters, concreteArea, concreteModel), reinforcement)
 		{
 		}

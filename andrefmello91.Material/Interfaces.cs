@@ -1,5 +1,9 @@
-﻿using andrefmello91.OnPlaneComponents;
+﻿using System;
+using andrefmello91.Extensions;
+using andrefmello91.Material.Concrete;
+using andrefmello91.OnPlaneComponents;
 using UnitsNet;
+using UnitsNet.Units;
 
 namespace andrefmello91.Material
 {
@@ -71,4 +75,44 @@ namespace andrefmello91.Material
 		/// <param name="strainState">The current strain state.</param>
 		void Calculate(StrainState strainState);
 	}
+	
+		/// <summary>
+	///     Interface for material parameters.
+	/// </summary>
+	public interface IMaterialParameters : IUnitConvertible<PressureUnit>, IApproachable<IMaterialParameters, Pressure>, IEquatable<IMaterialParameters>, IComparable<IMaterialParameters>
+	{
+		#region Properties
+
+		/// <summary>
+		///     The initial elastic module.
+		/// </summary>
+		Pressure ElasticModule { get; }
+
+		/// <summary>
+		///     The plastic strain.
+		/// </summary>
+		double PlasticStrain { get; }
+
+		/// <summary>
+		///     The compressive strength.
+		/// </summary>
+		/// <remarks>
+		///		Positive value.
+		/// </remarks>
+		Pressure CompressiveStrength { get; }
+
+		/// <summary>
+		///     The tensile strength.
+		/// </summary>
+		Pressure TensileStrength { get; }
+
+		/// <summary>
+		///     The ultimate strain.
+		/// </summary>
+		double UltimateStrain { get; }
+
+		#endregion
+
+	}
+
 }

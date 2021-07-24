@@ -30,8 +30,8 @@ namespace andrefmello91.Material.Concrete
 			///     DSFM constitutive object.
 			/// </summary>
 			/// <param name="considerCrackSlip">Consider crack slip (default: true)</param>
-			/// <inheritdoc cref="Constitutive(IParameters)" />
-			public DSFMConstitutive(IParameters parameters, bool considerCrackSlip = true) : base(parameters) => ConsiderCrackSlip = considerCrackSlip;
+			/// <inheritdoc cref="Constitutive(IConcreteParameters)" />
+			public DSFMConstitutive(IConcreteParameters parameters, bool considerCrackSlip = true) : base(parameters) => ConsiderCrackSlip = considerCrackSlip;
 
 			#endregion
 

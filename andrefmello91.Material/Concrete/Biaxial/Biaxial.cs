@@ -166,7 +166,7 @@ namespace andrefmello91.Material.Concrete
 		///     Create a concrete object for membrane calculations.
 		/// </summary>
 		/// <inheritdoc />
-		protected BiaxialConcrete(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+		protected BiaxialConcrete(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
 			: base(parameters, model) =>
 			ConstitutiveEquations = Constitutive.From(model, parameters);
 
@@ -174,8 +174,8 @@ namespace andrefmello91.Material.Concrete
 
 		#region Methods
 
-		/// <inheritdoc cref="BiaxialConcrete(IParameters, ConstitutiveModel)"/>
-		public static BiaxialConcrete From(IParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
+		/// <inheritdoc cref="BiaxialConcrete(IConcreteParameters, ConstitutiveModel)"/>
+		public static BiaxialConcrete From(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
 			model switch
 			{
 				ConstitutiveModel.SMM => new SMMConcrete(parameters),

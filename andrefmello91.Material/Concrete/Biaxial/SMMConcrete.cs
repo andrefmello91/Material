@@ -22,7 +22,7 @@ namespace andrefmello91.Material.Concrete
 		// private StrainState NotAffectedStrains { get; set; }
 		
 		/// <inheritdoc />
-		internal SMMConcrete(IParameters parameters)
+		internal SMMConcrete(IConcreteParameters parameters)
 			: base(parameters, ConstitutiveModel.SMM)
 		{
 			Strains  = new StrainState(0, 0, 0, Constants.PiOver4);

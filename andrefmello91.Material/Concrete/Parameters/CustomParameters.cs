@@ -1,4 +1,5 @@
-﻿using andrefmello91.Extensions;
+﻿using System;
+using andrefmello91.Extensions;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -7,7 +8,7 @@ namespace andrefmello91.Material.Concrete
 	/// <summary>
 	///     Concrete parameters struct.
 	/// </summary>
-	public struct CustomParameters : IParameters, ICloneable<CustomParameters>
+	public struct CustomParameters : IConcreteParameters, ICloneable<CustomParameters>
 	{
 		private Length _aggDiameter;
 		private Pressure _strength;
@@ -72,6 +73,9 @@ namespace andrefmello91.Material.Concrete
 
 		/// <inheritdoc />
 		public bool ConsiderConfinement { get; set; }
+
+		/// <inheritdoc />
+		Pressure IMaterialParameters.CompressiveStrength => Strength;
 
 		/// <inheritdoc />
 		public Pressure TensileStrength
@@ -186,7 +190,7 @@ namespace andrefmello91.Material.Concrete
 		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
 		/// <inheritdoc />
-		public bool Approaches(IParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
+		public bool Approaches(IConcreteParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
 
 		/// <inheritdoc />
 		public CustomParameters Clone() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain);
@@ -203,7 +207,7 @@ namespace andrefmello91.Material.Concrete
 		///     <see cref="Strength" /> is compared.
 		/// </remarks>
 		/// <inheritdoc />
-		public int CompareTo(IParameters? other) =>
+		public int CompareTo(IConcreteParameters? other) =>
 			Strength == other?.Strength
 				? 0
 				: Strength > other?.Strength
@@ -211,7 +215,7 @@ namespace andrefmello91.Material.Concrete
 					: -1;
 
 		/// <inheritdoc />
-		public bool Equals(IParameters? other) => Approaches(other, Parameters.Tolerance);
+		public bool Equals(IConcreteParameters? other) => Approaches(other, Parameters.Tolerance);
 
 		/// <inheritdoc />
 		public override string ToString()
@@ -232,6 +236,17 @@ namespace andrefmello91.Material.Concrete
 
 
 		/// <inheritdoc />
+		bool IApproachable<IMaterialParameters, Pressure>.Approaches(IMaterialParameters other, Pressure tolerance) => other is IConcreteParameters parameters && Approaches(parameters, tolerance);
+
+		/// <inheritdoc />
+		bool IEquatable<IMaterialParameters>.Equals(IMaterialParameters other) => other is IConcreteParameters parameters && Equals(parameters);
+
+		/// <inheritdoc />
+		int IComparable<IMaterialParameters>.CompareTo(IMaterialParameters other) => other is IConcreteParameters parameters
+			? CompareTo(parameters)
+			: 0;
+
+		/// <inheritdoc />
 		public override bool Equals(object? obj) => obj is CustomParameters other && Equals(other);
 
 		/// <inheritdoc />
@@ -241,9 +256,9 @@ namespace andrefmello91.Material.Concrete
 
 		#region Operators
 
-		public static bool operator ==(CustomParameters left, IParameters right) => left.Equals(right);
+		public static bool operator ==(CustomParameters left, IConcreteParameters right) => left.Equals(right);
 
-		public static bool operator !=(CustomParameters left, IParameters right) => !left.Equals(right);
+		public static bool operator !=(CustomParameters left, IConcreteParameters right) => !left.Equals(right);
 
 		#endregion
 
