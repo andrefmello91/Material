@@ -28,11 +28,6 @@ namespace andrefmello91.Material.Concrete
 		public Area Area { get; }
 
 		/// <summary>
-		///     Returns true if concrete is cracked.
-		/// </summary>
-		public bool Cracked => _constitutive.Cracked;
-
-		/// <summary>
 		///     Calculate current concrete force.
 		/// </summary>
 		public Force Force => Stress * Area;

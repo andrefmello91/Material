@@ -5,6 +5,27 @@ using andrefmello91.Extensions;
 namespace andrefmello91.Material.Concrete
 {
 	/// <summary>
+	///     Constitutive models for concrete.
+	/// </summary>
+	public enum ConstitutiveModel
+	{
+		/// <summary>
+		///     Modified Compression Field constitutive model.
+		/// </summary>
+		MCFT,
+
+		/// <summary>
+		///     Disturbed Stress Field constitutive model.
+		/// </summary>
+		DSFM,
+		
+		/// <summary>
+		///     Softened Membrane Model constitutive model.
+		/// </summary>
+		SMM
+	}
+
+	/// <summary>
 	///     Directions for concrete.
 	/// </summary>
 	public enum Direction

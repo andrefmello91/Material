@@ -1,4 +1,5 @@
-﻿using andrefmello91.Extensions;
+﻿using System;
+using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
 using UnitsNet;
 #nullable enable
@@ -10,7 +11,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Base class for concrete constitutive model.
 		/// </summary>
-		private abstract class Constitutive : IConstitutive
+		private abstract class Constitutive : IEquatable<Constitutive>
 		{
 
 			#region Fields
@@ -27,8 +28,6 @@ namespace andrefmello91.Material.Concrete
 			#region Interface Implementations
 
 			public bool ConsiderCrackSlip { get; protected set; }
-
-			public bool Cracked { get; set; }
 
 			public abstract ConstitutiveModel Model { get; }
 
@@ -126,19 +125,9 @@ namespace andrefmello91.Material.Concrete
 			/// <inheritdoc cref="TensileStress"/>
 			protected abstract Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null);
 			
-			/// <summary>
-			///     Check if concrete is cracked for <see cref="UniaxialConcrete" /> case and set cracked property.
-			/// </summary>
-			/// <param name="strain">Current strain.</param>
-			protected void VerifyCrackedState(double strain)
-			{
-				if (!Cracked && strain >= Parameters.CrackingStrain)
-					Cracked = true;
-			}
-
 			#region Interface Implementations
 
-			public bool Equals(IConstitutive? other) => Model == other?.Model;
+			public bool Equals(Constitutive? other) => Model == other?.Model;
 
 			#endregion
 

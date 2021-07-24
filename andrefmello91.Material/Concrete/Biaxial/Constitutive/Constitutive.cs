@@ -1,4 +1,5 @@
-﻿using andrefmello91.Extensions;
+﻿using System;
+using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
 using andrefmello91.OnPlaneComponents;
 using MathNet.Numerics;
@@ -14,7 +15,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Base class for concrete constitutive model.
 		/// </summary>
-		protected abstract class Constitutive : IConstitutive
+		protected abstract class Constitutive : IEquatable<Constitutive>
 		{
 
 			#region Fields
@@ -364,7 +365,8 @@ namespace andrefmello91.Material.Concrete
 
 			#region Interface Implementations
 
-			public bool Equals(IConstitutive? other) => other is not null && Model == other.Model;
+			/// <inheritdoc />
+			public bool Equals(Constitutive? other) => other is not null && Model == other.Model;
 
 			#endregion
 
