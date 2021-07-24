@@ -59,7 +59,7 @@ namespace andrefmello91.Material.Concrete
 						true => fp * (2 * e2_ep - e2_ep * e2_ep),
 						
 						// Post-peak
-						_ => UnitMath.Min(fp * (1D - ((e2_ep - 1D) / (4D / soft - 1D)).Pow(2)), 0.5 * fp)
+						_ => UnitMath.Max(fp * (1D - ((e2_ep - 1D) / (4D / soft - 1D)).Pow(2)), 0.5 * fp)
 					};
 			}
 

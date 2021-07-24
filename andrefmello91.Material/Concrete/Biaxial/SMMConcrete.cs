@@ -72,7 +72,7 @@ namespace andrefmello91.Material.Concrete
 		///		Calculate the deviation angle for a strain state.
 		/// </summary>
 		/// <param name="strains">The strain state for the principal direction of concrete.</param>
-		private static double CalculateDeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan();
+		private static double CalculateDeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan().AsFinite();
 
 	}
 }
