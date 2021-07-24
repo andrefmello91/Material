@@ -71,12 +71,12 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get normal stiffness.
 		/// </summary>
-		public Force Stiffness => Steel.ElasticModule * Area;
+		public Force Stiffness => Steel.Parameters.ElasticModule * Area;
 
 		/// <summary>
 		///     Get the yield force.
 		/// </summary>
-		public Force YieldForce => Area * Steel.YieldStress;
+		public Force YieldForce => Area * Steel.Parameters.YieldStress;
 
 		#region Interface Implementations
 
@@ -135,7 +135,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Calculate maximum value of tensile strength that can be transmitted across cracks.
 		/// </summary>
-		public Pressure MaximumPrincipalTensileStress() => Ratio * (Steel.YieldStress - Steel.Stress);
+		public Pressure MaximumPrincipalTensileStress() => Ratio * (Steel.Parameters.YieldStress - Steel.Stress);
 
 		/// <summary>
 		///     Set steel strain and stress.

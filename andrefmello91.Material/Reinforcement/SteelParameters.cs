@@ -202,5 +202,14 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public static bool operator !=(SteelParameters left, SteelParameters right) => left.IsNotEqualTo(right);
 
+		/// <summary>
+		///		Create a steel from this parameters.
+		/// </summary>
+		public static implicit operator Steel(SteelParameters parameters) => new (parameters);
+
+		/// <summary>
+		///		Get this steel's parameters.
+		/// </summary>
+		public static implicit operator SteelParameters?(Steel? steel) => steel?.Parameters;
 	}
 }

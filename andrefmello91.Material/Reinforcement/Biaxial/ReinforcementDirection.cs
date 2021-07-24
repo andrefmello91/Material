@@ -49,7 +49,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get reinforcement initial stiffness (ratio multiplied by steel elastic module).
 		/// </summary>
-		public Pressure InitialStiffness => Ratio * Steel.ElasticModule;
+		public Pressure InitialStiffness => Ratio * Steel.Parameters.ElasticModule;
 
 		/// <summary>
 		///     Returns true if <see cref="Angle" /> is approximately zero.
@@ -93,7 +93,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get reinforcement yield stress (ratio multiplied by steel yield stress).
 		/// </summary>
-		public Pressure YieldStress => Ratio * Steel.YieldStress;
+		public Pressure YieldStress => Ratio * Steel.Parameters.YieldStress;
 
 		#region Interface Implementations
 

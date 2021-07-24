@@ -28,24 +28,16 @@ namespace andrefmello91.Material.Reinforcement
 		#region Properties
 
 		/// <summary>
-		///     Get elastic module.
+		///		The steel parameters.
 		/// </summary>
-		public Pressure ElasticModule { get; private set; }
-
-		/// <summary>
-		///     Get hardening module.
-		/// </summary>
-		public Pressure HardeningModule { get; private set; }
-
-		/// <summary>
-		///     Get hardening strain.
-		/// </summary>
-		public double HardeningStrain { get; }
-
+		public SteelParameters Parameters { get; }
+		
 		/// <summary>
 		///     Get current steel secant module.
 		/// </summary>
-		public Pressure SecantModule => Strain.ApproxZero() ? ElasticModule : Stress / Strain;
+		public Pressure SecantModule => Strain.ApproxZero() 
+			?Parameters.ElasticModule
+			: Stress / Strain;
 
 		/// <summary>
 		///     Get current strain.
@@ -57,21 +49,6 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Pressure Stress { get; private set; }
 
-		/// <summary>
-		///     Get ultimate strain.
-		/// </summary>
-		public double UltimateStrain { get; }
-
-		/// <summary>
-		///     Get yield strain.
-		/// </summary>
-		public double YieldStrain => YieldStress / ElasticModule;
-
-		/// <summary>
-		///     Get yield stress.
-		/// </summary>
-		public Pressure YieldStress { get; private set; }
-
 		#region Interface Implementations
 
 		/// <summary>
@@ -79,7 +56,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public PressureUnit Unit
 		{
-			get => YieldStress.Unit;
+			get => Parameters.Unit;
 			set => ChangeUnit(value);
 		}
 
@@ -89,13 +66,22 @@ namespace andrefmello91.Material.Reinforcement
 
 		#region Constructors
 
+		/// <summary>
+		///		Create a steel object from steel parameters.
+		/// </summary>
+		/// <param name="parameters">Steel parameters.</param>
+		public Steel(SteelParameters parameters)
+		{
+			Parameters = parameters;
+		}
+		
 		/// <inheritdoc cref="Steel(Pressure, Pressure, double)" />
 		/// <param name="unit">
 		///     The <see cref="PressureUnit" /> of <paramref name="yieldStress" /> and
 		///     <paramref name="elasticModule" />.
 		/// </param>
 		public Steel(double yieldStress, double elasticModule = 210000, double ultimateStrain = 0.01, PressureUnit unit = PressureUnit.Megapascal)
-			: this((Pressure) yieldStress.As(unit), (Pressure) elasticModule.As(unit), ultimateStrain)
+			: this(new SteelParameters(yieldStress, elasticModule, ultimateStrain, unit))
 		{
 		}
 
@@ -106,10 +92,8 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="elasticModule">Steel elastic module.</param>
 		/// <param name="ultimateStrain">Steel ultimate strain.</param>
 		public Steel(Pressure yieldStress, Pressure elasticModule, double ultimateStrain = 0.01)
+			: this (new SteelParameters(yieldStress, elasticModule, ultimateStrain))
 		{
-			YieldStress    = yieldStress;
-			ElasticModule  = elasticModule.ToUnit(yieldStress.Unit);
-			UltimateStrain = ultimateStrain.AsFinite();
 		}
 
 		/// <inheritdoc cref="Steel(Pressure, Pressure, Pressure, double, double)" />
@@ -126,11 +110,8 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="hardeningStrain">Steel strain at the beginning of hardening.</param>
 		/// <inheritdoc cref="Steel(Pressure, Pressure, double)" />
 		public Steel(Pressure yieldStress, Pressure elasticModule, Pressure hardeningModule, double hardeningStrain, double ultimateStrain = 0.01)
-			: this(yieldStress, elasticModule, ultimateStrain)
+			: this(new SteelParameters(yieldStress, elasticModule, hardeningModule, hardeningStrain, ultimateStrain))
 		{
-			_considerHardening = true;
-			HardeningModule    = hardeningModule.ToUnit(yieldStress.Unit);
-			HardeningStrain    = hardeningStrain.AsFinite();
 		}
 
 		#endregion
@@ -141,30 +122,30 @@ namespace andrefmello91.Material.Reinforcement
 		///     Calculate stress, given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		private Pressure CalculateStress(double strain)
+		private static Pressure CalculateStress(SteelParameters parameters, double strain)
 		{
 			// Correct value
 			strain = strain.AsFinite();
 
-			return _considerHardening switch
+			return parameters.ConsiderHardening switch
 			{
 				// Failure
-				{ } when strain.Abs() >= UltimateStrain => Pressure.Zero,
+				{ } when strain.Abs() >= parameters.UltimateStrain => Pressure.Zero,
 
 				// Elastic
-				{ } when strain.IsBetween(-YieldStrain, YieldStrain) => ElasticModule * strain,
+				{ } when strain.IsBetween(-parameters.YieldStrain, parameters.YieldStrain) => parameters.ElasticModule * strain,
 
 				// Compression yielding
-				{ } when strain.IsBetween(-UltimateStrain, -YieldStrain) => -YieldStress,
+				{ } when strain.IsBetween(-parameters.UltimateStrain, -parameters.YieldStrain) => -parameters.YieldStress,
 
 				// Tension yielding with no hardening
-				false when strain.IsBetween(YieldStrain, UltimateStrain) => YieldStress,
+				false when strain.IsBetween(parameters.YieldStrain, parameters.UltimateStrain) => parameters.YieldStress,
 
 				// Tension yielding with hardening
-				true when strain.IsBetween(YieldStrain, HardeningStrain) => YieldStress,
+				true when strain.IsBetween(parameters.YieldStrain, parameters.HardeningStrain) => parameters.YieldStress,
 
 				// Tension hardening (if considered)
-				true when strain.IsBetween(HardeningStrain, UltimateStrain) => YieldStress + HardeningModule * (strain - HardeningStrain),
+				true when strain.IsBetween(parameters.HardeningStrain, parameters.UltimateStrain) => parameters.YieldStress + parameters.HardeningModule * (strain - parameters.HardeningStrain),
 
 				// Default
 				_ => Pressure.Zero
@@ -174,10 +155,7 @@ namespace andrefmello91.Material.Reinforcement
 		}
 
 		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
-		public Steel Convert(PressureUnit unit) =>
-			!_considerHardening
-				? new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), UltimateStrain)
-				: new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), HardeningModule.ToUnit(unit), HardeningStrain, UltimateStrain);
+		public Steel Convert(PressureUnit unit) => new (Parameters.Convert(unit));
 
 		/// <summary>
 		///     Set steel strain and calculate stress.
@@ -186,24 +164,13 @@ namespace andrefmello91.Material.Reinforcement
 		public void Calculate(double strain)
 		{
 			Strain = strain.AsFinite();
-			Stress = CalculateStress(strain);
+			Stress = CalculateStress(Parameters, strain);
 		}
 
 		#region Interface Implementations
 
 		/// <inheritdoc />
-		public bool Approaches(Steel? other, Pressure tolerance)
-		{
-			if (other is null)
-				return false;
-
-			var basic = YieldStress.Approx(other.YieldStress, tolerance) && ElasticModule.Approx(other.ElasticModule, tolerance) && UltimateStrain.Approx(other.UltimateStrain);
-
-			if (!other._considerHardening)
-				return basic;
-
-			return basic && HardeningModule.Approx(other.HardeningModule, tolerance) && HardeningStrain.Approx(other.HardeningStrain);
-		}
+		public bool Approaches(Steel? other, Pressure tolerance) => other is not null && Parameters.Approaches(other.Parameters, tolerance);
 
 		/// <inheritdoc />
 		public void ChangeUnit(PressureUnit unit)
@@ -211,29 +178,19 @@ namespace andrefmello91.Material.Reinforcement
 			if (Unit == unit)
 				return;
 
-			YieldStress   = YieldStress.ToUnit(unit);
-			ElasticModule = ElasticModule.ToUnit(unit);
-			Stress        = Stress.ToUnit(unit);
-
-			if (!_considerHardening)
-				return;
-
-			HardeningModule = HardeningModule.ToUnit(unit);
+			Parameters.ChangeUnit(unit);
+			Stress = Stress.ToUnit(unit);
 		}
 
 		/// <inheritdoc />
-		public Steel Clone() => !_considerHardening
-			? new Steel(YieldStress, ElasticModule, UltimateStrain)
-			: new Steel(YieldStress, ElasticModule, HardeningModule, HardeningStrain, UltimateStrain);
+		public Steel Clone() => new (Parameters.Clone());
 
 
 		/// <inheritdoc />
 		public int CompareTo(Steel? other) =>
-			other is null || YieldStress > other.YieldStress || YieldStress.Approx(other.YieldStress, Tolerance) && ElasticModule > other.ElasticModule
-				? 1
-				: YieldStress.Approx(other.YieldStress, Tolerance) && ElasticModule.Approx(other.ElasticModule, Tolerance)
-					? 0
-					: -1;
+			other is not null
+				? Parameters.CompareTo(other.Parameters)
+				: 1;
 
 		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
@@ -248,27 +205,10 @@ namespace andrefmello91.Material.Reinforcement
 		public override bool Equals(object? other) => other is Steel steel && Equals(steel);
 
 		/// <inheritdoc />
-		public override int GetHashCode() => (int) ElasticModule.Gigapascals * (int) YieldStress.Megapascals;
+		public override int GetHashCode() => Parameters.GetHashCode();
 
 		/// <inheritdoc />
-		public override string ToString()
-		{
-			var epsilon = (char) Characters.Epsilon;
-
-			var msg =
-				"Steel Parameters:\n" +
-				$"fy = {YieldStress}\n" +
-				$"Es = {ElasticModule}\n" +
-				$"{epsilon}y = {YieldStrain:0.##E+00}";
-
-			if (_considerHardening)
-				msg += "\n\n" +
-				       "Hardening parameters:\n" +
-				       $"Es = {HardeningModule}\n" +
-				       $"{epsilon}y = {HardeningStrain:0.##E+00}";
-
-			return msg;
-		}
+		public override string ToString() => Parameters.ToString();
 
 		#endregion
 
