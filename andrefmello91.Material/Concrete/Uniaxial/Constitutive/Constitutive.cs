@@ -108,12 +108,10 @@ namespace andrefmello91.Material.Concrete
 			{
 				if (strain.ApproxZero())
 					return Pressure.Zero;
-				
-				VerifyCrackedState(strain);
 
-				return Cracked
-					? CrackedStress(strain, reinforcement)
-					: UncrackedStress(strain);
+				return strain <= Parameters.CrackingStrain
+					? UncrackedStress(strain)
+					: CrackedStress(strain, reinforcement);
 			}
 
 			/// <summary>
