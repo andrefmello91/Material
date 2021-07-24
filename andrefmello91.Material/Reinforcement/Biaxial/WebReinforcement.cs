@@ -16,7 +16,7 @@ namespace andrefmello91.Material.Reinforcement
 	/// <summary>
 	///     Web reinforcement class.
 	/// </summary>
-	public class WebReinforcement : IUnitConvertible<LengthUnit>, IApproachable<WebReinforcement, Length>, IComparable<WebReinforcement>, IEquatable<WebReinforcement>, ICloneable<WebReinforcement>
+	public class WebReinforcement : IBiaxialMaterial, IUnitConvertible<LengthUnit>, IApproachable<WebReinforcement, Length>, IComparable<WebReinforcement>, IEquatable<WebReinforcement>, ICloneable<WebReinforcement>
 	{
 
 		#region Fields
@@ -93,6 +93,12 @@ namespace andrefmello91.Material.Reinforcement
 					(MaterialMatrix) Ds.Transform(t);
 			}
 		}
+
+		/// <inheritdoc />
+		PrincipalStrainState IBiaxialMaterial.PrincipalStrains => (PrincipalStrainState) Strains;
+
+		/// <inheritdoc />
+		PrincipalStressState IBiaxialMaterial.PrincipalStresses => (PrincipalStressState) Stresses;
 
 		/// <summary>
 		///     Get/set reinforcement <see cref="StrainState" />, at horizontal plane.
@@ -311,13 +317,16 @@ namespace andrefmello91.Material.Reinforcement
 		///     Calculate current <see cref="StressState" />, in MPa.
 		/// </summary>
 		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
-		public void CalculateStresses(StrainState strainsState)
+		public void Calculate(StrainState strainsState)
 		{
 			// Set strains
-			Strains = strainsState.Clone();
+			Strains = strainsState.ThetaX.Approx(DirectionX?.Angle ?? 0, 1E-3)
+				? strainsState
+				: strainsState.Transform((DirectionX?.Angle ?? 0) - strainsState.ThetaX);
 
-			// Transform directions and calculate stresses in steel
-			SetStrainsAndStresses(StrainState.Transform(Strains, DirectionX?.Angle ?? 0));
+			// Calculate stresses
+			DirectionX?.Calculate(Strains.EpsilonX);
+			DirectionY?.Calculate(Strains.EpsilonY);
 		}
 
 		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
@@ -346,36 +355,6 @@ namespace andrefmello91.Material.Reinforcement
 			// Check the maximum value of fc1 that can be transmitted across cracks
 			return
 				fcx * cosNx * cosNx + fcy * cosNy * cosNy;
-		}
-
-		/// <summary>
-		///     Set steel <see cref="StrainState" />.
-		/// </summary>
-		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
-		public void SetStrains(StrainState strainsState)
-		{
-			DirectionX?.Steel?.SetStrain(strainsState.EpsilonX);
-			DirectionY?.Steel?.SetStrain(strainsState.EpsilonY);
-		}
-
-		/// <summary>
-		///     Set steel <see cref="StrainState" /> and calculate <see cref="StressState" />, in MPa.
-		/// </summary>
-		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
-		public void SetStrainsAndStresses(StrainState strainsState)
-		{
-			SetStrains(strainsState);
-			SetStresses(strainsState);
-		}
-
-		/// <summary>
-		///     Set steel <see cref="StressState" />, given <see cref="StrainState" />.
-		/// </summary>
-		/// <param name="strainsState">Current <see cref="StrainState" />.</param>
-		public void SetStresses(StrainState strainsState)
-		{
-			DirectionX?.Steel?.SetStress(strainsState.EpsilonX);
-			DirectionY?.Steel?.SetStress(strainsState.EpsilonY);
 		}
 
 		#region Interface Implementations

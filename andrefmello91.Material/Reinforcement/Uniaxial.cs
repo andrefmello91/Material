@@ -11,7 +11,7 @@ namespace andrefmello91.Material.Reinforcement
 	/// <summary>
 	///     Uniaxial reinforcement class.
 	/// </summary>
-	public class UniaxialReinforcement : IUnitConvertible<LengthUnit>, IApproachable<UniaxialReinforcement, Length>, IEquatable<UniaxialReinforcement>, IComparable<UniaxialReinforcement>, ICloneable<UniaxialReinforcement>
+	public class UniaxialReinforcement : IUniaxialMaterial, IUnitConvertible<LengthUnit>, IApproachable<UniaxialReinforcement, Length>, IEquatable<UniaxialReinforcement>, IComparable<UniaxialReinforcement>, ICloneable<UniaxialReinforcement>
 	{
 
 		#region Fields
@@ -26,7 +26,7 @@ namespace andrefmello91.Material.Reinforcement
 		#region Properties
 
 		/// <summary>
-		///     Get reinforcement area.
+		///     The reinforcement area.
 		/// </summary>
 		public Area Area { get; private set; }
 
@@ -41,9 +41,15 @@ namespace andrefmello91.Material.Reinforcement
 		public Area ConcreteArea { get; set; }
 
 		/// <summary>
-		///     Get current force.
+		///     The current force.
 		/// </summary>
 		public Force Force => Area * Steel.Stress;
+
+		/// <inheritdoc />
+		public double Strain => Steel.Strain;
+
+		/// <inheritdoc />
+		public Pressure Stress => Steel.Stress;
 
 		/// <summary>
 		///     Get number of reinforcing bars.
@@ -53,7 +59,9 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get reinforcement ratio in the cross-section.
 		/// </summary>
-		public double Ratio => ConcreteArea == Area.Zero ? 0 : Area / ConcreteArea;
+		public double Ratio => ConcreteArea == Area.Zero 
+			? 0 
+			: Area / ConcreteArea;
 
 		/// <summary>
 		///     Get <see cref="Reinforcement.Steel" /> of this.
@@ -113,12 +121,6 @@ namespace andrefmello91.Material.Reinforcement
 
 		#region Methods
 
-		/// <summary>
-		///     Calculate current force.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public Force CalculateForce(double strain) => Area * Steel.CalculateStress(strain);
-
 		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public UniaxialReinforcement Convert(LengthUnit unit) => new(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), ConcreteArea.ToUnit(unit.GetAreaUnit()));
 
@@ -136,22 +138,10 @@ namespace andrefmello91.Material.Reinforcement
 		public Pressure MaximumPrincipalTensileStress() => Ratio * (Steel.YieldStress - Steel.Stress);
 
 		/// <summary>
-		///     Set steel strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public void SetStrain(double strain) => Steel.SetStrain(strain);
-
-		/// <summary>
 		///     Set steel strain and stress.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public void SetStrainAndStress(double strain) => Steel.SetStrainAndStress(strain);
-
-		/// <summary>
-		///     Set steel stress, given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public void SetStress(double strain) => Steel.SetStress(strain);
+		public void Calculate(double strain) => Steel.Calculate(strain);
 
 		/// <summary>
 		///     Calculated reinforcement area.

@@ -13,7 +13,7 @@ namespace andrefmello91.Material.Concrete
 	/// <summary>
 	///     Biaxial concrete for membrane calculations.
 	/// </summary>
-	public partial class BiaxialConcrete : Concrete, ICloneable<BiaxialConcrete>
+	public partial class BiaxialConcrete : Concrete, IBiaxialMaterial, ICloneable<BiaxialConcrete>
 	{
 
 		#region Properties

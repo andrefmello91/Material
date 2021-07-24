@@ -8,7 +8,7 @@ namespace andrefmello91.Material.Concrete
 	/// <summary>
 	///     Concrete uniaxial class.
 	/// </summary>
-	public partial class UniaxialConcrete : Concrete, ICloneable<UniaxialConcrete>
+	public partial class UniaxialConcrete : Concrete, IUniaxialMaterial, ICloneable<UniaxialConcrete>
 	{
 
 		#region Fields
@@ -23,12 +23,12 @@ namespace andrefmello91.Material.Concrete
 		#region Properties
 
 		/// <summary>
-		///     Get concrete area.
+		///     The concrete area.
 		/// </summary>
 		public Area Area { get; }
 
 		/// <summary>
-		///     Calculate current concrete force.
+		///     The current concrete force.
 		/// </summary>
 		public Force Force => Stress * Area;
 
@@ -48,12 +48,12 @@ namespace andrefmello91.Material.Concrete
 		public Force Stiffness => Parameters.ElasticModule * Area;
 
 		/// <summary>
-		///     Get/set concrete strain.
+		///     The concrete strain.
 		/// </summary>
 		public double Strain { get; private set; }
 
 		/// <summary>
-		///     Get/set concrete stress.
+		///     The concrete stress.
 		/// </summary>
 		public Pressure Stress { get; private set; }
 
@@ -78,13 +78,6 @@ namespace andrefmello91.Material.Concrete
 		#region Methods
 
 		/// <summary>
-		///     Calculate force given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		/// <param name="reinforcement">The uniaxial reinforcement (only for DSFM).</param>
-		public Force CalculateForce(double strain, UniaxialReinforcement? reinforcement = null) => Area * CalculateStress(strain, reinforcement);
-
-		/// <summary>
 		///     Calculate stress given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
@@ -92,13 +85,7 @@ namespace andrefmello91.Material.Concrete
 		///     The <see cref="UniaxialReinforcement" /> (only for
 		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
 		/// </param>
-		public Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
-
-		/// <summary>
-		///     Set concrete strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public void SetStrain(double strain) => Strain = strain;
+		private Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
 
 		/// <summary>
 		///     Set concrete strain and calculate stress, in MPa.
@@ -108,21 +95,14 @@ namespace andrefmello91.Material.Concrete
 		///     The <see cref="UniaxialReinforcement" /> (only for
 		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
 		/// </param>
-		public void SetStrainsAndStresses(double strain, UniaxialReinforcement? reinforcement = null)
+		public void Calculate(double strain, UniaxialReinforcement? reinforcement = null)
 		{
-			SetStrain(strain);
-			SetStress(strain, reinforcement);
+			Strain = strain;
+			Stress = CalculateStress(strain, reinforcement);
 		}
 
-		/// <summary>
-		///     Set concrete stress (in MPa) given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		/// <param name="reinforcement">
-		///     The <see cref="UniaxialReinforcement" /> (only for
-		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
-		/// </param>
-		public void SetStress(double strain, UniaxialReinforcement? reinforcement = null) => Stress = CalculateStress(strain, reinforcement);
+		/// <inheritdoc />
+		void IUniaxialMaterial.Calculate(double strain) => Calculate(strain);
 
 		#region Interface Implementations
 

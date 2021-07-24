@@ -141,7 +141,7 @@ namespace andrefmello91.Material.Reinforcement
 		///     Calculate stress, given strain.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public Pressure CalculateStress(double strain)
+		private Pressure CalculateStress(double strain)
 		{
 			// Correct value
 			strain = strain.AsFinite();
@@ -180,26 +180,14 @@ namespace andrefmello91.Material.Reinforcement
 				: new Steel(YieldStress.ToUnit(unit), ElasticModule.ToUnit(unit), HardeningModule.ToUnit(unit), HardeningStrain, UltimateStrain);
 
 		/// <summary>
-		///     Set steel strain.
+		///     Set steel strain and calculate stress.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
-		public void SetStrain(double strain) => Strain = strain.AsFinite();
-
-		/// <summary>
-		///     Set steel strain and stress.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public void SetStrainAndStress(double strain)
+		public void Calculate(double strain)
 		{
-			SetStrain(strain);
-			SetStress(strain);
+			Strain = strain.AsFinite();
+			Stress = CalculateStress(strain);
 		}
-
-		/// <summary>
-		///     Set steel stress, given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public void SetStress(double strain) => Stress = CalculateStress(strain);
 
 		#region Interface Implementations
 
