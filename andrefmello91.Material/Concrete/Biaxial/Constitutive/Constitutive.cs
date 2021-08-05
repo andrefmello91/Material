@@ -136,9 +136,14 @@ namespace andrefmello91.Material.Concrete
 					default:
 						return new StressState(0, 0, 0, strainsAtAvgPrincipal.ThetaX);
 				}
-				
+
+				// Calculate shear stress (for SMM)
+				var tau = Model is ConstitutiveModel.SMM
+					? 0.5 * yxy * (fc1 - fc2) / (ec1 - ec2)
+					: Pressure.Zero;
+
 				return
-					new StressState(fc1, fc2, Pressure.Zero, strainsAtAvgPrincipal.ThetaX);
+					new StressState(fc1, fc2, tau, strainsAtAvgPrincipal.ThetaX);
 			}
 
 			/// <summary>
