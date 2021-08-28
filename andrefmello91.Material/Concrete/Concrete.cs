@@ -59,6 +59,14 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		public IConcreteParameters Parameters { get; }
 
+		/// <summary>
+		///		Check if concrete is cracked.
+		/// </summary>
+		/// <returns>
+		///		<b>True</b> if concrete is cracked.
+		///	</returns>
+		public abstract bool Cracked { get; }
+
 		#endregion
 
 		#region Constructors

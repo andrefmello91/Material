@@ -34,10 +34,20 @@ namespace andrefmello91.Material.Concrete
 
 			#region Interface Implementations
 
+			/// <summary>
+			///		The crack slip consideration.
+			/// </summary>
+			/// <remarks>
+			///		Only for <see cref="ConstitutiveModel.DSFM"/>.
+			/// </remarks>
 			public bool ConsiderCrackSlip { get; set; }
 
-			public bool Cracked { get; set; }
+			/// <inheritdoc cref="Concrete.Cracked"/>
+			public bool Cracked { get; private set; }
 
+			/// <summary>
+			///		The constitutive model of concrete.
+			/// </summary>
 			public abstract ConstitutiveModel Model { get; }
 
 			#endregion
@@ -264,7 +274,7 @@ namespace andrefmello91.Material.Concrete
 				var fc1 = ec1 * Parameters.ElasticModule;
 
 				// Verify if fc1 cracks concrete
-				VerifyCrackedState(fc1, ec2);
+				CheckCrackedState(fc1, ec2);
 
 				return fc1;
 			}
@@ -341,11 +351,8 @@ namespace andrefmello91.Material.Concrete
 			/// </summary>
 			/// <param name="fc1">Principal tensile stress.</param>
 			/// <param name="ec2">Principal compressive strain.</param>
-			private void VerifyCrackedState(Pressure fc1, double ec2)
+			private void CheckCrackedState(Pressure fc1, double ec2)
 			{
-				if (Cracked)
-					return;
-
 				var ft = Parameters.TensileStrength;
 				var ec = Parameters.PlasticStrain;
 
@@ -357,10 +364,7 @@ namespace andrefmello91.Material.Concrete
 				fcr = Min(fcr, ft);
 
 				// Verify is concrete is cracked
-				if (fc1 >= fcr)
-
-					// Set cracked state
-					Cracked = true;
+				Cracked = fc1 >= fcr;
 			}
 
 			#region Interface Implementations
@@ -372,6 +376,7 @@ namespace andrefmello91.Material.Concrete
 
 			#region Object override
 
+			/// <inheritdoc/>
 			public override string ToString() => $"{Model}";
 
 			#endregion

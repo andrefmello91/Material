@@ -27,10 +27,19 @@ namespace andrefmello91.Material.Concrete
 
 			#region Interface Implementations
 
-			public bool ConsiderCrackSlip { get; protected set; }
-
+			/// <summary>
+			///		The constitutive model of concrete.
+			/// </summary>
 			public abstract ConstitutiveModel Model { get; }
 
+			/// <summary>
+			///		Check if concrete is cracked.
+			/// </summary>
+			/// <returns>
+			///		<b>True</b> if concrete is cracked.
+			///	</returns>
+			public bool Cracked { get; private set; }
+			
 			#endregion
 
 			#endregion
@@ -108,11 +117,22 @@ namespace andrefmello91.Material.Concrete
 				if (strain.ApproxZero())
 					return Pressure.Zero;
 
-				return strain <= Parameters.CrackingStrain
+				CheckCrackedState(strain);
+				
+				return !Cracked
 					? UncrackedStress(strain)
 					: CrackedStress(strain, reinforcement);
 			}
 
+			/// <summary>
+			///		Check if concrete is cracked based on <paramref name="strain"/>.
+			/// </summary>
+			/// <inheritdoc cref="UncrackedStress"/>
+			private void CheckCrackedState(double strain)
+			{
+				Cracked = strain >= Parameters.CrackingStrain;
+			}
+			
 			/// <summary>
 			///		Calculate the tensile strain for uncracked state.
 			/// </summary>

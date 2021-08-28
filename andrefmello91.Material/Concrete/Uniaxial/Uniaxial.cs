@@ -57,6 +57,9 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		public Pressure Stress { get; private set; }
 
+		/// <inheritdoc />
+		public override bool Cracked => _constitutive.Cracked;
+
 		#endregion
 
 		#region Constructors
@@ -112,6 +115,7 @@ namespace andrefmello91.Material.Concrete
 		#endregion
 
 		#region Object override
+
 
 		/// <inheritdoc />
 		public override bool Equals(Concrete? other) => other is UniaxialConcrete && base.Equals(other);

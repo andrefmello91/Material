@@ -35,7 +35,7 @@ namespace andrefmello91.Material.Concrete
 		/// <summary>
 		///     Returns true if concrete is cracked.
 		/// </summary>
-		public bool Cracked => ConstitutiveEquations.Cracked;
+		public override bool Cracked => ConstitutiveEquations.Cracked;
 
 		/// <summary>
 		///     Get/set Cs coefficient for concrete softening.
