@@ -41,6 +41,11 @@ namespace andrefmello91.Material.Reinforcement
 		public Length BarSpacing { get; private set; }
 
 		/// <summary>
+		///		The number of stirrup legs/ branches.
+		/// </summary>
+		public int NumberOfLegs { get; }
+		
+		/// <summary>
 		///     Get reinforcement capacity reserve for tension.
 		///     <para>(<see cref="YieldStress" /> - <see cref="Stress" />).</para>
 		/// </summary>
@@ -113,34 +118,26 @@ namespace andrefmello91.Material.Reinforcement
 
 		#region Constructors
 
-		/// <inheritdoc cref="WebReinforcementDirection" />
-		/// <param name="unit">
-		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
-		///     <paramref name="width" />.
-		/// </param>
-		public WebReinforcementDirection(double barDiameter, double barSpacing, [NotNull] Steel steel, double width, double angle, LengthUnit unit = LengthUnit.Millimeter)
-			: this((Length) barDiameter.As(unit), (Length) barSpacing.As(unit), steel, (Length) width.As(unit), angle)
-		{
-		}
-
 		/// <summary>
 		///     Reinforcement direction object for web reinforcement.
 		/// </summary>
 		/// <param name="barDiameter">The bar diameter.</param>
 		/// <param name="barSpacing">The bar spacing.</param>
-		/// <param name="steel">The steel object (not null).</param>
+		/// <param name="steelParameters">The steel object (not null).</param>
 		/// <param name="width">The width of cross-section.</param>
 		/// <param name="angle">
 		///     The angle (in radians) of this <see cref="WebReinforcementDirection" />, related to horizontal axis.
 		///     <para><paramref name="angle" /> is positive if counterclockwise.</para>
 		/// </param>
-		public WebReinforcementDirection(Length barDiameter, Length barSpacing, [NotNull] Steel steel, Length width, double angle)
+		/// <param name="numberOfLegs">The number of stirrup legs/ branches. Default: 2.</param>
+		private WebReinforcementDirection(Length barDiameter, Length barSpacing, SteelParameters steelParameters, Length width, double angle, int numberOfLegs = 2)
 		{
-			BarDiameter = barDiameter;
-			BarSpacing  = barSpacing.ToUnit(barDiameter.Unit);
-			Steel       = steel;
-			_width      = width.ToUnit(barDiameter.Unit);
-			Angle       = angle;
+			BarDiameter  = barDiameter;
+			BarSpacing   = barSpacing.ToUnit(barDiameter.Unit);
+			Steel        = steelParameters;
+			_width       = width.ToUnit(barDiameter.Unit);
+			Angle        = angle;
+			NumberOfLegs = numberOfLegs;
 		}
 
 		#endregion
@@ -150,10 +147,10 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Calculate reinforcement ratio for distributed reinforcement.
 		/// </summary>
-		public static double CalculateRatio(WebReinforcementDirection? direction) =>
+		private static double CalculateRatio(WebReinforcementDirection? direction) =>
 			direction is null || direction.BarDiameter.ApproxZero(Tolerance) || direction.BarSpacing.ApproxZero(Tolerance) || direction.Width.ApproxZero(Tolerance)
 				? 0
-				: 0.5 * Constants.Pi * direction.BarDiameter * direction.BarDiameter / (direction.BarSpacing * direction.Width);
+				: 0.25 * direction.NumberOfLegs * Constants.Pi * direction.BarDiameter * direction.BarDiameter / (direction.BarSpacing * direction.Width);
 
 		/// <summary>
 		///     Calculate the crack spacing at this direction, according to Kaklauskas (2019) expression.
@@ -163,27 +160,25 @@ namespace andrefmello91.Material.Reinforcement
 				? Length.FromMillimeters(21)
 				: Length.FromMillimeters(21) + 0.155 * BarDiameter / Ratio;
 
-		/// <inheritdoc cref="GetDirection(Length, Length, Reinforcement.Steel?, Length, double)" />
-		/// <inheritdoc cref="WebReinforcementDirection(double, double, Reinforcement.Steel, double, double, LengthUnit)"
-		///     select="params" />
-		public static WebReinforcementDirection? GetDirection(double barDiameter, double barSpacing, Steel? steel, double width, double angle, LengthUnit unit = LengthUnit.Millimeter) =>
-			GetDirection((Length) barDiameter.As(unit), (Length) barSpacing.As(unit), steel, (Length) width.As(unit), angle);
+		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)" />
+		/// <param name="unit">The unit of <paramref name="barDiameter"/>, <paramref name="barSpacing"/> and <paramref name="width"/>.</param>
+		public static WebReinforcementDirection? From(double barDiameter, double barSpacing, SteelParameters steelParameters, double width, double angle, int numberOfLegs = 2, LengthUnit unit = LengthUnit.Millimeter) =>
+			From((Length) barDiameter.As(unit), (Length) barSpacing.As(unit), steelParameters, (Length) width.As(unit), angle, numberOfLegs);
 
 		/// <summary>
 		///     Get a <see cref="WebReinforcementDirection" />.
 		/// </summary>
 		/// <returns>
-		///     Null if <paramref name="barDiameter" /> or <paramref name="barSpacing" /> are zero, or if
-		///     <paramref name="steel" /> is null.
+		///     Null any of <paramref name="barDiameter" /> or <paramref name="barSpacing" /> is zero.
 		/// </returns>
-		/// <inheritdoc cref="WebReinforcementDirection(Length, Length, Reinforcement.Steel, Length, double)" select="params" />
-		public static WebReinforcementDirection? GetDirection(Length barDiameter, Length barSpacing, Steel? steel, Length width, double angle) =>
-			steel is null || barDiameter.ApproxZero(Tolerance) || barSpacing.ApproxZero(Tolerance)
+		/// <inheritdoc cref="WebReinforcementDirection(Length, Length, SteelParameters, Length, double, int)" select="params" />
+		public static WebReinforcementDirection? From(Length barDiameter, Length barSpacing, SteelParameters steelParameters, Length width, double angle, int numberOfLegs = 2) =>
+			barDiameter.ApproxZero(Tolerance) || barSpacing.ApproxZero(Tolerance)
 				? null
-				: new WebReinforcementDirection(barDiameter, barSpacing, steel, width, angle);
+				: new WebReinforcementDirection(barDiameter, barSpacing, steelParameters, width, angle, numberOfLegs);
 
 		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
-		public WebReinforcementDirection Convert(LengthUnit unit) => new(BarDiameter.ToUnit(unit), BarSpacing.ToUnit(unit), Steel.Clone(), Width.ToUnit(unit), Angle);
+		public WebReinforcementDirection Convert(LengthUnit unit) => new(BarDiameter.ToUnit(unit), BarSpacing.ToUnit(unit), Steel.Parameters.Clone(), Width.ToUnit(unit), Angle);
 
 		/// <summary>
 		///     Compare two reinforcement objects.
@@ -218,7 +213,7 @@ namespace andrefmello91.Material.Reinforcement
 		}
 
 		/// <inheritdoc />
-		public WebReinforcementDirection Clone() => new(BarDiameter, BarSpacing, Steel.Clone(), Width, Angle);
+		public WebReinforcementDirection Clone() => new(BarDiameter, BarSpacing, Steel.Parameters.Clone(), Width, Angle);
 
 		/// <inheritdoc />
 		public int CompareTo(WebReinforcementDirection? other) =>
