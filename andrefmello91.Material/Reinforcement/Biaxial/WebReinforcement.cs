@@ -3,7 +3,6 @@ using andrefmello91.Extensions;
 using andrefmello91.Material.Concrete;
 using andrefmello91.OnPlaneComponents;
 using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using UnitsNet;
 using UnitsNet.Units;
@@ -51,7 +50,7 @@ namespace andrefmello91.Material.Reinforcement
 
 				if (DirectionX is not null)
 					Ds[0, 0] = DirectionX.InitialStiffness;
-				
+
 				if (DirectionY is not null)
 					Ds[1, 1] = DirectionY.InitialStiffness;
 
@@ -63,66 +62,6 @@ namespace andrefmello91.Material.Reinforcement
 
 				return
 					(MaterialMatrix) Ds.Transform(t);
-			}
-		}
-
-		/// <summary>
-		///     Get current <see cref="WebReinforcement" /> stiffness <see cref="Matrix" /> with elements in
-		///     <see cref="PressureUnit.Megapascal" />.
-		/// </summary>
-		public MaterialMatrix Stiffness
-		{
-			get
-			{
-				// Steel matrix
-				var Ds = MaterialMatrix.Zero();
-
-				if (DirectionX is not null)
-					Ds[0, 0] = DirectionX.Stiffness;
-				
-				if (DirectionY is not null)
-					Ds[1, 1] = DirectionY.Stiffness;
-
-				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
-					return Ds;
-
-				// Transform
-				var t = StrainRelations.TransformationMatrix(DirectionX?.Angle ?? DirectionY?.Angle - Constants.PiOver2 ?? 0);
-
-				return
-					(MaterialMatrix) Ds.Transform(t);
-			}
-		}
-
-		/// <inheritdoc />
-		PrincipalStrainState IBiaxialMaterial.PrincipalStrains => (PrincipalStrainState) Strains;
-
-		/// <inheritdoc />
-		PrincipalStressState IBiaxialMaterial.PrincipalStresses => (PrincipalStressState) Stresses;
-
-		/// <summary>
-		///     Get/set reinforcement <see cref="StrainState" />, at horizontal plane.
-		/// </summary>
-		public StrainState Strains { get; private set; }
-
-		/// <summary>
-		///     Get reinforcement <see cref="StressState" />, transformed to horizontal plane.
-		/// </summary>
-		public StressState Stresses
-		{
-			get
-			{
-				Pressure
-					fsx = DirectionX?.Stress ?? Pressure.Zero,
-					fsy = DirectionY?.Stress ?? Pressure.Zero;
-
-				var stresses = new StressState(fsx, fsy, Pressure.Zero);
-
-				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
-					return stresses;
-
-				return
-					stresses.Transform(-DirectionX?.Angle ?? 0);
 			}
 		}
 
@@ -157,7 +96,65 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public bool YReinforced => DirectionY is not null && DirectionY.BarDiameter > Length.Zero && DirectionY.BarSpacing > Length.Zero;
 
-		#region Interface Implementations
+		/// <summary>
+		///     Get current <see cref="WebReinforcement" /> stiffness <see cref="Matrix" /> with elements in
+		///     <see cref="PressureUnit.Megapascal" />.
+		/// </summary>
+		public MaterialMatrix Stiffness
+		{
+			get
+			{
+				// Steel matrix
+				var Ds = MaterialMatrix.Zero();
+
+				if (DirectionX is not null)
+					Ds[0, 0] = DirectionX.Stiffness;
+
+				if (DirectionY is not null)
+					Ds[1, 1] = DirectionY.Stiffness;
+
+				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
+					return Ds;
+
+				// Transform
+				var t = StrainRelations.TransformationMatrix(DirectionX?.Angle ?? DirectionY?.Angle - Constants.PiOver2 ?? 0);
+
+				return
+					(MaterialMatrix) Ds.Transform(t);
+			}
+		}
+
+		/// <summary>
+		///     Get/set reinforcement <see cref="StrainState" />, at horizontal plane.
+		/// </summary>
+		public StrainState Strains { get; private set; }
+
+		/// <summary>
+		///     Get reinforcement <see cref="StressState" />, transformed to horizontal plane.
+		/// </summary>
+		public StressState Stresses
+		{
+			get
+			{
+				Pressure
+					fsx = DirectionX?.Stress ?? Pressure.Zero,
+					fsy = DirectionY?.Stress ?? Pressure.Zero;
+
+				var stresses = new StressState(fsx, fsy, Pressure.Zero);
+
+				if ((DirectionX is null || DirectionX.IsHorizontal) && (DirectionY is null || DirectionY.IsVertical))
+					return stresses;
+
+				return
+					stresses.Transform(-DirectionX?.Angle ?? 0);
+			}
+		}
+
+		/// <inheritdoc />
+		PrincipalStrainState IBiaxialMaterial.PrincipalStrains => (PrincipalStrainState) Strains;
+
+		/// <inheritdoc />
+		PrincipalStressState IBiaxialMaterial.PrincipalStresses => (PrincipalStressState) Stresses;
 
 		/// <inheritdoc />
 		public LengthUnit Unit
@@ -168,14 +165,7 @@ namespace andrefmello91.Material.Reinforcement
 
 		#endregion
 
-		#endregion
-
 		#region Constructors
-
-		private WebReinforcement(WebReinforcementDirection? directionX, WebReinforcementDirection? directionY, double width, LengthUnit unit = LengthUnit.Millimeter)
-			: this(directionX, directionY, (Length) width.As(unit))
-		{
-		}
 
 		/// <summary>
 		///     Create a web reinforcement, with different X and Y directions.
@@ -205,17 +195,22 @@ namespace andrefmello91.Material.Reinforcement
 				DirectionY.Width = width;
 		}
 
+		private WebReinforcement(WebReinforcementDirection? directionX, WebReinforcementDirection? directionY, double width, LengthUnit unit = LengthUnit.Millimeter)
+			: this(directionX, directionY, (Length) width.As(unit))
+		{
+		}
+
 		#endregion
 
 		#region Methods
 
-		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)"/>
+		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)" />
 		/// <param name="unit">
 		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
 		///     <paramref name="width" />.
 		/// </param>
 		public static WebReinforcement From(double barDiameter, double barSpacing, SteelParameters steel, double width, double angleX = 0, int numberOfLegs = 2, LengthUnit unit = LengthUnit.Millimeter) =>
-			From((Length)barDiameter.As(unit), (Length)barSpacing.As(unit), steel, (Length)width.As(unit), angleX, numberOfLegs);
+			From((Length) barDiameter.As(unit), (Length) barSpacing.As(unit), steel, (Length) width.As(unit), angleX, numberOfLegs);
 
 
 		/// <summary>
@@ -233,9 +228,10 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="numberOfLegs">The number of stirrup legs/ branches.</param>
 		public static WebReinforcement From(Length barDiameter, Length barSpacing, SteelParameters steel, Length width, double angleX = 0, int numberOfLegs = 2) =>
 			new(WebReinforcementDirection.From(barDiameter, barSpacing, steel, width, angleX, numberOfLegs), WebReinforcementDirection.From(barDiameter, barSpacing, steel.Clone(), width, angleX + Constants.PiOver2, numberOfLegs), width);
-			
 
-		/// <inheritdoc cref="XOnly(UnitsNet.Length,UnitsNet.Length,andrefmello91.Material.Reinforcement.SteelParameters,UnitsNet.Length,double,int)" />
+
+		/// <inheritdoc
+		///     cref="XOnly(UnitsNet.Length,UnitsNet.Length,andrefmello91.Material.Reinforcement.SteelParameters,UnitsNet.Length,double,int)" />
 		/// <param name="unit">
 		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
 		///     <paramref name="width" />.
@@ -246,14 +242,15 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get a <see cref="WebReinforcement" /> with <see cref="DirectionX" /> only.
 		/// </summary>
-		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)"/>
+		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)" />
 		/// <param name="barDiameter">The bar diameter for X direction.</param>
 		/// <param name="barSpacing">The bar spacing for X direction.</param>
 		/// <param name="steel">The steel objects for X direction.</param>
 		public static WebReinforcement XOnly(Length barDiameter, Length barSpacing, SteelParameters steel, Length width, double angleX = 0, int numberOfLegs = 2) =>
 			new(WebReinforcementDirection.From(barDiameter, barSpacing, steel, width, angleX, numberOfLegs), null, width);
 
-		/// <inheritdoc cref="YOnly(UnitsNet.Length,UnitsNet.Length,andrefmello91.Material.Reinforcement.SteelParameters,UnitsNet.Length,double,int)" />
+		/// <inheritdoc
+		///     cref="YOnly(UnitsNet.Length,UnitsNet.Length,andrefmello91.Material.Reinforcement.SteelParameters,UnitsNet.Length,double,int)" />
 		/// <param name="unit">
 		///     The <see cref="LengthUnit" /> of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
 		///     <paramref name="width" />.
@@ -264,7 +261,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get a <see cref="WebReinforcement" /> with <see cref="DirectionY" /> only.
 		/// </summary>
-		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)"/>
+		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)" />
 		/// <param name="barDiameter">The bar diameter for Y direction.</param>
 		/// <param name="barSpacing">The bar spacing for  Y direction.</param>
 		/// <param name="steel">The steel objects for Y direction.</param>
@@ -291,21 +288,14 @@ namespace andrefmello91.Material.Reinforcement
 				(thetaNx, thetaNy);
 		}
 
-		/// <inheritdoc />
-		public void Calculate(StrainState strainsState)
-		{
-			// Set strains
-			Strains = strainsState.ThetaX.Approx(DirectionX?.Angle ?? 0, 1E-3)
-				? strainsState
-				: strainsState.Transform((DirectionX?.Angle ?? 0) - strainsState.ThetaX);
-
-			// Calculate stresses
-			DirectionX?.Calculate(Strains.EpsilonX);
-			DirectionY?.Calculate(Strains.EpsilonY);
-		}
-
 		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public WebReinforcement Convert(LengthUnit unit) => new(DirectionX?.Convert(unit), DirectionY?.Convert(unit), _width.ToUnit(unit));
+
+		/// <inheritdoc />
+		public override bool Equals(object? other) => other is WebReinforcement reinforcement && Equals(reinforcement);
+
+		/// <inheritdoc />
+		public override int GetHashCode() => DirectionX?.GetHashCode() ?? 1 * DirectionY?.GetHashCode() ?? 1 * (int) Width.Millimeters;
 
 		/// <summary>
 		///     Calculate maximum value of principal tensile strength (fc1) that can be transmitted across cracks.
@@ -332,24 +322,27 @@ namespace andrefmello91.Material.Reinforcement
 				fcx * cosNx * cosNx + fcy * cosNy * cosNy;
 		}
 
-		#region Interface Implementations
+		/// <inheritdoc />
+		public override string ToString() =>
+			"Reinforcement (x):\n" +
+			$"{DirectionX?.ToString() ?? "null"}\n\n" +
+			"Reinforcement (y):\n" +
+			$"{DirectionY?.ToString() ?? "null"}";
 
 		/// <inheritdoc />
 		public bool Approaches(WebReinforcement? other, Length tolerance) => other is not null && (DirectionX?.Approaches(other.DirectionX, tolerance) ?? false) && (DirectionY?.Approaches(other.DirectionY, tolerance) ?? false);
 
 		/// <inheritdoc />
-		public void ChangeUnit(LengthUnit unit)
+		public void Calculate(StrainState strainsState)
 		{
-			if (Unit == unit)
-				return;
+			// Set strains
+			Strains = strainsState.ThetaX.Approx(DirectionX?.Angle ?? 0, 1E-3)
+				? strainsState
+				: strainsState.Transform((DirectionX?.Angle ?? 0) - strainsState.ThetaX);
 
-			if (DirectionX is not null)
-				DirectionX.Unit = unit;
-
-			if (DirectionY is not null)
-				DirectionY.Unit = unit;
-
-			_width = _width.ToUnit(unit);
+			// Calculate stresses
+			DirectionX?.Calculate(Strains.EpsilonX);
+			DirectionY?.Calculate(Strains.EpsilonY);
 		}
 
 		/// <inheritdoc />
@@ -374,8 +367,6 @@ namespace andrefmello91.Material.Reinforcement
 			};
 		}
 
-		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
-
 		/// <summary>
 		///     Compare two reinforcement objects.
 		///     <para>Returns true if parameters are equal.</para>
@@ -383,24 +374,22 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="other">The other reinforcement object.</param>
 		public virtual bool Equals(WebReinforcement? other) => Approaches(other, Tolerance);
 
-		#endregion
-
-		#region Object override
-
 		/// <inheritdoc />
-		public override bool Equals(object? other) => other is WebReinforcement reinforcement && Equals(reinforcement);
+		public void ChangeUnit(LengthUnit unit)
+		{
+			if (Unit == unit)
+				return;
 
-		/// <inheritdoc />
-		public override int GetHashCode() => DirectionX?.GetHashCode() ?? 1 * DirectionY?.GetHashCode() ?? 1 * (int) Width.Millimeters;
+			if (DirectionX is not null)
+				DirectionX.Unit = unit;
 
-		/// <inheritdoc />
-		public override string ToString() =>
-			"Reinforcement (x):\n" +
-			$"{DirectionX?.ToString() ?? "null"}\n\n" +
-			"Reinforcement (y):\n" +
-			$"{DirectionY?.ToString() ?? "null"}";
+			if (DirectionY is not null)
+				DirectionY.Unit = unit;
 
-		#endregion
+			_width = _width.ToUnit(unit);
+		}
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		#endregion
 

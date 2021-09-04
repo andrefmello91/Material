@@ -28,15 +28,15 @@ namespace andrefmello91.Material.Reinforcement
 		#region Properties
 
 		/// <summary>
-		///		The steel parameters.
+		///     The steel parameters.
 		/// </summary>
 		public SteelParameters Parameters { get; }
-		
+
 		/// <summary>
 		///     Get current steel secant module.
 		/// </summary>
-		public Pressure SecantModule => Strain.ApproxZero() 
-			?Parameters.ElasticModule
+		public Pressure SecantModule => Strain.ApproxZero()
+			? Parameters.ElasticModule
 			: Stress / Strain;
 
 		/// <summary>
@@ -49,8 +49,6 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Pressure Stress { get; private set; }
 
-		#region Interface Implementations
-
 		/// <summary>
 		///     Get the <see cref="PressureUnit" /> that this was constructed with.
 		/// </summary>
@@ -62,19 +60,14 @@ namespace andrefmello91.Material.Reinforcement
 
 		#endregion
 
-		#endregion
-
 		#region Constructors
 
 		/// <summary>
-		///		Create a steel object from steel parameters.
+		///     Create a steel object from steel parameters.
 		/// </summary>
 		/// <param name="parameters">Steel parameters.</param>
-		public Steel(SteelParameters parameters)
-		{
-			Parameters = parameters;
-		}
-		
+		public Steel(SteelParameters parameters) => Parameters = parameters;
+
 		/// <inheritdoc cref="Steel(Pressure, Pressure, double)" />
 		/// <param name="unit">
 		///     The <see cref="PressureUnit" /> of <paramref name="yieldStress" /> and
@@ -92,7 +85,7 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="elasticModule">Steel elastic module.</param>
 		/// <param name="ultimateStrain">Steel ultimate strain.</param>
 		public Steel(Pressure yieldStress, Pressure elasticModule, double ultimateStrain = 0.01)
-			: this (new SteelParameters(yieldStress, elasticModule, ultimateStrain))
+			: this(new SteelParameters(yieldStress, elasticModule, ultimateStrain))
 		{
 		}
 
@@ -154,9 +147,6 @@ namespace andrefmello91.Material.Reinforcement
 			// Failure
 		}
 
-		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
-		public Steel Convert(PressureUnit unit) => new (Parameters.Convert(unit));
-
 		/// <summary>
 		///     Set steel strain and calculate stress.
 		/// </summary>
@@ -167,10 +157,34 @@ namespace andrefmello91.Material.Reinforcement
 			Stress = CalculateStress(Parameters, strain);
 		}
 
-		#region Interface Implementations
+		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
+		public Steel Convert(PressureUnit unit) => new(Parameters.Convert(unit));
+
+
+		/// <inheritdoc />
+		public override bool Equals(object? other) => other is Steel steel && Equals(steel);
+
+		/// <inheritdoc />
+		public override int GetHashCode() => Parameters.GetHashCode();
+
+		/// <inheritdoc />
+		public override string ToString() => Parameters.ToString();
 
 		/// <inheritdoc />
 		public bool Approaches(Steel? other, Pressure tolerance) => other is not null && Parameters.Approaches(other.Parameters, tolerance);
+
+		/// <inheritdoc />
+		public Steel Clone() => new(Parameters.Clone());
+
+
+		/// <inheritdoc />
+		public int CompareTo(Steel? other) =>
+			other is not null
+				? Parameters.CompareTo(other.Parameters)
+				: 1;
+
+		/// <inheritdoc />
+		public virtual bool Equals(Steel? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc />
 		public void ChangeUnit(PressureUnit unit)
@@ -182,35 +196,7 @@ namespace andrefmello91.Material.Reinforcement
 			Stress = Stress.ToUnit(unit);
 		}
 
-		/// <inheritdoc />
-		public Steel Clone() => new (Parameters.Clone());
-
-
-		/// <inheritdoc />
-		public int CompareTo(Steel? other) =>
-			other is not null
-				? Parameters.CompareTo(other.Parameters)
-				: 1;
-
 		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
-
-		/// <inheritdoc />
-		public virtual bool Equals(Steel? other) => Approaches(other, Tolerance);
-
-		#endregion
-
-		#region Object override
-
-		/// <inheritdoc />
-		public override bool Equals(object? other) => other is Steel steel && Equals(steel);
-
-		/// <inheritdoc />
-		public override int GetHashCode() => Parameters.GetHashCode();
-
-		/// <inheritdoc />
-		public override string ToString() => Parameters.ToString();
-
-		#endregion
 
 		#endregion
 

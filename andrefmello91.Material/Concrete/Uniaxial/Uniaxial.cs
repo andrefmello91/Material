@@ -22,15 +22,8 @@ namespace andrefmello91.Material.Concrete
 
 		#region Properties
 
-		/// <summary>
-		///     The concrete area.
-		/// </summary>
-		public Area Area { get; }
-
-		/// <summary>
-		///     The current concrete force.
-		/// </summary>
-		public Force Force => Stress * Area;
+		/// <inheritdoc />
+		public override bool Cracked => _constitutive.Cracked;
 
 		/// <summary>
 		///     Calculate maximum force resisted by concrete (negative value).
@@ -48,6 +41,16 @@ namespace andrefmello91.Material.Concrete
 		public Force Stiffness => Parameters.ElasticModule * Area;
 
 		/// <summary>
+		///     The concrete area.
+		/// </summary>
+		public Area Area { get; }
+
+		/// <summary>
+		///     The current concrete force.
+		/// </summary>
+		public Force Force => Stress * Area;
+
+		/// <summary>
 		///     The concrete strain.
 		/// </summary>
 		public double Strain { get; private set; }
@@ -56,9 +59,6 @@ namespace andrefmello91.Material.Concrete
 		///     The concrete stress.
 		/// </summary>
 		public Pressure Stress { get; private set; }
-
-		/// <inheritdoc />
-		public override bool Cracked => _constitutive.Cracked;
 
 		#endregion
 
@@ -81,16 +81,6 @@ namespace andrefmello91.Material.Concrete
 		#region Methods
 
 		/// <summary>
-		///     Calculate stress given strain.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		/// <param name="reinforcement">
-		///     The <see cref="UniaxialReinforcement" /> (only for
-		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
-		/// </param>
-		private Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
-
-		/// <summary>
 		///     Set concrete strain and calculate stress, in MPa.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
@@ -104,18 +94,6 @@ namespace andrefmello91.Material.Concrete
 			Stress = CalculateStress(strain, reinforcement);
 		}
 
-		/// <inheritdoc />
-		void IUniaxialMaterial.Calculate(double strain) => Calculate(strain);
-
-		#region Interface Implementations
-
-		/// <inheritdoc />
-		public UniaxialConcrete Clone() => new(Parameters, Area, Model);
-
-		#endregion
-
-		#region Object override
-
 
 		/// <inheritdoc />
 		public override bool Equals(Concrete? other) => other is UniaxialConcrete && base.Equals(other);
@@ -126,7 +104,21 @@ namespace andrefmello91.Material.Concrete
 		/// <inheritdoc />
 		public override int GetHashCode() => Parameters.GetHashCode();
 
-		#endregion
+		/// <summary>
+		///     Calculate stress given strain.
+		/// </summary>
+		/// <param name="strain">Current strain.</param>
+		/// <param name="reinforcement">
+		///     The <see cref="UniaxialReinforcement" /> (only for
+		///     <see cref="UniaxialConcrete.DSFMConstitutive" />).
+		/// </param>
+		private Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) => _constitutive.CalculateStress(strain, reinforcement);
+
+		/// <inheritdoc />
+		public UniaxialConcrete Clone() => new(Parameters, Area, Model);
+
+		/// <inheritdoc />
+		void IUniaxialMaterial.Calculate(double strain) => Calculate(strain);
 
 		#endregion
 

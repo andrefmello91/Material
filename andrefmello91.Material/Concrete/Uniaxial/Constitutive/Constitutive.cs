@@ -25,22 +25,18 @@ namespace andrefmello91.Material.Concrete
 
 			#region Properties
 
-			#region Interface Implementations
-
 			/// <summary>
-			///		The constitutive model of concrete.
-			/// </summary>
-			public abstract ConstitutiveModel Model { get; }
-
-			/// <summary>
-			///		Check if concrete is cracked.
+			///     Check if concrete is cracked.
 			/// </summary>
 			/// <returns>
-			///		<b>True</b> if concrete is cracked.
-			///	</returns>
+			///     <b>True</b> if concrete is cracked.
+			/// </returns>
 			public bool Cracked { get; private set; }
-			
-			#endregion
+
+			/// <summary>
+			///     The constitutive model of concrete.
+			/// </summary>
+			public abstract ConstitutiveModel Model { get; }
 
 			#endregion
 
@@ -101,11 +97,19 @@ namespace andrefmello91.Material.Concrete
 					? Parameters.ElasticModule
 					: stress / strain;
 
+			public override string ToString() => $"{Model}";
+
 			/// <summary>
 			///     Calculate compressive stress for <see cref="UniaxialConcrete" /> case.
 			/// </summary>
 			/// <param name="strain">Compressive strain (negative) in concrete.</param>
 			protected abstract Pressure CompressiveStress(double strain);
+
+			/// <summary>
+			///     Calculate the tensile strain for cracked state.
+			/// </summary>
+			/// <inheritdoc cref="TensileStress" />
+			protected abstract Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null);
 
 			/// <summary>
 			///     Calculate tensile stress for <see cref="UniaxialConcrete" /> case.
@@ -118,44 +122,28 @@ namespace andrefmello91.Material.Concrete
 					return Pressure.Zero;
 
 				CheckCrackedState(strain);
-				
+
 				return !Cracked
 					? UncrackedStress(strain)
 					: CrackedStress(strain, reinforcement);
 			}
 
 			/// <summary>
-			///		Check if concrete is cracked based on <paramref name="strain"/>.
-			/// </summary>
-			/// <inheritdoc cref="UncrackedStress"/>
-			private void CheckCrackedState(double strain)
-			{
-				Cracked = strain >= Parameters.CrackingStrain;
-			}
-			
-			/// <summary>
-			///		Calculate the tensile strain for uncracked state.
+			///     Calculate the tensile strain for uncracked state.
 			/// </summary>
 			/// <param name="strain">Tensile strain in concrete.</param>
 			protected Pressure UncrackedStress(double strain) => Parameters.ElasticModule * strain;
 
 			/// <summary>
-			///		Calculate the tensile strain for cracked state.
+			///     Check if concrete is cracked based on <paramref name="strain" />.
 			/// </summary>
-			/// <inheritdoc cref="TensileStress"/>
-			protected abstract Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null);
-			
-			#region Interface Implementations
+			/// <inheritdoc cref="UncrackedStress" />
+			private void CheckCrackedState(double strain)
+			{
+				Cracked = strain >= Parameters.CrackingStrain;
+			}
 
 			public bool Equals(Constitutive? other) => Model == other?.Model;
-
-			#endregion
-
-			#region Object override
-
-			public override string ToString() => $"{Model}";
-
-			#endregion
 
 			#endregion
 

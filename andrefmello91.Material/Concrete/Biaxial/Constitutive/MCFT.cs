@@ -19,7 +19,7 @@ namespace andrefmello91.Material.Concrete
 
 			#region Properties
 
-			public override ConstitutiveModel Model { get; } = Material.Concrete.ConstitutiveModel.MCFT;
+			public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
 
 			#endregion
 

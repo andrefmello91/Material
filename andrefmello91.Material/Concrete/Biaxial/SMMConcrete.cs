@@ -7,20 +7,27 @@ using UnitsNet;
 namespace andrefmello91.Material.Concrete
 {
 	/// <summary>
-	///		SMM concrete auxiliary class.
+	///     SMM concrete auxiliary class.
 	/// </summary>
 	internal class SMMConcrete : BiaxialConcrete
 	{
+
+		#region Properties
+
 		/// <summary>
 		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
 		/// </summary>
 		private new SMMConstitutive ConstitutiveEquations => (SMMConstitutive) base.ConstitutiveEquations;
 
+		#endregion
+
+		#region Constructors
+
 		// /// <summary>
 		// ///		The strain state in the average principal strain direction, not affected by Poisson effect.
 		// /// </summary>
 		// private StrainState NotAffectedStrains { get; set; }
-		
+
 		/// <inheritdoc />
 		internal SMMConcrete(IConcreteParameters parameters)
 			: base(parameters, ConstitutiveModel.SMM)
@@ -29,33 +36,43 @@ namespace andrefmello91.Material.Concrete
 			Stresses = new StressState(0, 0, 0, Constants.PiOver4);
 		}
 
+		#endregion
+
+		#region Methods
+
+		/// <summary>
+		///     Calculate the deviation angle for a strain state.
+		/// </summary>
+		/// <param name="strains">The strain state for the principal direction of concrete.</param>
+		private static double CalculateDeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan().AsFinite();
+
 		/// <inheritdoc />
 		public override void Calculate(StrainState strains, WebReinforcement? reinforcement, Length? referenceLength = null)
 		{
 			// Update strains
 			// var theta          = strains.ToPrincipal().Theta1 + DeviationAngle;
-			Strains            = strains;
-			PrincipalStrains   = Strains.ToPrincipal();
-			
+			Strains          = strains;
+			PrincipalStrains = Strains.ToPrincipal();
+
 			// Calculate deviation angle
 			DeviationAngle = CalculateDeviationAngle(Strains);
-			
+
 			// Calculate stresses
 			Stresses          = ConstitutiveEquations.CalculateStresses(Strains, reinforcement, deviationAngle: DeviationAngle);
 			PrincipalStresses = Stresses.ToPrincipal();
-			
+
 			// Update stresses
 			UpdateStresses(reinforcement);
 		}
 
 		/// <summary>
-		///		Update the stress state based in equilibrium on crack.
+		///     Update the stress state based in equilibrium on crack.
 		/// </summary>
 		private void UpdateStresses(WebReinforcement? reinforcement)
 		{
 			if (reinforcement is null)
 				return;
-			
+
 			// Check the maximum value of fc1 that can be transmitted across cracks
 			var fc1s = reinforcement.MaximumPrincipalTensileStress(PrincipalStresses.Theta1);
 
@@ -63,16 +80,12 @@ namespace andrefmello91.Material.Concrete
 				return;
 
 			// Recalculate stresses
-			var pStresses     = PrincipalStresses.Clone();
+			var pStresses = PrincipalStresses.Clone();
 			PrincipalStresses = new PrincipalStressState(fc1s, pStresses.Sigma2, pStresses.Theta1);
 			Stresses          = PrincipalStresses.Transform(DeviationAngle);
 		}
-		
-		/// <summary>
-		///		Calculate the deviation angle for a strain state.
-		/// </summary>
-		/// <param name="strains">The strain state for the principal direction of concrete.</param>
-		private static double CalculateDeviationAngle(StrainState strains) => 0.5 * (strains.GammaXY / (strains.EpsilonX - strains.EpsilonY)).Atan().AsFinite();
+
+		#endregion
 
 	}
 }

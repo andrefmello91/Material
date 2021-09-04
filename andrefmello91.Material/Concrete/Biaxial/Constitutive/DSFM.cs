@@ -182,7 +182,7 @@ namespace andrefmello91.Material.Concrete
 
 				if (reinforcement is null)
 					return fc1b;
-				
+
 				// Check the maximum value of fc1 that can be transmitted across cracks
 				var fc1s = reinforcement.MaximumPrincipalTensileStress(theta1);
 

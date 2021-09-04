@@ -1,6 +1,5 @@
 ﻿using System;
 using andrefmello91.Extensions;
-using andrefmello91.Material.Concrete;
 using andrefmello91.OnPlaneComponents;
 using UnitsNet;
 using UnitsNet.Units;
@@ -8,10 +7,13 @@ using UnitsNet.Units;
 namespace andrefmello91.Material
 {
 	/// <summary>
-	///		Interface for uniaxial material.
+	///     Interface for uniaxial material.
 	/// </summary>
 	public interface IUniaxialMaterial
 	{
+
+		#region Properties
+
 		/// <summary>
 		///     The cross section area.
 		/// </summary>
@@ -32,18 +34,28 @@ namespace andrefmello91.Material
 		/// </summary>
 		Pressure Stress { get; }
 
+		#endregion
+
+		#region Methods
+
 		/// <summary>
 		///     Update strain and calculate stress in this material.
 		/// </summary>
 		/// <param name="strain">Current strain.</param>
 		void Calculate(double strain);
+
+		#endregion
+
 	}
 
 	/// <summary>
-	///		Interface for biaxial material.
+	///     Interface for biaxial material.
 	/// </summary>
 	public interface IBiaxialMaterial
 	{
+
+		#region Properties
+
 		/// <summary>
 		///     The principal strains at this material.
 		/// </summary>
@@ -55,6 +67,11 @@ namespace andrefmello91.Material
 		PrincipalStressState PrincipalStresses { get; }
 
 		/// <summary>
+		///     The stiffness of this material.
+		/// </summary>
+		MaterialMatrix Stiffness { get; }
+
+		/// <summary>
 		///     The strains at this material.
 		/// </summary>
 		StrainState Strains { get; }
@@ -64,24 +81,35 @@ namespace andrefmello91.Material
 		/// </summary>
 		StressState Stresses { get; }
 
-		/// <summary>
-		///		The stiffness of this material.
-		/// </summary>
-		MaterialMatrix Stiffness { get; }
+		#endregion
+
+		#region Methods
 
 		/// <summary>
-		///		Update strains and calculate stresses.
+		///     Update strains and calculate stresses.
 		/// </summary>
 		/// <param name="strainState">The current strain state.</param>
 		void Calculate(StrainState strainState);
+
+		#endregion
+
 	}
-	
-		/// <summary>
+
+	/// <summary>
 	///     Interface for material parameters.
 	/// </summary>
 	public interface IMaterialParameters : IUnitConvertible<PressureUnit>, IApproachable<IMaterialParameters, Pressure>, IEquatable<IMaterialParameters>, IComparable<IMaterialParameters>
 	{
+
 		#region Properties
+
+		/// <summary>
+		///     The compressive strength.
+		/// </summary>
+		/// <remarks>
+		///     Positive value.
+		/// </remarks>
+		Pressure CompressiveStrength { get; }
 
 		/// <summary>
 		///     The initial elastic module.
@@ -92,14 +120,6 @@ namespace andrefmello91.Material
 		///     The plastic strain.
 		/// </summary>
 		double PlasticStrain { get; }
-
-		/// <summary>
-		///     The compressive strength.
-		/// </summary>
-		/// <remarks>
-		///		Positive value.
-		/// </remarks>
-		Pressure CompressiveStrength { get; }
 
 		/// <summary>
 		///     The tensile strength.

@@ -117,11 +117,7 @@ namespace andrefmello91.Material.Concrete
 		/// </summary>
 		protected abstract void CalculateCustomParameters();
 
-		#region Interface Implementations
-
 		public bool Equals(ParameterCalculator? other) => other is not null && Model == other.Model;
-
-		#endregion
 
 		#endregion
 

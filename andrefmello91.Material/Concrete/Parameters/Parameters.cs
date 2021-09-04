@@ -14,41 +14,39 @@ namespace andrefmello91.Material.Concrete
 
 		#region Fields
 
-		private Length _aggDiameter;
-		private Pressure _strength;
-
 		/// <summary>
 		///     The default <see cref="Pressure" /> tolerance.
 		/// </summary>
 		public static readonly Pressure Tolerance = Pressure.FromPascals(1E-3);
+
+		private Length _aggDiameter;
 
 		/// <summary>
 		///     Calculator for concrete parameters.
 		/// </summary>
 		private ParameterCalculator _calculator;
 
+		private Pressure _strength;
+
 		#endregion
 
 		#region Properties
 
-		PressureUnit IUnitConvertible<PressureUnit>.Unit
+		/// <inheritdoc />
+		public Length AggregateDiameter
 		{
-			get => StressUnit;
-			set => StressUnit = value;
-		}
-
-		LengthUnit IUnitConvertible<LengthUnit>.Unit
-		{
-			get => DiameterUnit;
-			set => DiameterUnit = value;
+			get => _aggDiameter;
+			set => _aggDiameter = value.ToUnit(DiameterUnit);
 		}
 
 		/// <inheritdoc />
-		public PressureUnit StressUnit
-		{
-			get => Strength.Unit;
-			set => ChangeUnit(value);
-		}
+		public Pressure CompressiveStrength => Strength;
+
+		/// <inheritdoc />
+		public bool ConsiderConfinement { get; set; }
+
+		/// <inheritdoc />
+		public double CrackingStrain => TensileStrength / ElasticModule;
 
 		/// <inheritdoc />
 		public LengthUnit DiameterUnit
@@ -58,15 +56,10 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
-		public Pressure Strength
-		{
-			get => _strength;
-			set
-			{
-				_strength            = value.ToUnit(StressUnit);
-				_calculator.Strength = _strength;
-			}
-		}
+		public Pressure ElasticModule => _calculator.ElasticModule.ToUnit(StressUnit);
+
+		/// <inheritdoc />
+		public ForcePerLength FractureParameter => _calculator.FractureParameter;
 
 		/// <inheritdoc />
 		public ParameterModel Model
@@ -83,47 +76,55 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
-		public Length AggregateDiameter
-		{
-			get => _aggDiameter;
-			set => _aggDiameter = value.ToUnit(DiameterUnit);
-		}
-
-		/// <inheritdoc />
-		public bool ConsiderConfinement { get; set; }
-
-		/// <inheritdoc />
-		public Pressure CompressiveStrength => Strength;
-
-		/// <inheritdoc />
-		public Pressure TensileStrength => _calculator.TensileStrength.ToUnit(StressUnit);
-
-		/// <inheritdoc />
-		public Pressure ElasticModule => _calculator.ElasticModule.ToUnit(StressUnit);
+		public double PlasticStrain => _calculator.PlasticStrain;
 
 		/// <inheritdoc />
 		public Pressure SecantModule => _calculator.SecantModule.ToUnit(StressUnit);
 
 		/// <inheritdoc />
-		public double PlasticStrain => _calculator.PlasticStrain;
+		public Pressure Strength
+		{
+			get => _strength;
+			set
+			{
+				_strength            = value.ToUnit(StressUnit);
+				_calculator.Strength = _strength;
+			}
+		}
 
 		/// <inheritdoc />
-		public double UltimateStrain => _calculator.UltimateStrain;
+		public PressureUnit StressUnit
+		{
+			get => Strength.Unit;
+			set => ChangeUnit(value);
+		}
 
 		/// <inheritdoc />
-		public double CrackingStrain => TensileStrength / ElasticModule;
+		public Pressure TensileStrength => _calculator.TensileStrength.ToUnit(StressUnit);
 
 		/// <inheritdoc />
 		public Pressure TransverseModule => (ElasticModule / 2.4).ToUnit(StressUnit);
-
-		/// <inheritdoc />
-		public ForcePerLength FractureParameter => _calculator.FractureParameter;
 
 		/// <inheritdoc />
 		public AggregateType Type
 		{
 			get => _calculator.Type;
 			set => _calculator.Type = value;
+		}
+
+		/// <inheritdoc />
+		public double UltimateStrain => _calculator.UltimateStrain;
+
+		PressureUnit IUnitConvertible<PressureUnit>.Unit
+		{
+			get => StressUnit;
+			set => StressUnit = value;
+		}
+
+		LengthUnit IUnitConvertible<LengthUnit>.Unit
+		{
+			get => DiameterUnit;
+			set => DiameterUnit = value;
 		}
 
 		#endregion
@@ -190,6 +191,49 @@ namespace andrefmello91.Material.Concrete
 			new(Pressure.FromMegapascals(50), aggregateDiameter, model, type, considerConfinement);
 
 		/// <summary>
+		///     Create a clone of this object with converted units.
+		/// </summary>
+		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
+		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
+		public Parameters Convert(PressureUnit? stressUnit = null, LengthUnit? lengthUnit = null) =>
+			new(stressUnit.HasValue ? Strength.ToUnit(stressUnit.Value) : Strength, lengthUnit.HasValue ? AggregateDiameter.ToUnit(lengthUnit.Value) : AggregateDiameter, Model, Type);
+
+
+		/// <inheritdoc />
+		public override bool Equals(object? obj) => obj is Parameters other && Equals(other);
+
+		/// <inheritdoc />
+		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
+
+		/// <summary>
+		///     Get a <see cref="CustomParameters" /> from this object.
+		/// </summary>
+		public CustomParameters ToCustomParameters() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain, ConsiderConfinement);
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			char
+				phi = (char) Characters.Phi,
+				eps = (char) Characters.Epsilon;
+
+			return
+				"Concrete Parameters:\n\n" +
+				$"fc = {Strength}\n" +
+				$"ft = {TensileStrength}\n" +
+				$"Ec = {ElasticModule}\n" +
+				$"{eps}c = {PlasticStrain:0.##E+00}\n" +
+				$"{eps}cu = {UltimateStrain:0.##E+00}\n" +
+				$"{phi},ag = {AggregateDiameter}";
+		}
+
+		/// <inheritdoc />
+		public Parameters Clone() => new(Strength, AggregateDiameter, Model, Type);
+
+		/// <inheritdoc />
+		public bool Approaches(IConcreteParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
+
+		/// <summary>
 		///     Change <see cref="AggregateDiameter" /> unit.
 		/// </summary>
 		/// <param name="unit">The desired <see cref="LengthUnit" />.</param>
@@ -213,29 +257,6 @@ namespace andrefmello91.Material.Concrete
 			_strength = _strength.ToUnit(unit);
 		}
 
-		/// <summary>
-		///     Create a clone of this object with converted units.
-		/// </summary>
-		/// <param name="stressUnit">The desired <see cref="PressureUnit" />.</param>
-		/// <param name="lengthUnit">The desired <see cref="LengthUnit" />.</param>
-		public Parameters Convert(PressureUnit? stressUnit = null, LengthUnit? lengthUnit = null) =>
-			new(stressUnit.HasValue ? Strength.ToUnit(stressUnit.Value) : Strength, lengthUnit.HasValue ? AggregateDiameter.ToUnit(lengthUnit.Value) : AggregateDiameter, Model, Type);
-
-		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(lengthUnit: unit);
-
-		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
-
-		/// <inheritdoc />
-		public bool Approaches(IConcreteParameters? other, Pressure tolerance) => Model == other?.Model && Strength.Approx(other.Strength, tolerance);
-
-		/// <inheritdoc />
-		public Parameters Clone() => new(Strength, AggregateDiameter, Model, Type);
-
-		/// <summary>
-		///     Get a <see cref="CustomParameters" /> from this object.
-		/// </summary>
-		public CustomParameters ToCustomParameters() => new(Strength, TensileStrength, ElasticModule, AggregateDiameter, PlasticStrain, UltimateStrain, ConsiderConfinement);
-
 		/// <remarks>
 		///     <see cref="Strength" /> is compared.
 		/// </remarks>
@@ -251,39 +272,19 @@ namespace andrefmello91.Material.Concrete
 		public bool Equals(IConcreteParameters? other) => Approaches(other, Tolerance);
 
 		/// <inheritdoc />
-		public override string ToString()
-		{
-			char
-				phi = (char) Characters.Phi,
-				eps = (char) Characters.Epsilon;
-
-			return
-				"Concrete Parameters:\n\n" +
-				$"fc = {Strength}\n" +
-				$"ft = {TensileStrength}\n" +
-				$"Ec = {ElasticModule}\n" +
-				$"{eps}c = {PlasticStrain:0.##E+00}\n" +
-				$"{eps}cu = {UltimateStrain:0.##E+00}\n" +
-				$"{phi},ag = {AggregateDiameter}";
-		}
-
-
-		/// <inheritdoc />
-		public override bool Equals(object? obj) => obj is Parameters other && Equals(other);
-
-		/// <inheritdoc />
-		public override int GetHashCode() => (int) Strength.Megapascals * (int) AggregateDiameter.Millimeters;
-
-		/// <inheritdoc />
 		bool IApproachable<IMaterialParameters, Pressure>.Approaches(IMaterialParameters other, Pressure tolerance) => other is IConcreteParameters parameters && Approaches(parameters, tolerance);
-
-		/// <inheritdoc />
-		bool IEquatable<IMaterialParameters>.Equals(IMaterialParameters other) => other is IConcreteParameters parameters && Equals(parameters);
 
 		/// <inheritdoc />
 		int IComparable<IMaterialParameters>.CompareTo(IMaterialParameters other) => other is IConcreteParameters parameters
 			? CompareTo(parameters)
 			: 0;
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(lengthUnit: unit);
+
+		IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
+
+		/// <inheritdoc />
+		bool IEquatable<IMaterialParameters>.Equals(IMaterialParameters other) => other is IConcreteParameters parameters && Equals(parameters);
 
 		#endregion
 

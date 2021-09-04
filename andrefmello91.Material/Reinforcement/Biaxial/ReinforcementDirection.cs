@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using andrefmello91.Extensions;
 using MathNet.Numerics;
 using UnitsNet;
@@ -31,6 +30,24 @@ namespace andrefmello91.Material.Reinforcement
 		public double Angle { get; }
 
 		/// <summary>
+		///     The cross-section area of this reinforcement direction, per stirrup.
+		/// </summary>
+		public Area Area
+		{
+			get
+			{
+				var unit = Unit.GetAreaUnit();
+
+				if (unit is AreaUnit.Undefined)
+					unit = AreaUnit.SquareMillimeter;
+
+				return
+					(0.25 * NumberOfLegs * Constants.Pi * BarDiameter * BarDiameter)
+					.ToUnit(unit);
+			}
+		}
+
+		/// <summary>
 		///     Get the bar diameter.
 		/// </summary>
 		public Length BarDiameter { get; private set; }
@@ -40,11 +57,6 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Length BarSpacing { get; private set; }
 
-		/// <summary>
-		///		The number of stirrup legs/ branches.
-		/// </summary>
-		public int NumberOfLegs { get; }
-		
 		/// <summary>
 		///     Get reinforcement capacity reserve for tension.
 		///     <para>(<see cref="YieldStress" /> - <see cref="Stress" />).</para>
@@ -67,12 +79,17 @@ namespace andrefmello91.Material.Reinforcement
 		public bool IsVertical => Angle.Approx(Constants.PiOver2, 1E-3);
 
 		/// <summary>
+		///     The number of stirrup legs/ branches.
+		/// </summary>
+		public int NumberOfLegs { get; }
+
+		/// <summary>
 		///     Get reinforcement ratio.
 		/// </summary>
 		public double Ratio => BarSpacing.ApproxZero(Tolerance) || Width.ApproxZero(Tolerance)
 			? 0
 			: Area / (BarSpacing * Width);
-		
+
 		/// <summary>
 		///     Get the steel object.
 		/// </summary>
@@ -102,8 +119,6 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Pressure YieldStress => Ratio * Steel.Parameters.YieldStress;
 
-		#region Interface Implementations
-
 		/// <summary>
 		///     Get/set the <see cref="LengthUnit" /> of <see cref="BarDiameter" />, <see cref="BarSpacing" /> and
 		///     <see cref="Width" />.
@@ -113,26 +128,6 @@ namespace andrefmello91.Material.Reinforcement
 			get => BarDiameter.Unit;
 			set => ChangeUnit(value);
 		}
-
-		/// <summary>
-		///		The cross-section area of this reinforcement direction, per stirrup.
-		/// </summary>
-		public Area Area
-		{
-			get
-			{
-				var unit = Unit.GetAreaUnit();
-
-				if (unit is AreaUnit.Undefined)
-					unit = AreaUnit.SquareMillimeter;
-
-				return
-					(0.25 * NumberOfLegs * Constants.Pi * BarDiameter * BarDiameter)
-					.ToUnit(unit);
-			}
-		}
-
-		#endregion
 
 		#endregion
 
@@ -164,16 +159,11 @@ namespace andrefmello91.Material.Reinforcement
 
 		#region Methods
 
-		/// <summary>
-		///     Calculate the crack spacing at this direction, according to Kaklauskas (2019) expression.
-		/// </summary>
-		public Length CrackSpacing() =>
-			BarDiameter.ApproxZero(Tolerance) || Ratio.ApproxZero()
-				? Length.FromMillimeters(21)
-				: Length.FromMillimeters(21) + 0.155 * BarDiameter / Ratio;
-
 		/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)" />
-		/// <param name="unit">The unit of <paramref name="barDiameter"/>, <paramref name="barSpacing"/> and <paramref name="width"/>.</param>
+		/// <param name="unit">
+		///     The unit of <paramref name="barDiameter" />, <paramref name="barSpacing" /> and
+		///     <paramref name="width" />.
+		/// </param>
 		public static WebReinforcementDirection? From(double barDiameter, double barSpacing, SteelParameters steelParameters, double width, double angle, int numberOfLegs = 2, LengthUnit unit = LengthUnit.Millimeter) =>
 			From((Length) barDiameter.As(unit), (Length) barSpacing.As(unit), steelParameters, (Length) width.As(unit), angle, numberOfLegs);
 
@@ -189,8 +179,25 @@ namespace andrefmello91.Material.Reinforcement
 				? null
 				: new WebReinforcementDirection(barDiameter, barSpacing, steelParameters, width, angle, numberOfLegs);
 
+		/// <summary>
+		///     Set steel strain and stress.
+		/// </summary>
+		/// <param name="strain">Current strain.</param>
+		public void Calculate(double strain) => Steel.Calculate(strain);
+
 		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public WebReinforcementDirection Convert(LengthUnit unit) => new(BarDiameter.ToUnit(unit), BarSpacing.ToUnit(unit), Steel.Parameters.Clone(), Width.ToUnit(unit), Angle);
+
+		/// <summary>
+		///     Calculate the crack spacing at this direction, according to Kaklauskas (2019) expression.
+		/// </summary>
+		public Length CrackSpacing() =>
+			BarDiameter.ApproxZero(Tolerance) || Ratio.ApproxZero()
+				? Length.FromMillimeters(21)
+				: Length.FromMillimeters(21) + 0.155 * BarDiameter / Ratio;
+
+		/// <inheritdoc />
+		public override bool Equals(object? other) => other is WebReinforcementDirection reinforcement && Equals(reinforcement);
 
 		/// <summary>
 		///     Compare two reinforcement objects.
@@ -201,55 +208,6 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="other">The other reinforcement object.</param>
 		/// <param name="tolerance">The tolerance to consider values being equal.</param>
 		public virtual bool EqualsDiameterAndSpacing(WebReinforcementDirection? other, Length? tolerance = null) => other is not null && BarDiameter.Approx(other.BarDiameter, tolerance ?? Tolerance) && BarSpacing.Approx(other.BarSpacing, tolerance ?? Tolerance);
-
-		/// <summary>
-		///     Set steel strain and stress.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public void Calculate(double strain) => Steel.Calculate(strain);
-
-		#region Interface Implementations
-
-		/// <inheritdoc />
-		public bool Approaches(WebReinforcementDirection? other, Length tolerance) => other is not null && NumberOfLegs == other.NumberOfLegs && EqualsDiameterAndSpacing(other, tolerance);
-
-		/// <inheritdoc />
-		public void ChangeUnit(LengthUnit unit)
-		{
-			if (Unit == unit)
-				return;
-
-			BarDiameter = BarDiameter.ToUnit(unit);
-			BarSpacing  = BarSpacing.ToUnit(unit);
-			_width      = _width.ToUnit(unit);
-		}
-
-		/// <inheritdoc />
-		public WebReinforcementDirection Clone() => new(BarDiameter, BarSpacing, Steel.Parameters.Clone(), Width, Angle);
-
-		/// <inheritdoc />
-		public int CompareTo(WebReinforcementDirection? other) =>
-			other is null || Area > other.Area || BarDiameter > other.BarDiameter || BarDiameter.Approx(other.BarDiameter, Tolerance) && BarSpacing > other.BarSpacing
-				? 1
-				: Equals(other)
-					? 0
-					: -1;
-
-		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
-
-		/// <summary>
-		///     Compare two reinforcement objects.
-		///     <para>Returns true if parameters are equal.</para>
-		/// </summary>
-		/// <param name="other">The other reinforcement object.</param>
-		public virtual bool Equals(WebReinforcementDirection? other) => Approaches(other, Tolerance);
-
-		#endregion
-
-		#region Object override
-
-		/// <inheritdoc />
-		public override bool Equals(object? other) => other is WebReinforcementDirection reinforcement && Equals(reinforcement);
 
 		/// <inheritdoc />
 		public override int GetHashCode() => NumberOfLegs * (int) BarDiameter.Millimeters.Pow(BarSpacing.Millimeters);
@@ -268,7 +226,39 @@ namespace andrefmello91.Material.Reinforcement
 				Steel;
 		}
 
-		#endregion
+		/// <inheritdoc />
+		public bool Approaches(WebReinforcementDirection? other, Length tolerance) => other is not null && NumberOfLegs == other.NumberOfLegs && EqualsDiameterAndSpacing(other, tolerance);
+
+		/// <inheritdoc />
+		public WebReinforcementDirection Clone() => new(BarDiameter, BarSpacing, Steel.Parameters.Clone(), Width, Angle);
+
+		/// <inheritdoc />
+		public int CompareTo(WebReinforcementDirection? other) =>
+			other is null || Area > other.Area || BarDiameter > other.BarDiameter || BarDiameter.Approx(other.BarDiameter, Tolerance) && BarSpacing > other.BarSpacing
+				? 1
+				: Equals(other)
+					? 0
+					: -1;
+
+		/// <summary>
+		///     Compare two reinforcement objects.
+		///     <para>Returns true if parameters are equal.</para>
+		/// </summary>
+		/// <param name="other">The other reinforcement object.</param>
+		public virtual bool Equals(WebReinforcementDirection? other) => Approaches(other, Tolerance);
+
+		/// <inheritdoc />
+		public void ChangeUnit(LengthUnit unit)
+		{
+			if (Unit == unit)
+				return;
+
+			BarDiameter = BarDiameter.ToUnit(unit);
+			BarSpacing  = BarSpacing.ToUnit(unit);
+			_width      = _width.ToUnit(unit);
+		}
+
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		#endregion
 

@@ -18,7 +18,7 @@ namespace andrefmello91.Material.Concrete
 		///     Disturbed Stress Field constitutive model.
 		/// </summary>
 		DSFM,
-		
+
 		/// <summary>
 		///     Softened Membrane Model constitutive model.
 		/// </summary>
@@ -50,6 +50,14 @@ namespace andrefmello91.Material.Concrete
 		#region Properties
 
 		/// <summary>
+		///     Check if concrete is cracked.
+		/// </summary>
+		/// <returns>
+		///     <b>True</b> if concrete is cracked.
+		/// </returns>
+		public abstract bool Cracked { get; }
+
+		/// <summary>
 		///     Get concrete <see cref="ConstitutiveModel" />.
 		/// </summary>
 		public ConstitutiveModel Model { get; }
@@ -58,14 +66,6 @@ namespace andrefmello91.Material.Concrete
 		///     Get concrete <see cref="IConcreteParameters" />.
 		/// </summary>
 		public IConcreteParameters Parameters { get; }
-
-		/// <summary>
-		///		Check if concrete is cracked.
-		/// </summary>
-		/// <returns>
-		///		<b>True</b> if concrete is cracked.
-		///	</returns>
-		public abstract bool Cracked { get; }
 
 		#endregion
 
@@ -86,18 +86,6 @@ namespace andrefmello91.Material.Concrete
 
 		#region Methods
 
-		#region Interface Implementations
-
-		/// <inheritdoc />
-		public int CompareTo(Concrete? other) => Parameters.CompareTo(other?.Parameters);
-
-		/// <inheritdoc />
-		public virtual bool Equals(Concrete? other) => Model == other?.Model && Parameters == other?.Parameters;
-
-		#endregion
-
-		#region Object override
-
 		/// <inheritdoc />
 		public override bool Equals(object? obj) => obj is Concrete concrete && Equals(concrete);
 
@@ -109,7 +97,11 @@ namespace andrefmello91.Material.Concrete
 		/// <inheritdoc />
 		public override string ToString() => Parameters.ToString()!;
 
-		#endregion
+		/// <inheritdoc />
+		public int CompareTo(Concrete? other) => Parameters.CompareTo(other?.Parameters);
+
+		/// <inheritdoc />
+		public virtual bool Equals(Concrete? other) => Model == other?.Model && Parameters == other?.Parameters;
 
 		#endregion
 

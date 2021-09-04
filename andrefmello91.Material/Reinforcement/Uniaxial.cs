@@ -26,11 +26,6 @@ namespace andrefmello91.Material.Reinforcement
 		#region Properties
 
 		/// <summary>
-		///     The reinforcement area.
-		/// </summary>
-		public Area Area { get; private set; }
-
-		/// <summary>
 		///     Get bar diameter.
 		/// </summary>
 		public Length BarDiameter { get; private set; }
@@ -41,17 +36,6 @@ namespace andrefmello91.Material.Reinforcement
 		public Area ConcreteArea { get; set; }
 
 		/// <summary>
-		///     The current force.
-		/// </summary>
-		public Force Force => Area * Steel.Stress;
-
-		/// <inheritdoc />
-		public double Strain => Steel.Strain;
-
-		/// <inheritdoc />
-		public Pressure Stress => Steel.Stress;
-
-		/// <summary>
 		///     Get number of reinforcing bars.
 		/// </summary>
 		public int NumberOfBars { get; }
@@ -59,8 +43,8 @@ namespace andrefmello91.Material.Reinforcement
 		/// <summary>
 		///     Get reinforcement ratio in the cross-section.
 		/// </summary>
-		public double Ratio => ConcreteArea == Area.Zero 
-			? 0 
+		public double Ratio => ConcreteArea == Area.Zero
+			? 0
 			: Area / ConcreteArea;
 
 		/// <summary>
@@ -78,7 +62,21 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Force YieldForce => Area * Steel.Parameters.YieldStress;
 
-		#region Interface Implementations
+		/// <summary>
+		///     The reinforcement area.
+		/// </summary>
+		public Area Area { get; private set; }
+
+		/// <summary>
+		///     The current force.
+		/// </summary>
+		public Force Force => Area * Steel.Stress;
+
+		/// <inheritdoc />
+		public double Strain => Steel.Strain;
+
+		/// <inheritdoc />
+		public Pressure Stress => Steel.Stress;
 
 		/// <inheritdoc />
 		public LengthUnit Unit
@@ -86,8 +84,6 @@ namespace andrefmello91.Material.Reinforcement
 			get => BarDiameter.Unit;
 			set => ChangeUnit(value);
 		}
-
-		#endregion
 
 		#endregion
 
@@ -124,6 +120,9 @@ namespace andrefmello91.Material.Reinforcement
 		/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 		public UniaxialReinforcement Convert(LengthUnit unit) => new(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), ConcreteArea.ToUnit(unit.GetAreaUnit()));
 
+		/// <inheritdoc />
+		public override bool Equals(object? other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
+
 		/// <summary>
 		///     Compare two reinforcement objects.
 		///     <para>Returns true if <see cref="NumberOfBars" /> and <see cref="BarDiameter" /> are equal.</para>
@@ -132,36 +131,31 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="tolerance">The tolerance.</param>
 		public bool EqualsNumberAndDiameter(UniaxialReinforcement? other, Length tolerance) => other is not null && NumberOfBars == other.NumberOfBars && BarDiameter.Approx(other.BarDiameter, tolerance);
 
+		/// <inheritdoc />
+		public override int GetHashCode() => (int) BarDiameter.Millimeters.Pow(NumberOfBars);
+
 		/// <summary>
 		///     Calculate maximum value of tensile strength that can be transmitted across cracks.
 		/// </summary>
 		public Pressure MaximumPrincipalTensileStress() => Ratio * (Steel.Parameters.YieldStress - Steel.Stress);
 
-		/// <summary>
-		///     Set steel strain and stress.
-		/// </summary>
-		/// <param name="strain">Current strain.</param>
-		public void Calculate(double strain) => Steel.Calculate(strain);
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			var phi = (char) Characters.Phi;
+
+			return
+				$"Reinforcement: {NumberOfBars} {phi} {BarDiameter} ({Area})\n\n"
+				+ Steel;
+		}
 
 		/// <summary>
 		///     Calculated reinforcement area.
 		/// </summary>
 		private Area CalculateArea() => 0.25 * NumberOfBars * Constants.Pi * BarDiameter * BarDiameter;
 
-		#region Interface Implementations
-
 		/// <inheritdoc />
 		public bool Approaches(UniaxialReinforcement? other, Length tolerance) => other is not null && EqualsNumberAndDiameter(other, tolerance);
-
-		/// <inheritdoc />
-		public void ChangeUnit(LengthUnit unit)
-		{
-			if (Unit == unit)
-				return;
-
-			BarDiameter = BarDiameter.ToUnit(unit);
-			Area        = Area.ToUnit(unit.GetAreaUnit());
-		}
 
 		/// <inheritdoc />
 		public UniaxialReinforcement Clone() => new(NumberOfBars, BarDiameter, Steel.Clone(), ConcreteArea);
@@ -174,8 +168,6 @@ namespace andrefmello91.Material.Reinforcement
 					? 0
 					: -1;
 
-		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
-
 		/// <summary>
 		///     Compare two reinforcement objects.
 		///     <para>Returns true if parameters are equal.</para>
@@ -183,27 +175,23 @@ namespace andrefmello91.Material.Reinforcement
 		/// <param name="other">The other reinforcement object.</param>
 		public virtual bool Equals(UniaxialReinforcement? other) => Approaches(other, Tolerance);
 
-		#endregion
-
-		#region Object override
-
-		/// <inheritdoc />
-		public override bool Equals(object? other) => other is UniaxialReinforcement reinforcement && Equals(reinforcement);
-
-		/// <inheritdoc />
-		public override int GetHashCode() => (int) BarDiameter.Millimeters.Pow(NumberOfBars);
+		/// <summary>
+		///     Set steel strain and stress.
+		/// </summary>
+		/// <param name="strain">Current strain.</param>
+		public void Calculate(double strain) => Steel.Calculate(strain);
 
 		/// <inheritdoc />
-		public override string ToString()
+		public void ChangeUnit(LengthUnit unit)
 		{
-			var phi = (char) Characters.Phi;
+			if (Unit == unit)
+				return;
 
-			return
-				$"Reinforcement: {NumberOfBars} {phi} {BarDiameter} ({Area})\n\n"
-				+ Steel;
+			BarDiameter = BarDiameter.ToUnit(unit);
+			Area        = Area.ToUnit(unit.GetAreaUnit());
 		}
 
-		#endregion
+		IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
 		#endregion
 
