@@ -114,6 +114,9 @@ namespace andrefmello91.Material.Reinforcement
 			set => _width = value.ToUnit(Unit);
 		}
 
+		/// <inheritdoc cref="Reinforcement.Steel.Yielded" />
+		public bool Yielded => Steel.Yielded;
+
 		/// <summary>
 		///     Get reinforcement yield stress (ratio multiplied by steel yield stress).
 		/// </summary>

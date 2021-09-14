@@ -57,6 +57,9 @@ namespace andrefmello91.Material.Reinforcement
 		/// </summary>
 		public Force Stiffness => Steel.Parameters.ElasticModule * Area;
 
+		/// <inheritdoc cref="Reinforcement.Steel.Yielded" />
+		public bool Yielded => Steel.Yielded;
+
 		/// <summary>
 		///     Get the yield force.
 		/// </summary>

@@ -25,6 +25,9 @@ namespace andrefmello91.Material.Concrete
 		/// <inheritdoc />
 		public override bool Cracked => _constitutive.Cracked;
 
+		/// <inheritdoc />
+		public override bool Crushed => Strain.Abs() >= Parameters.UltimateStrain.Abs();
+
 		/// <summary>
 		///     Calculate maximum force resisted by concrete (negative value).
 		/// </summary>
@@ -39,6 +42,9 @@ namespace andrefmello91.Material.Concrete
 		///     Calculate normal stiffness.
 		/// </summary>
 		public Force Stiffness => Parameters.ElasticModule * Area;
+
+		/// <inheritdoc />
+		public override bool Yielded => Strain.Abs() >= Parameters.PlasticStrain.Abs();
 
 		/// <summary>
 		///     The concrete area.

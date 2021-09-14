@@ -50,6 +50,14 @@ namespace andrefmello91.Material.Reinforcement
 		public Pressure Stress { get; private set; }
 
 		/// <summary>
+		///     Check if steel yielded.
+		/// </summary>
+		/// <returns>
+		///     True if steel strain is bigger than <see cref="SteelParameters.YieldStrain" />.
+		/// </returns>
+		public bool Yielded => Strain.Abs() >= Parameters.YieldStrain;
+
+		/// <summary>
 		///     Get the <see cref="PressureUnit" /> that this was constructed with.
 		/// </summary>
 		public PressureUnit Unit

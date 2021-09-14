@@ -58,6 +58,14 @@ namespace andrefmello91.Material.Concrete
 		public abstract bool Cracked { get; }
 
 		/// <summary>
+		///     Check if concrete crushed.
+		/// </summary>
+		/// <returns>
+		///     <b>True</b> if concrete strain is bigger than <see cref="IConcreteParameters.UltimateStrain" />.
+		/// </returns>
+		public abstract bool Crushed { get; }
+
+		/// <summary>
 		///     Get concrete <see cref="ConstitutiveModel" />.
 		/// </summary>
 		public ConstitutiveModel Model { get; }
@@ -66,6 +74,14 @@ namespace andrefmello91.Material.Concrete
 		///     Get concrete <see cref="IConcreteParameters" />.
 		/// </summary>
 		public IConcreteParameters Parameters { get; }
+
+		/// <summary>
+		///     Check if concrete yielded.
+		/// </summary>
+		/// <returns>
+		///     <b>True</b> if concrete strain is bigger than <see cref="IConcreteParameters.PlasticStrain" />.
+		/// </returns>
+		public abstract bool Yielded { get; }
 
 		#endregion
 
