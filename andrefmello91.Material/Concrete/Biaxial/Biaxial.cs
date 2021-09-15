@@ -32,7 +32,7 @@ namespace andrefmello91.Material.Concrete
 		public override bool Cracked => ConstitutiveEquations.Cracked;
 
 		/// <inheritdoc />
-		public override bool Crushed => PrincipalStrains.Epsilon2.Abs() >= Parameters.UltimateStrain.Abs();
+		public override bool Crushed => PrincipalStrains.Epsilon2 <= -Parameters.UltimateStrain.Abs();
 
 		/// <summary>
 		///     Get/set Cs coefficient for concrete softening.
@@ -76,7 +76,7 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
-		public override bool Yielded => PrincipalStrains.Epsilon2.Abs() >= Parameters.PlasticStrain.Abs();
+		public override bool Yielded => PrincipalStrains.Epsilon2 <= -Parameters.PlasticStrain.Abs();
 
 		/// <summary>
 		///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
