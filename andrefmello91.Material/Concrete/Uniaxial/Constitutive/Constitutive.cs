@@ -1,6 +1,7 @@
 ﻿using System;
 using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
+using MathNet.Numerics;
 using UnitsNet;
 #nullable enable
 
@@ -75,17 +76,12 @@ namespace andrefmello91.Material.Concrete
 			///     The <see cref="UniaxialReinforcement" /> reinforcement (only for
 			///     <see cref="DSFMConstitutive" />).
 			/// </param>
-			public Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null)
-			{
-				// Correct value
-				strain = strain.AsFinite();
-
-				return strain.ApproxZero()
+			public Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) =>
+				!strain.IsFinite() || strain.ApproxZero() || strain < Parameters.UltimateStrain || strain > Parameters.UltimateStrain.Abs()
 					? Pressure.Zero
 					: strain > 0
 						? TensileStress(strain, reinforcement)
 						: CompressiveStress(strain);
-			}
 
 			/// <summary>
 			///     Calculate current secant module.

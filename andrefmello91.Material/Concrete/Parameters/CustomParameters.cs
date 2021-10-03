@@ -64,6 +64,7 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
+		/// <inheritdoc cref="Parameters.PlasticStrain"/>
 		public double PlasticStrain
 		{
 			get => _plasticStrain;
@@ -101,6 +102,7 @@ namespace andrefmello91.Material.Concrete
 		public AggregateType Type { get; set; }
 
 		/// <inheritdoc />
+		/// <inheritdoc cref="Parameters.PlasticStrain"/>
 		public double UltimateStrain
 		{
 			get => _ultimateStrain;
@@ -261,8 +263,14 @@ namespace andrefmello91.Material.Concrete
 
 		#region Operators
 
+		/// <returns>
+		///     True if objects are equal.
+		/// </returns>
 		public static bool operator ==(CustomParameters left, IConcreteParameters right) => left.Equals(right);
 
+		/// <returns>
+		///     True if objects are not equal.
+		/// </returns>
 		public static bool operator !=(CustomParameters left, IConcreteParameters right) => !left.Equals(right);
 
 		#endregion

@@ -62,7 +62,7 @@ namespace andrefmello91.Material.Concrete
 		/// <remarks>
 		///     If set to true, concrete strength is increase in case of biaxial compression.
 		/// </remarks>
-		public bool ConsiderConfinement { get; set; }
+		bool ConsiderConfinement { get; set; }
 
 		/// <summary>
 		///     Get concrete cracking strain.

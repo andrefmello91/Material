@@ -40,7 +40,7 @@ namespace andrefmello91.Material.Concrete
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1)
 			{
-				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain >= 0)
+				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain.ApproxZero() || strain >= 0 || strain < Parameters.UltimateStrain)
 					return Pressure.Zero;
 
 				// Get strains

@@ -1,6 +1,7 @@
 ﻿using System;
 using andrefmello91.Extensions;
 using andrefmello91.Material.Reinforcement;
+using MathNet.Numerics;
 using UnitsNet;
 using static UnitsNet.UnitMath;
 
@@ -64,6 +65,9 @@ namespace andrefmello91.Material.Concrete
 			/// <inheritdoc />
 			protected override Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1)
 			{
+				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain.ApproxZero() || strain >= 0 || strain < Parameters.UltimateStrain)
+					return Pressure.Zero;
+
 				// Calculate softening coefficient
 				var soft = (TensileStrainFunction(transverseStrain) * _strengthFunction * DeviationFunction(deviationAngle)).AsFinite();
 

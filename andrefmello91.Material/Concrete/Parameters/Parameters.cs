@@ -76,6 +76,9 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
+		/// <remarks>
+		///		Negative value.
+		/// </remarks>
 		public double PlasticStrain => _calculator.PlasticStrain;
 
 		/// <inheritdoc />
@@ -113,6 +116,7 @@ namespace andrefmello91.Material.Concrete
 		}
 
 		/// <inheritdoc />
+		/// <inheritdoc cref="PlasticStrain"/>
 		public double UltimateStrain => _calculator.UltimateStrain;
 
 		PressureUnit IUnitConvertible<PressureUnit>.Unit

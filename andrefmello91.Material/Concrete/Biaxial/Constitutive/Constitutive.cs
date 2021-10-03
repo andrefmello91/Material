@@ -119,7 +119,7 @@ namespace andrefmello91.Material.Concrete
 				if (strainsAtAvgPrincipal.IsZero)
 					return new StressState(0, 0, 0, strainsAtAvgPrincipal.ThetaX);
 
-				// Rotate is necessary
+				// Rotate if necessary
 				if (strainsAtAvgPrincipal.X < strainsAtAvgPrincipal.Y)
 					strainsAtAvgPrincipal = strainsAtAvgPrincipal.Transform(Constants.PiOver2);
 
@@ -342,7 +342,7 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
 			private Pressure TensileStress(double strain, double transverseStrain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null)
 			{
-				if (!strain.IsFinite() || strain <= 0)
+				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain.ApproxZero() || strain <= 0 || strain > Parameters.UltimateStrain.Abs())
 					return Pressure.Zero;
 
 				// Calculate initial uncracked state
@@ -360,6 +360,9 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
 			private Pressure UncrackedStress(double strain, double transverseStrain)
 			{
+				if (Cracked)
+					return Pressure.Zero;
+
 				// Get strains
 				double
 					ec1 = strain,
