@@ -360,9 +360,6 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="transverseStrain">The strain at the transverse direction to <paramref name="strain" />.</param>
 			private Pressure UncrackedStress(double strain, double transverseStrain)
 			{
-				if (Cracked)
-					return Pressure.Zero;
-
 				// Get strains
 				double
 					ec1 = strain,

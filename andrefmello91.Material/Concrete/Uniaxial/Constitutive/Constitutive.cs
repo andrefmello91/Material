@@ -134,10 +134,7 @@ namespace andrefmello91.Material.Concrete
 			///     Check if concrete is cracked based on <paramref name="strain" />.
 			/// </summary>
 			/// <inheritdoc cref="UncrackedStress" />
-			private void CheckCrackedState(double strain)
-			{
-				Cracked = strain >= Parameters.CrackingStrain;
-			}
+			private void CheckCrackedState(double strain) => Cracked = strain >= Parameters.CrackingStrain;
 
 			public bool Equals(Constitutive? other) => Model == other?.Model;
 
