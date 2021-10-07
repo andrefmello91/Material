@@ -342,7 +342,7 @@ namespace andrefmello91.Material.Concrete
 			/// <param name="referenceLength">The reference length (only for <see cref="DSFMConstitutive" />).</param>
 			private Pressure TensileStress(double strain, double transverseStrain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null)
 			{
-				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain.ApproxZero() || strain <= 0 || strain > Parameters.UltimateStrain.Abs())
+				if (!strain.IsFinite() || !transverseStrain.IsFinite() || strain.ApproxZero())
 					return Pressure.Zero;
 
 				// Calculate initial uncracked state

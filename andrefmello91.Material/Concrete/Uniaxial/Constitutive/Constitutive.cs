@@ -77,7 +77,7 @@ namespace andrefmello91.Material.Concrete
 			///     <see cref="DSFMConstitutive" />).
 			/// </param>
 			public Pressure CalculateStress(double strain, UniaxialReinforcement? reinforcement = null) =>
-				!strain.IsFinite() || strain.ApproxZero() || strain < Parameters.UltimateStrain || strain > Parameters.UltimateStrain.Abs()
+				!strain.IsFinite() || strain.ApproxZero()
 					? Pressure.Zero
 					: strain > 0
 						? TensileStress(strain, reinforcement)
