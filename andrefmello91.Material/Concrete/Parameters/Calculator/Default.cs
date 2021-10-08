@@ -39,7 +39,7 @@ namespace andrefmello91.Material.Concrete
 
 		#region Methods
 
-		private static Pressure Ec(Pressure strength) => -2 * strength / ec;
+		private static Pressure Ec(Pressure strength) => (Pressure) (4732.98 * strength.Megapascals.Sqrt()).As(PressureUnit.Megapascal);
 
 		private static Pressure fcr(Pressure strength) => (Pressure) (0.65 * Math.Pow(strength.Megapascals, 1D / 3)).As(PressureUnit.Megapascal);
 
