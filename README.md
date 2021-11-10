@@ -1,5 +1,7 @@
 # Material
-This library implements models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.
+This library is part of the research published in [Structures Journal](https://authors.elsevier.com/a/1e1Wj8MoIGt99M).
+
+It implements models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.
 
 Code parameters implemented for concrete: [*fib* Model Code 2010](https://www.fib-international.org/publications/fib-bulletins/model-code-2010-final-draft,-volume-1-detail.html) and [ABNT NBR 6118:2014](https://www.abntcatalogo.com.br/norma.aspx?ID=317027).
 
