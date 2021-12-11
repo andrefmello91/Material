@@ -10,6 +10,11 @@ namespace andrefmello91.Material.Concrete;
 public enum ConstitutiveModel
 {
 	/// <summary>
+	///     Softened Membrane Model constitutive model.
+	/// </summary>
+	SMM,
+
+	/// <summary>
 	///     Modified Compression Field constitutive model.
 	/// </summary>
 	MCFT,
@@ -17,12 +22,7 @@ public enum ConstitutiveModel
 	/// <summary>
 	///     Disturbed Stress Field constitutive model.
 	/// </summary>
-	DSFM,
-
-	/// <summary>
-	///     Softened Membrane Model constitutive model.
-	/// </summary>
-	SMM
+	DSFM
 }
 
 /// <summary>
@@ -92,7 +92,7 @@ public abstract class Concrete : IEquatable<Concrete>, IComparable<Concrete>
 	/// </summary>
 	/// <param name="parameters">Concrete <see cref="IConcreteParameters" /> object.</param>
 	/// <param name="model">The <see cref="ConstitutiveModel" />.</param>
-	protected Concrete(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
+	protected Concrete(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.SMM)
 	{
 		Parameters = parameters;
 		Model      = model;

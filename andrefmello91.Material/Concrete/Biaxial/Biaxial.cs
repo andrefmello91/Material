@@ -177,7 +177,7 @@ public partial class BiaxialConcrete : Concrete, IBiaxialMaterial, ICloneable<Bi
 	#region Methods
 
 	/// <inheritdoc cref="BiaxialConcrete(IConcreteParameters, ConstitutiveModel)" />
-	public static BiaxialConcrete From(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT) =>
+	public static BiaxialConcrete From(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.SMM) =>
 		model switch
 		{
 			ConstitutiveModel.SMM => new SMMConcrete(parameters),

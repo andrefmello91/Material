@@ -75,7 +75,7 @@ public partial class UniaxialConcrete : Concrete, IUniaxialMaterial, ICloneable<
 	/// </summary>
 	/// <param name="concreteArea">The concrete cross-section area.</param>
 	/// <inheritdoc cref="Concrete(IConcreteParameters, ConstitutiveModel)" />
-	public UniaxialConcrete(IConcreteParameters parameters, Area concreteArea, ConstitutiveModel model = ConstitutiveModel.MCFT)
+	public UniaxialConcrete(IConcreteParameters parameters, Area concreteArea, ConstitutiveModel model = ConstitutiveModel.SMM)
 		: base(parameters, model)
 	{
 		Area          = concreteArea;
