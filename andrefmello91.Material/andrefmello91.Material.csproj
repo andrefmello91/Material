@@ -4,7 +4,7 @@
         <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
         <LangVersion>default</LangVersion>
         <Nullable>enable</Nullable>
-        <Version>1.1.1</Version>
+        <Version>1.1.2</Version>
         <Authors>andrefmello91</Authors>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
@@ -19,7 +19,7 @@
         <PackageId>andrefmello91.Material</PackageId>
         <PackageDescription>Implementation of models for nonlinear analysis of concrete and reinforcement, for uniaxial and biaxial state of stresses.</PackageDescription>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageReleaseNotes>Updated packages.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updated default constitutive model to SMM and default elastic module from ACI 318/19.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -28,8 +28,8 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)'=='Release'">
-        <PackageReference Include="andrefmello91.Extensions" Version="1.0.9"/>
-        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.1.5"/>
+        <PackageReference Include="andrefmello91.Extensions" Version="1.1.0"/>
+        <PackageReference Include="andrefmello91.OnPlaneComponents" Version="1.1.6"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(Configuration)'=='Debug'">
