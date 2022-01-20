@@ -19,6 +19,20 @@ This library uses:
 
 - [Extensions](https://github.com/andrefmello91/Extensions) for some numeric extensions.
 
+### Uniaxial materials
+
+`var concrete = new UniaxialConcrete([Parameters], [Concrete area], [Constitutive Model])`
+
+`var reinforcement = new UniaxialReinforcement([Number of bars], [Bar diameter], [Steel parameters], [Concrete area])`
+
+### Biaxial materials
+
+`var concrete = BiaxialConcrete.From([Parameters], [Constitutive Model])`
+
+`var reinforcementDirection = WebReinforcementDirection.From([Bar diameter], [Bar spacing], [Steel parameters], [Cross-section Width], [Direction angle])`
+
+`var webReinforcement = new WebReinforcement([WebReinforcementDirection in X], [WebReinforcementDirection in Y], [Cross-section Width])`
+
 ## Usage
 
 ### Package reference:
