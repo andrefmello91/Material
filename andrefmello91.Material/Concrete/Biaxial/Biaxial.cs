@@ -15,8 +15,6 @@ namespace andrefmello91.Material.Concrete;
 public partial class BiaxialConcrete : Concrete, IBiaxialMaterial, ICloneable<BiaxialConcrete>
 {
 
-	#region Properties
-
 	/// <summary>
 	///     Get/set crack slip consideration.
 	/// </summary>
@@ -160,10 +158,6 @@ public partial class BiaxialConcrete : Concrete, IBiaxialMaterial, ICloneable<Bi
 	/// </summary>
 	public StressState Stresses { get; protected set; }
 
-	#endregion
-
-	#region Constructors
-
 	/// <summary>
 	///     Create a concrete object for membrane calculations.
 	/// </summary>
@@ -171,10 +165,6 @@ public partial class BiaxialConcrete : Concrete, IBiaxialMaterial, ICloneable<Bi
 	protected BiaxialConcrete(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.MCFT)
 		: base(parameters, model) =>
 		ConstitutiveEquations = Constitutive.From(model, parameters);
-
-	#endregion
-
-	#region Methods
 
 	/// <inheritdoc cref="BiaxialConcrete(IConcreteParameters, ConstitutiveModel)" />
 	public static BiaxialConcrete From(IConcreteParameters parameters, ConstitutiveModel model = ConstitutiveModel.SMM) =>
@@ -234,7 +224,4 @@ public partial class BiaxialConcrete : Concrete, IBiaxialMaterial, ICloneable<Bi
 
 	/// <inheritdoc />
 	public BiaxialConcrete Clone() => new(Parameters, Model);
-
-	#endregion
-
 }

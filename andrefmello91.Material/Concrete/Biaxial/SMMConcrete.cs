@@ -12,16 +12,10 @@ namespace andrefmello91.Material.Concrete;
 internal class SMMConcrete : BiaxialConcrete
 {
 
-	#region Properties
-
 	/// <summary>
 	///     Get concrete <see cref="BiaxialConcrete.Constitutive" />.
 	/// </summary>
 	private new SMMConstitutive ConstitutiveEquations => (SMMConstitutive) base.ConstitutiveEquations;
-
-	#endregion
-
-	#region Constructors
 
 	// /// <summary>
 	// ///		The strain state in the average principal strain direction, not affected by Poisson effect.
@@ -35,10 +29,6 @@ internal class SMMConcrete : BiaxialConcrete
 		Strains  = new StrainState(0, 0, 0, Constants.PiOver4);
 		Stresses = new StressState(0, 0, 0, Constants.PiOver4);
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>
 	///     Calculate the deviation angle for a strain state.
@@ -84,7 +74,4 @@ internal class SMMConcrete : BiaxialConcrete
 		PrincipalStresses = new PrincipalStressState(fc1s, pStresses.Sigma2, pStresses.Theta1);
 		Stresses          = PrincipalStresses.Transform(DeviationAngle);
 	}
-
-	#endregion
-
 }

@@ -47,8 +47,6 @@ public enum Direction
 public abstract class Concrete : IEquatable<Concrete>, IComparable<Concrete>
 {
 
-	#region Properties
-
 	/// <summary>
 	///     Check if concrete is cracked.
 	/// </summary>
@@ -83,10 +81,6 @@ public abstract class Concrete : IEquatable<Concrete>, IComparable<Concrete>
 	/// </returns>
 	public abstract bool Yielded { get; }
 
-	#endregion
-
-	#region Constructors
-
 	/// <summary>
 	///     Base concrete object.
 	/// </summary>
@@ -97,10 +91,6 @@ public abstract class Concrete : IEquatable<Concrete>, IComparable<Concrete>
 		Parameters = parameters;
 		Model      = model;
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <inheritdoc />
 	public override bool Equals(object? obj) => obj is Concrete concrete && Equals(concrete);
@@ -119,10 +109,6 @@ public abstract class Concrete : IEquatable<Concrete>, IComparable<Concrete>
 	/// <inheritdoc />
 	public virtual bool Equals(Concrete? other) => Model == other?.Model && Parameters == other?.Parameters;
 
-	#endregion
-
-	#region Operators
-
 	/// <summary>
 	///     Returns true if parameters and constitutive model are equal.
 	/// </summary>
@@ -132,7 +118,4 @@ public abstract class Concrete : IEquatable<Concrete>, IComparable<Concrete>
 	///     Returns true if parameters and constitutive model are different.
 	/// </summary>
 	public static bool operator !=(Concrete? left, Concrete? right) => left.IsNotEqualTo(right);
-
-	#endregion
-
 }

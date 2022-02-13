@@ -11,16 +11,10 @@ namespace andrefmello91.Material.Concrete;
 public partial class UniaxialConcrete : Concrete, IUniaxialMaterial, ICloneable<UniaxialConcrete>
 {
 
-	#region Fields
-
 	/// <summary>
 	///     Get concrete <see cref="UniaxialConcrete.Constitutive" />.
 	/// </summary>
 	private readonly Constitutive _constitutive;
-
-	#endregion
-
-	#region Properties
 
 	/// <inheritdoc />
 	public override bool Cracked => _constitutive.Cracked;
@@ -66,10 +60,6 @@ public partial class UniaxialConcrete : Concrete, IUniaxialMaterial, ICloneable<
 	/// </summary>
 	public Pressure Stress { get; private set; }
 
-	#endregion
-
-	#region Constructors
-
 	/// <summary>
 	///     Concrete for uniaxial calculations.
 	/// </summary>
@@ -81,10 +71,6 @@ public partial class UniaxialConcrete : Concrete, IUniaxialMaterial, ICloneable<
 		Area          = concreteArea;
 		_constitutive = Constitutive.From(model, parameters);
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>
 	///     Set concrete strain and calculate stress, in MPa.
@@ -125,7 +111,4 @@ public partial class UniaxialConcrete : Concrete, IUniaxialMaterial, ICloneable<
 
 	/// <inheritdoc />
 	void IUniaxialMaterial.Calculate(double strain) => Calculate(strain);
-
-	#endregion
-
 }

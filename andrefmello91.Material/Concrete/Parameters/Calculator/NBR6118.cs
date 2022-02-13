@@ -11,15 +11,9 @@ namespace andrefmello91.Material.Concrete;
 internal class NBR6118 : ParameterCalculator
 {
 
-	#region Properties
-
 	public override ParameterModel Model => ParameterModel.NBR6118;
 
 	public override Pressure SecantModule => AlphaI(Strength) * ElasticModule;
-
-	#endregion
-
-	#region Constructors
 
 	/// <summary>
 	///     Parameters calculator based on NBR 6118:2014.
@@ -29,10 +23,6 @@ internal class NBR6118 : ParameterCalculator
 		: base(strength, type)
 	{
 	}
-
-	#endregion
-
-	#region Methods
 
 	private static double AlphaE(AggregateType type) =>
 		type switch
@@ -72,7 +62,4 @@ internal class NBR6118 : ParameterCalculator
 		strength.Megapascals <= 50
 			? Pressure.From(0.3, PressureUnit.Megapascal) * strength.Megapascals.Pow(2.0 / 3)
 			: Pressure.From(2.12, PressureUnit.Megapascal) * Math.Log(1 + 0.11 * strength.Megapascals);
-
-	#endregion
-
 }

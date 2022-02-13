@@ -12,8 +12,6 @@ namespace andrefmello91.Material;
 public interface IUniaxialMaterial
 {
 
-	#region Properties
-
 	/// <summary>
 	///     The cross section area.
 	/// </summary>
@@ -34,18 +32,11 @@ public interface IUniaxialMaterial
 	/// </summary>
 	Pressure Stress { get; }
 
-	#endregion
-
-	#region Methods
-
 	/// <summary>
 	///     Update strain and calculate stress in this material.
 	/// </summary>
 	/// <param name="strain">Current strain.</param>
 	void Calculate(double strain);
-
-	#endregion
-
 }
 
 /// <summary>
@@ -53,8 +44,6 @@ public interface IUniaxialMaterial
 /// </summary>
 public interface IBiaxialMaterial
 {
-
-	#region Properties
 
 	/// <summary>
 	///     The principal strains at this material.
@@ -81,18 +70,11 @@ public interface IBiaxialMaterial
 	/// </summary>
 	StressState Stresses { get; }
 
-	#endregion
-
-	#region Methods
-
 	/// <summary>
 	///     Update strains and calculate stresses.
 	/// </summary>
 	/// <param name="strainState">The current strain state.</param>
 	void Calculate(StrainState strainState);
-
-	#endregion
-
 }
 
 /// <summary>
@@ -100,8 +82,6 @@ public interface IBiaxialMaterial
 /// </summary>
 public interface IMaterialParameters : IUnitConvertible<PressureUnit>, IApproachable<IMaterialParameters, Pressure>, IEquatable<IMaterialParameters>, IComparable<IMaterialParameters>
 {
-
-	#region Properties
 
 	/// <summary>
 	///     The compressive strength.
@@ -130,7 +110,4 @@ public interface IMaterialParameters : IUnitConvertible<PressureUnit>, IApproach
 	///     The ultimate strain.
 	/// </summary>
 	double UltimateStrain { get; }
-
-	#endregion
-
 }

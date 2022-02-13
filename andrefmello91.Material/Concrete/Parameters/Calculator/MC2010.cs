@@ -13,8 +13,6 @@ namespace andrefmello91.Material.Concrete;
 internal class MC2010 : ParameterCalculator
 {
 
-	#region Fields
-
 	/// <summary>
 	///     Array of high strength concrete classes, C50 to C90 (MC2010).
 	/// </summary>
@@ -31,15 +29,7 @@ internal class MC2010 : ParameterCalculator
 		-0.0034, -0.0034, -0.0033, -0.0032, -0.0031, -0.003
 	};
 
-	#endregion
-
-	#region Properties
-
 	public override ParameterModel Model => ParameterModel.MC2010;
-
-	#endregion
-
-	#region Constructors
 
 	/// <summary>
 	///     Parameter calculator based on fib Model Code 2010.
@@ -48,10 +38,6 @@ internal class MC2010 : ParameterCalculator
 	internal MC2010(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength, type)
 	{
 	}
-
-	#endregion
-
-	#region Methods
 
 	private static double AlphaE(AggregateType type) =>
 		type switch
@@ -111,7 +97,4 @@ internal class MC2010 : ParameterCalculator
 		PlasticStrain   = ec1(Strength);
 		UltimateStrain  = ecu(Strength);
 	}
-
-	#endregion
-
 }

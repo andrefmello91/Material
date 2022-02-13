@@ -14,16 +14,10 @@ namespace andrefmello91.Material.Reinforcement;
 public class UniaxialReinforcement : IUniaxialMaterial, IUnitConvertible<LengthUnit>, IApproachable<UniaxialReinforcement, Length>, IEquatable<UniaxialReinforcement>, IComparable<UniaxialReinforcement>, ICloneable<UniaxialReinforcement>
 {
 
-	#region Fields
-
 	/// <summary>
 	///     The tolerance to consider displacements equal.
 	/// </summary>
 	public static readonly Length Tolerance = Length.FromMillimeters(1E-3);
-
-	#endregion
-
-	#region Properties
 
 	/// <summary>
 	///     Get bar diameter.
@@ -88,10 +82,6 @@ public class UniaxialReinforcement : IUniaxialMaterial, IUnitConvertible<LengthU
 		set => ChangeUnit(value);
 	}
 
-	#endregion
-
-	#region Constructors
-
 	/// <param name="concreteArea">The concrete area, in <see cref="AreaUnit" /> compatible to <paramref name="unit" />.</param>
 	/// <param name="unit">The <see cref="LengthUnit" /> of <paramref name="barDiameter" />.</param>
 	/// <inheritdoc cref="UniaxialReinforcement" />
@@ -115,10 +105,6 @@ public class UniaxialReinforcement : IUniaxialMaterial, IUnitConvertible<LengthU
 		ConcreteArea = concreteArea;
 		Steel        = steel;
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 	public UniaxialReinforcement Convert(LengthUnit unit) => new(NumberOfBars, BarDiameter.ToUnit(unit), Steel.Clone(), ConcreteArea.ToUnit(unit.GetAreaUnit()));
@@ -196,10 +182,6 @@ public class UniaxialReinforcement : IUniaxialMaterial, IUnitConvertible<LengthU
 
 	IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
-	#endregion
-
-	#region Operators
-
 	/// <summary>
 	///     Returns true if steel parameters are equal.
 	/// </summary>
@@ -209,7 +191,4 @@ public class UniaxialReinforcement : IUniaxialMaterial, IUnitConvertible<LengthU
 	///     Returns true if steel parameters are different.
 	/// </summary>
 	public static bool operator !=(UniaxialReinforcement? left, UniaxialReinforcement? right) => left.IsNotEqualTo(right);
-
-	#endregion
-
 }

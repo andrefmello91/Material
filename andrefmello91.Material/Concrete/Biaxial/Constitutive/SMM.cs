@@ -17,32 +17,18 @@ public partial class BiaxialConcrete
 	protected class SMMConstitutive : Constitutive
 	{
 
-		#region Fields
-
 		/// <summary>
 		///     <inheritdoc cref="StrengthFunction" />
 		/// </summary>
 		private readonly double _strengthFunction;
 
-		#endregion
-
-		#region Properties
-
 		public override ConstitutiveModel Model { get; } = ConstitutiveModel.SMM;
-
-		#endregion
-
-		#region Constructors
 
 		/// <summary>
 		///     MCFT constitutive object.
 		/// </summary>
 		/// <inheritdoc cref="Constitutive(IConcreteParameters)" />
 		public SMMConstitutive(IConcreteParameters parameters) : base(parameters) => _strengthFunction = StrengthFunction(parameters.Strength);
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>
 		///     Calculate the deviation angle function for the softening parameter.
@@ -94,8 +80,5 @@ public partial class BiaxialConcrete
 		/// <inheritdoc />
 		protected override Pressure CrackedStress(double strain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null) =>
 			Parameters.TensileStrength * (Parameters.CrackingStrain / strain).Pow(0.4);
-
-		#endregion
-
 	}
 }

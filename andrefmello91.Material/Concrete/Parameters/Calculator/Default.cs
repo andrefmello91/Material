@@ -11,21 +11,11 @@ namespace andrefmello91.Material.Concrete;
 internal class Default : ParameterCalculator
 {
 
-	#region Fields
-
 	// Strains
 	private const double ec = -0.002;
 	private const double ecu = -0.0035;
 
-	#endregion
-
-	#region Properties
-
 	public override ParameterModel Model => ParameterModel.Default;
-
-	#endregion
-
-	#region Constructors
 
 	/// <summary>
 	///     Parameter calculator based on Classic DSFM formulation.
@@ -34,10 +24,6 @@ internal class Default : ParameterCalculator
 	internal Default(Pressure strength, AggregateType type = AggregateType.Quartzite) : base(strength, type)
 	{
 	}
-
-	#endregion
-
-	#region Methods
 
 	private static Pressure Ec(Pressure strength) => (Pressure) (4732.98 * strength.Megapascals.Sqrt()).As(PressureUnit.Megapascal);
 
@@ -50,7 +36,4 @@ internal class Default : ParameterCalculator
 		PlasticStrain   = ec;
 		UltimateStrain  = ecu;
 	}
-
-	#endregion
-
 }

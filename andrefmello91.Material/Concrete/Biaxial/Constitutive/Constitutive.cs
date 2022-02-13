@@ -19,16 +19,10 @@ public partial class BiaxialConcrete
 	protected abstract class Constitutive : IEquatable<Constitutive>
 	{
 
-		#region Fields
-
 		/// <summary>
 		///     Concrete <see cref="IConcreteParameters" />.
 		/// </summary>
 		protected readonly IConcreteParameters Parameters;
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>
 		///     The crack slip consideration.
@@ -49,20 +43,12 @@ public partial class BiaxialConcrete
 		/// </summary>
 		public abstract ConstitutiveModel Model { get; }
 
-		#endregion
-
-		#region Constructors
-
 		// Constructor
 		/// <summary>
 		///     Base class for concrete behavior
 		/// </summary>
 		/// <inheritdoc cref="From" />
 		protected Constitutive(IConcreteParameters parameters) => Parameters = parameters;
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>
 		///     Get concrete <see cref="Constitutive" /> object based on the <see cref="ConstitutiveModel" />.
@@ -376,8 +362,5 @@ public partial class BiaxialConcrete
 
 		/// <inheritdoc />
 		public bool Equals(Constitutive? other) => other is not null && Model == other.Model;
-
-		#endregion
-
 	}
 }

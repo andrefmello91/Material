@@ -15,13 +15,7 @@ public partial class UniaxialConcrete
 	private class MCFTConstitutive : Constitutive
 	{
 
-		#region Properties
-
 		public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
-
-		#endregion
-
-		#region Constructors
 
 		/// <summary>
 		///     MCFT constitutive object.
@@ -30,10 +24,6 @@ public partial class UniaxialConcrete
 		public MCFTConstitutive(IConcreteParameters parameters) : base(parameters)
 		{
 		}
-
-		#endregion
-
-		#region Methods
 
 		/// <inheritdoc />
 		protected override Pressure CompressiveStress(double strain)
@@ -51,8 +41,5 @@ public partial class UniaxialConcrete
 		/// <inheritdoc />
 		protected override Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null) =>
 			Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
-
-		#endregion
-
 	}
 }

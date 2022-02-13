@@ -16,13 +16,7 @@ public partial class UniaxialConcrete
 	private class DSFMConstitutive : Constitutive
 	{
 
-		#region Properties
-
 		public override ConstitutiveModel Model { get; } = ConstitutiveModel.DSFM;
-
-		#endregion
-
-		#region Constructors
 
 		/// <summary>
 		///     DSFM constitutive object.
@@ -33,10 +27,6 @@ public partial class UniaxialConcrete
 			: base(parameters)
 		{
 		}
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>
 		///     Calculate reference length.
@@ -135,8 +125,5 @@ public partial class UniaxialConcrete
 			return
 				Min(fc1s, fc1b);
 		}
-
-		#endregion
-
 	}
 }

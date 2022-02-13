@@ -17,13 +17,7 @@ public partial class BiaxialConcrete
 	protected class DSFMConstitutive : Constitutive
 	{
 
-		#region Properties
-
 		public override ConstitutiveModel Model { get; }
-
-		#endregion
-
-		#region Constructors
 
 		//
 		/// <summary>
@@ -32,10 +26,6 @@ public partial class BiaxialConcrete
 		/// <param name="considerCrackSlip">Consider crack slip (default: true)</param>
 		/// <inheritdoc cref="Constitutive(IConcreteParameters)" />
 		public DSFMConstitutive(IConcreteParameters parameters, bool considerCrackSlip = true) : base(parameters) => ConsiderCrackSlip = considerCrackSlip;
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>
 		///     Calculate tension stiffening coefficient (for DSFM).
@@ -190,8 +180,5 @@ public partial class BiaxialConcrete
 			return
 				Min(fc1b, fc1s);
 		}
-
-		#endregion
-
 	}
 }

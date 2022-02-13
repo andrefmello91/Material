@@ -9,14 +9,8 @@ namespace andrefmello91.Material.Concrete;
 internal abstract class ParameterCalculator : IEquatable<ParameterCalculator>
 {
 
-	#region Fields
-
 	private Pressure _strength;
 	private AggregateType _type;
-
-	#endregion
-
-	#region Properties
 
 	/// <summary>
 	///     Get initial elastic module.
@@ -79,10 +73,6 @@ internal abstract class ParameterCalculator : IEquatable<ParameterCalculator>
 	/// </summary>
 	public double UltimateStrain { get; protected set; }
 
-	#endregion
-
-	#region Constructors
-
 	/// <summary>
 	///     Base parameter calculator class.
 	/// </summary>
@@ -94,10 +84,6 @@ internal abstract class ParameterCalculator : IEquatable<ParameterCalculator>
 		_type     = type;
 		CalculateCustomParameters();
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>
 	///     Get the <see cref="ParameterCalculator" /> based on <see cref="ParameterModel" />.
@@ -118,7 +104,4 @@ internal abstract class ParameterCalculator : IEquatable<ParameterCalculator>
 	protected abstract void CalculateCustomParameters();
 
 	public bool Equals(ParameterCalculator? other) => other is not null && Model == other.Model;
-
-	#endregion
-
 }

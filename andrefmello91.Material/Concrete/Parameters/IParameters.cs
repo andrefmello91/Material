@@ -49,8 +49,6 @@ public enum AggregateType
 public interface IConcreteParameters : IMaterialParameters, IUnitConvertible<LengthUnit>, IApproachable<IConcreteParameters, Pressure>, IEquatable<IConcreteParameters>, IComparable<IConcreteParameters>
 {
 
-	#region Properties
-
 	/// <summary>
 	///     Get/set maximum diameter of concrete aggregate.
 	/// </summary>
@@ -108,7 +106,4 @@ public interface IConcreteParameters : IMaterialParameters, IUnitConvertible<Len
 	///     Get the aggregate type.
 	/// </summary>
 	public AggregateType Type { get; set; }
-
-	#endregion
-
 }

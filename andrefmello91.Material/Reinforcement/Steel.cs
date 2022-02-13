@@ -11,8 +11,6 @@ namespace andrefmello91.Material.Reinforcement;
 public class Steel : IUnitConvertible<PressureUnit>, IApproachable<Steel, Pressure>, IEquatable<Steel>, IComparable<Steel>, ICloneable<Steel>
 {
 
-	#region Fields
-
 	/// <summary>
 	///     The default <see cref="Pressure" /> tolerance.
 	/// </summary>
@@ -22,10 +20,6 @@ public class Steel : IUnitConvertible<PressureUnit>, IApproachable<Steel, Pressu
 	///     Get tensile hardening consideration.
 	/// </summary>
 	private readonly bool _considerHardening;
-
-	#endregion
-
-	#region Properties
 
 	/// <summary>
 	///     The steel parameters.
@@ -65,10 +59,6 @@ public class Steel : IUnitConvertible<PressureUnit>, IApproachable<Steel, Pressu
 		get => Parameters.Unit;
 		set => ChangeUnit(value);
 	}
-
-	#endregion
-
-	#region Constructors
 
 	/// <summary>
 	///     Create a steel object from steel parameters.
@@ -114,10 +104,6 @@ public class Steel : IUnitConvertible<PressureUnit>, IApproachable<Steel, Pressu
 		: this(new SteelParameters(yieldStress, elasticModule, hardeningModule, hardeningStrain, ultimateStrain))
 	{
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>
 	///     Calculate stress, given strain.
@@ -206,10 +192,6 @@ public class Steel : IUnitConvertible<PressureUnit>, IApproachable<Steel, Pressu
 
 	IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
-	#endregion
-
-	#region Operators
-
 	/// <summary>
 	///     Returns true if steel parameters are equal.
 	/// </summary>
@@ -220,7 +202,4 @@ public class Steel : IUnitConvertible<PressureUnit>, IApproachable<Steel, Pressu
 	///     Returns true if steel parameters are different.
 	/// </summary>
 	public static bool operator !=(Steel? left, Steel? right) => left.IsNotEqualTo(right);
-
-	#endregion
-
 }

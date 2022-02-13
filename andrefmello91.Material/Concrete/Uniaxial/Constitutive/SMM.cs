@@ -14,29 +14,15 @@ public partial class UniaxialConcrete
 	private class SMMConstitutive : Constitutive
 	{
 
-		#region Fields
-
 		private readonly double _strengthFunction;
 
-		#endregion
-
-		#region Properties
-
 		public override ConstitutiveModel Model => ConstitutiveModel.SMM;
-
-		#endregion
-
-		#region Constructors
 
 		/// <summary>
 		///     MCFT constitutive object.
 		/// </summary>
 		/// <inheritdoc cref="Concrete" />
 		public SMMConstitutive(IConcreteParameters parameters) : base(parameters) => _strengthFunction = StrengthFunction(Parameters.Strength);
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>
 		///     Calculate the strength function for the softening parameter.
@@ -73,8 +59,5 @@ public partial class UniaxialConcrete
 		/// <inheritdoc />
 		protected override Pressure CrackedStress(double strain, UniaxialReinforcement? reinforcement = null) =>
 			Parameters.TensileStrength * (Parameters.CrackingStrain / strain).Pow(0.4);
-
-		#endregion
-
 	}
 }

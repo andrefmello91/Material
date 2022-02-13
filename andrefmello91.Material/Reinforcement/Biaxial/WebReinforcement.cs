@@ -18,13 +18,7 @@ namespace andrefmello91.Material.Reinforcement;
 public class WebReinforcement : IBiaxialMaterial, IUnitConvertible<LengthUnit>, IApproachable<WebReinforcement, Length>, IComparable<WebReinforcement>, IEquatable<WebReinforcement>, ICloneable<WebReinforcement>
 {
 
-	#region Fields
-
 	private Length _width;
-
-	#endregion
-
-	#region Properties
 
 	// Properties
 	/// <summary>
@@ -163,10 +157,6 @@ public class WebReinforcement : IBiaxialMaterial, IUnitConvertible<LengthUnit>, 
 		set => ChangeUnit(value);
 	}
 
-	#endregion
-
-	#region Constructors
-
 	/// <summary>
 	///     Create a web reinforcement, with different X and Y directions.
 	/// </summary>
@@ -199,10 +189,6 @@ public class WebReinforcement : IBiaxialMaterial, IUnitConvertible<LengthUnit>, 
 		: this(directionX, directionY, (Length) width.As(unit))
 	{
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)" />
 	/// <param name="unit">
@@ -391,10 +377,6 @@ public class WebReinforcement : IBiaxialMaterial, IUnitConvertible<LengthUnit>, 
 
 	IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
-	#endregion
-
-	#region Operators
-
 	/// <summary>
 	///     Returns true if objects are equal.
 	/// </summary>
@@ -404,7 +386,4 @@ public class WebReinforcement : IBiaxialMaterial, IUnitConvertible<LengthUnit>, 
 	///     Returns true if objects are different.
 	/// </summary>
 	public static bool operator !=(WebReinforcement? left, WebReinforcement? right) => left.IsNotEqualTo(right);
-
-	#endregion
-
 }

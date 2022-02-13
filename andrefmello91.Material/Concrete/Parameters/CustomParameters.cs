@@ -11,18 +11,12 @@ namespace andrefmello91.Material.Concrete;
 public struct CustomParameters : IConcreteParameters, ICloneable<CustomParameters>
 {
 
-	#region Fields
-
 	private Length _aggDiameter;
 	private Pressure _elasticModule;
 	private double _plasticStrain;
 	private Pressure _strength;
 	private Pressure _tensileStrength;
 	private double _ultimateStrain;
-
-	#endregion
-
-	#region Properties
 
 	/// <inheritdoc />
 	public Length AggregateDiameter
@@ -124,10 +118,6 @@ public struct CustomParameters : IConcreteParameters, ICloneable<CustomParameter
 		set => DiameterUnit = value;
 	}
 
-	#endregion
-
-	#region Constructors
-
 	/// <inheritdoc cref="CustomParameters(Pressure, Pressure, Pressure, Length, double, double, bool)" />
 	public CustomParameters(double strength, double tensileStrength, double elasticModule, double aggregateDiameter, double plasticStrain = 0.002, double ultimateStrain = 0.0035, bool considerConfinement = false, PressureUnit strengthUnit = PressureUnit.Megapascal, LengthUnit diameterUnit = LengthUnit.Millimeter)
 		: this((Pressure) strength.As(strengthUnit), (Pressure) tensileStrength.As(strengthUnit), (Pressure) elasticModule.As(strengthUnit), (Length) aggregateDiameter.As(diameterUnit), plasticStrain, ultimateStrain, considerConfinement)
@@ -153,10 +143,6 @@ public struct CustomParameters : IConcreteParameters, ICloneable<CustomParameter
 		Type                = AggregateType.Quartzite;
 		ConsiderConfinement = considerConfinement;
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>
 	///     Create a clone of this object with converted units.
@@ -259,10 +245,6 @@ public struct CustomParameters : IConcreteParameters, ICloneable<CustomParameter
 	/// <inheritdoc />
 	bool IEquatable<IMaterialParameters>.Equals(IMaterialParameters other) => other is IConcreteParameters parameters && Equals(parameters);
 
-	#endregion
-
-	#region Operators
-
 	/// <returns>
 	///     True if objects are equal.
 	/// </returns>
@@ -272,7 +254,4 @@ public struct CustomParameters : IConcreteParameters, ICloneable<CustomParameter
 	///     True if objects are not equal.
 	/// </returns>
 	public static bool operator !=(CustomParameters left, IConcreteParameters right) => !left.Equals(right);
-
-	#endregion
-
 }

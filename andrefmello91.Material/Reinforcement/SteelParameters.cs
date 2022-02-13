@@ -11,16 +11,10 @@ namespace andrefmello91.Material.Reinforcement;
 public struct SteelParameters : IMaterialParameters, IApproachable<SteelParameters, Pressure>, IEquatable<SteelParameters>, IComparable<SteelParameters>, ICloneable<SteelParameters>
 {
 
-	#region Fields
-
 	/// <summary>
 	///     The default <see cref="Pressure" /> tolerance.
 	/// </summary>
 	public static readonly Pressure Tolerance = Pressure.FromPascals(1E-3);
-
-	#endregion
-
-	#region Properties
 
 	/// <summary>
 	///     Steel hardening consideration.
@@ -69,10 +63,6 @@ public struct SteelParameters : IMaterialParameters, IApproachable<SteelParamete
 	/// <inheritdoc />
 	Pressure IMaterialParameters.TensileStrength => YieldStress;
 
-	#endregion
-
-	#region Constructors
-
 	/// <summary>
 	///     Create steel parameters without hardening consideration.
 	/// </summary>
@@ -115,10 +105,6 @@ public struct SteelParameters : IMaterialParameters, IApproachable<SteelParamete
 		HardeningModule   = hardeningModule;
 		HardeningStrain   = hardeningStrain;
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <inheritdoc cref="IUnitConvertible{TUnit}.Convert" />
 	public SteelParameters Convert(PressureUnit unit)
@@ -207,10 +193,6 @@ public struct SteelParameters : IMaterialParameters, IApproachable<SteelParamete
 
 	IUnitConvertible<PressureUnit> IUnitConvertible<PressureUnit>.Convert(PressureUnit unit) => Convert(unit);
 
-	#endregion
-
-	#region Operators
-
 	/// <summary>
 	///     Returns true if steel parameters are equal.
 	/// </summary>
@@ -230,7 +212,4 @@ public struct SteelParameters : IMaterialParameters, IApproachable<SteelParamete
 	///     Returns true if steel parameters are different.
 	/// </summary>
 	public static bool operator !=(SteelParameters left, SteelParameters right) => left.IsNotEqualTo(right);
-
-	#endregion
-
 }

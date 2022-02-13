@@ -17,13 +17,7 @@ public partial class BiaxialConcrete
 	protected class MCFTConstitutive : Constitutive
 	{
 
-		#region Properties
-
 		public override ConstitutiveModel Model { get; } = ConstitutiveModel.MCFT;
-
-		#endregion
-
-		#region Constructors
 
 		/// <summary>
 		///     MCFT constitutive object.
@@ -32,10 +26,6 @@ public partial class BiaxialConcrete
 		public MCFTConstitutive(IConcreteParameters parameters) : base(parameters)
 		{
 		}
-
-		#endregion
-
-		#region Methods
 
 		/// <inheritdoc />
 		protected override Pressure CompressiveStress(double strain, double transverseStrain, double deviationAngle = 0, double confinementFactor = 1)
@@ -70,8 +60,5 @@ public partial class BiaxialConcrete
 		/// <inheritdoc />
 		protected override Pressure CrackedStress(double strain, double theta1, WebReinforcement? reinforcement, Length? referenceLength = null) =>
 			Parameters.TensileStrength / (1 + Math.Sqrt(500 * strain));
-
-		#endregion
-
 	}
 }

@@ -12,8 +12,6 @@ namespace andrefmello91.Material;
 public class RCCrossSection : IUniaxialMaterial, IEquatable<RCCrossSection>, ICloneable<RCCrossSection>
 {
 
-	#region Properties
-
 	/// <summary>
 	///     The concrete at this cross section.
 	/// </summary>
@@ -35,10 +33,6 @@ public class RCCrossSection : IUniaxialMaterial, IEquatable<RCCrossSection>, ICl
 
 	/// <inheritdoc />
 	public Pressure Stress => Concrete.Stress + (Reinforcement?.Ratio * Reinforcement?.Stress ?? Pressure.Zero);
-
-	#endregion
-
-	#region Constructors
 
 	/// <summary>
 	///     Create a reinforced concrete cross section.
@@ -62,10 +56,6 @@ public class RCCrossSection : IUniaxialMaterial, IEquatable<RCCrossSection>, ICl
 		: this(new UniaxialConcrete(concreteParameters, concreteArea, concreteModel), reinforcement)
 	{
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <inheritdoc />
 	public override bool Equals(object obj) => obj is RCCrossSection rc && Equals(rc);
@@ -92,16 +82,9 @@ public class RCCrossSection : IUniaxialMaterial, IEquatable<RCCrossSection>, ICl
 		Concrete.Calculate(strain, Reinforcement);
 	}
 
-	#endregion
-
-	#region Operators
-
 	/// <inheritdoc cref="ComparisonExtensions.IsEqualTo{T}" />
 	public static bool operator ==(RCCrossSection? left, RCCrossSection? right) => left.IsEqualTo(right);
 
 	/// <inheritdoc cref="ComparisonExtensions.IsNotEqualTo{T}" />
 	public static bool operator !=(RCCrossSection? left, RCCrossSection? right) => left.IsNotEqualTo(right);
-
-	#endregion
-
 }

@@ -15,16 +15,10 @@ public partial class UniaxialConcrete
 	private abstract class Constitutive : IEquatable<Constitutive>
 	{
 
-		#region Fields
-
 		/// <summary>
 		///     Concrete <see cref="IConcreteParameters" />.
 		/// </summary>
 		protected readonly IConcreteParameters Parameters;
-
-		#endregion
-
-		#region Properties
 
 		/// <summary>
 		///     Check if concrete is cracked.
@@ -39,20 +33,12 @@ public partial class UniaxialConcrete
 		/// </summary>
 		public abstract ConstitutiveModel Model { get; }
 
-		#endregion
-
-		#region Constructors
-
 		// Constructor
 		/// <summary>
 		///     Base class for concrete behavior
 		/// </summary>
 		/// <param name="parameters">Concrete parameters object.</param>
 		protected Constitutive(IConcreteParameters parameters) => Parameters = parameters;
-
-		#endregion
-
-		#region Methods
 
 		/// <summary>
 		///     Get concrete <see cref="Constitutive" /> object based on the <see cref="ConstitutiveModel" />.
@@ -137,8 +123,5 @@ public partial class UniaxialConcrete
 		private void CheckCrackedState(double strain) => Cracked = strain >= Parameters.CrackingStrain;
 
 		public bool Equals(Constitutive? other) => Model == other?.Model;
-
-		#endregion
-
 	}
 }

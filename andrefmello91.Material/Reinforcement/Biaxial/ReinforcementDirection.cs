@@ -15,13 +15,7 @@ namespace andrefmello91.Material.Reinforcement;
 public class WebReinforcementDirection : IUnitConvertible<LengthUnit>, IApproachable<WebReinforcementDirection, Length>, IEquatable<WebReinforcementDirection>, IComparable<WebReinforcementDirection>, ICloneable<WebReinforcementDirection>
 {
 
-	#region Fields
-
 	private Length _width;
-
-	#endregion
-
-	#region Properties
 
 	/// <summary>
 	///     Get the angle (in radians) of this <see cref="WebReinforcementDirection" />, related to horizontal axis.
@@ -132,10 +126,6 @@ public class WebReinforcementDirection : IUnitConvertible<LengthUnit>, IApproach
 		set => ChangeUnit(value);
 	}
 
-	#endregion
-
-	#region Constructors
-
 	/// <summary>
 	///     Reinforcement direction object for web reinforcement.
 	/// </summary>
@@ -157,10 +147,6 @@ public class WebReinforcementDirection : IUnitConvertible<LengthUnit>, IApproach
 		Angle        = angle;
 		NumberOfLegs = numberOfLegs;
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <inheritdoc cref="From(Length, Length, SteelParameters, Length, double, int)" />
 	/// <param name="unit">
@@ -263,10 +249,6 @@ public class WebReinforcementDirection : IUnitConvertible<LengthUnit>, IApproach
 
 	IUnitConvertible<LengthUnit> IUnitConvertible<LengthUnit>.Convert(LengthUnit unit) => Convert(unit);
 
-	#endregion
-
-	#region Operators
-
 	/// <summary>
 	///     Returns true if steel parameters are equal.
 	/// </summary>
@@ -276,7 +258,4 @@ public class WebReinforcementDirection : IUnitConvertible<LengthUnit>, IApproach
 	///     Returns true if steel parameters are different.
 	/// </summary>
 	public static bool operator !=(WebReinforcementDirection? left, WebReinforcementDirection? right) => left.IsNotEqualTo(right);
-
-	#endregion
-
 }

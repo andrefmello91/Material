@@ -12,8 +12,6 @@ namespace andrefmello91.Material.Concrete;
 public struct Parameters : IConcreteParameters, ICloneable<Parameters>
 {
 
-	#region Fields
-
 	/// <summary>
 	///     The default <see cref="Pressure" /> tolerance.
 	/// </summary>
@@ -27,10 +25,6 @@ public struct Parameters : IConcreteParameters, ICloneable<Parameters>
 	private ParameterCalculator _calculator;
 
 	private Pressure _strength;
-
-	#endregion
-
-	#region Properties
 
 	/// <inheritdoc />
 	public Length AggregateDiameter
@@ -131,10 +125,6 @@ public struct Parameters : IConcreteParameters, ICloneable<Parameters>
 		set => DiameterUnit = value;
 	}
 
-	#endregion
-
-	#region Constructors
-
 	/// <inheritdoc cref="Parameters(Pressure, Length, ParameterModel, AggregateType, bool)" />
 	/// <param name="strengthUnit">The <see cref="PressureUnit" /> of <paramref name="strength" />.</param>
 	/// <param name="diameterUnit">The <see cref="LengthUnit" /> of <paramref name="aggregateDiameter" />.</param>
@@ -161,10 +151,6 @@ public struct Parameters : IConcreteParameters, ICloneable<Parameters>
 		_calculator         = ParameterCalculator.GetCalculator(strength, model, type);
 		ConsiderConfinement = considerConfinement;
 	}
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>
 	///     Get concrete class C20 (fc = 20 MPa).
@@ -290,10 +276,6 @@ public struct Parameters : IConcreteParameters, ICloneable<Parameters>
 	/// <inheritdoc />
 	bool IEquatable<IMaterialParameters>.Equals(IMaterialParameters other) => other is IConcreteParameters parameters && Equals(parameters);
 
-	#endregion
-
-	#region Operators
-
 	/// <summary>
 	///     Returns true if objects are equal.
 	/// </summary>
@@ -303,7 +285,4 @@ public struct Parameters : IConcreteParameters, ICloneable<Parameters>
 	///     Returns true if objects are not equal.
 	/// </summary>
 	public static bool operator !=(Parameters left, IConcreteParameters right) => !left.Equals(right);
-
-	#endregion
-
 }
